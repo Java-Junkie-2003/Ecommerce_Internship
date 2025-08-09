@@ -1,10 +1,12 @@
+
+require("dotenv").config();
 const dev = {
     app: {
         port: process.env.DEV_APP_PORT || 3000
     },
     db: {
         user: process.env.DEV_DB_USER || "mongo",
-        password: process.env.DEV_DB_PASSWORD || "123456",
+        password: process.env.DEV_DB_PASSWORD || "root123456",
         name: process.env.DEV_DB_NAME || "EcommerceWeb"
     }
 };

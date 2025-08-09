@@ -12,11 +12,11 @@ app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
 // init db
-
+require('./db/init.mongodb')
 // init router
-
+app.use('/', require('./routes'))
 // handle errors
-app.use((error, req, res, next)=>{
+app.use((req, res, next)=>{
     const error = new Error('Not Found')
     error.status = 404
     next(error)
