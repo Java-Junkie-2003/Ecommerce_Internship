@@ -1,6 +1,6 @@
 const { Types } = require("mongoose")
 const crypto = require('crypto')
-
+const _ = require('lodash')
 const getSelectData = (select = []) => {
     return Object.fromEntries(select.map((e) => [e, 1]))
 }
@@ -20,10 +20,13 @@ const genSecretKey = _ =>{
         privateKey
     }
 }
-
+const getInfoData = ({fields=[], object = {}}) => {
+    return _.pick(object, fields)
+}
 module.exports = {
     getSelectData,
     getUnSelectData,
+    getInfoData,
     genSecretKey,
     convertToObjectId
 }
