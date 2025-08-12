@@ -40,7 +40,7 @@ export function attachInterceptors(instance: AxiosInstance): void {
           return instance(originalRequest);
         } catch (err) {
           if (typeof window !== 'undefined') {
-            window.location.href = '/auth/login';
+            window.location.href = '/login';
           }
           throw err;
         }
