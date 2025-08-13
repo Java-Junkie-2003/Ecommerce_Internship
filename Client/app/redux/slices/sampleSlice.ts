@@ -1,6 +1,6 @@
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchSample } from "~/redux/thunks/sample.thunk";
+import { fetchSample } from "@/redux/thunks/sample.thunk";
 
 interface CounterState {
   value: number;

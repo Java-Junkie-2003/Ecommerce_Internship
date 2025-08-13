@@ -1,13 +1,22 @@
-"use client"
+"use client";
+
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Star, ArrowRight, Quote } from 'lucide-react'
 import { Link } from "react-router"
-import SiteHeader from "~/components/layout/client-header"
-import SiteFooter from "~/components/layout/client-footer"
+import SiteHeader from "@/components/layout/client-header"
+import SiteFooter from "@/components/layout/client-footer"
+import type { Route } from "../+types/root";
 
-export default function HomePage() {
+export function meta({ }: Route.MetaArgs) {
+    return [
+        { title: "Trang chủ" },
+        { name: "description", content: "Khám phá bộ sưu tập nước hoa cao cấp" },
+    ];
+}
+
+const HomePage = () => {
   const products = [
     {
       id: "77884",
@@ -322,3 +331,5 @@ export default function HomePage() {
     </div>
   )
 }
+
+export default HomePage;

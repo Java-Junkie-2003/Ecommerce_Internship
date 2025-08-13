@@ -1,26 +1,28 @@
-import ApiClient from './api.client';
+import ApiClient from '@/lib/api/api.client'
 
-const client = ApiClient.getInstance();
+console.log('api.service.ts loaded');
+console.log('ApiClient at import time:', ApiClient);
+const client =  () => ApiClient.getInstance();
 
 export const ApiService = {
   get: async <T>(url: string, config?: any): Promise<T> => {
-    const res = await client.get<T>(url, config);
+    const res = await client().get<T>(url, config);
     return res.data;
   },
   post: async <T>(url: string, data?: any, config?: any): Promise<T> => {
-    const res = await client.post<T>(url, data, config);
+    const res = await client().post<T>(url, data, config);
     return res.data;
   },
   put: async <T>(url: string, data?: any, config?: any): Promise<T> => {
-    const res = await client.put<T>(url, data, config);
+    const res = await client().put<T>(url, data, config);
     return res.data;
   },
   patch: async <T>(url: string, data?: any, config?: any): Promise<T> => {
-    const res = await client.patch<T>(url, data, config);
+    const res = await client().patch<T>(url, data, config);
     return res.data;
   },
   delete: async <T>(url: string, config?: any): Promise<T> => {
-    const res = await client.delete<T>(url, config);
+    const res = await client().delete<T>(url, config);
     return res.data;
   },
   uploadFile: async <T>(
@@ -32,7 +34,7 @@ export const ApiService = {
     const formData = new FormData();
     formData.append('file', file);
 
-    const res = await client.post<T>(url, formData, {
+    const res = await client().post<T>(url, formData, {
       ...config,
       headers: {
         ...config?.headers,

@@ -1,38 +1,29 @@
-import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
-import { attachInterceptors } from '~/lib/api/api.interceptors';
 
-const API_CONFIG = {
-  TIMEOUT: 30000,
-} as const;
+import axios, { type AxiosInstance, type AxiosError } from "axios";
+// import { getAccessToken, getRefreshToken, setAccessToken, clearTokens } from '@/utils/token'; 
 
-export interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
-  _retry?: boolean;
-  metadata?: {
-    startTime: Date;
-  };
-}
+const API_CONFIG = { TIMEOUT: 30000 } as const;
 
 class ApiClient {
-  private static instance: AxiosInstance;
+  private static instance: AxiosInstance | null = null;
 
   public static getInstance(): AxiosInstance {
-    if (!this.instance) {
-      const baseURL = process.env.NEXT_PUBLIC_API_URL;
-      if (!baseURL) throw new Error('API base URL is not set');
+    if (!ApiClient.instance) {
+      const baseURL = import.meta.env.VITE_PUBLIC_API_URL;
+      if (!baseURL) {
+        throw new Error('API base URL is not set');
+      }
 
-      this.instance = axios.create({
+      const instance = axios.create({
         baseURL,
         timeout: API_CONFIG.TIMEOUT,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
       });
 
-      attachInterceptors(this.instance);
+      ApiClient.instance = instance;
     }
 
-    return this.instance;
+    return ApiClient.instance!;
   }
 }
 

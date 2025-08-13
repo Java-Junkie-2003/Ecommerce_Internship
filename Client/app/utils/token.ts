@@ -42,7 +42,7 @@ export const getAccessTokenSafe = (
 };
 
 // Save access token to cookies
-export const setAccessToken = (token: string, expires = 7): void => {
+export const setAccessToken = (token: string, expires = 1): void => {
   // Skip on server
   if (isServer()) return;
 
@@ -66,7 +66,7 @@ export const removeAccessToken = (): void => {
 };
 
 // Save refresh token to cookies
-export const setRefreshToken = (token: string, expires = 30): void => {
+export const setRefreshToken = (token: string, expires = 2): void => {
   Cookies.set(REFRESH_TOKEN_KEY, token, {
     expires,
     path: "/",

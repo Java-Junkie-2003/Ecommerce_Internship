@@ -2,13 +2,13 @@
 
 import { useState } from "react"
 import { Search, Filter, Grid, List, ShoppingCart, Heart, Star } from "lucide-react"
-import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
-import { Card, CardContent } from "~/components/ui/card"
-import { Badge } from "~/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
-import SiteHeader from "~/components/layout/client-header"
-import SiteFooter from "~/components/layout/client-footer"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import SiteHeader from "@/components/layout/client-header"
+import SiteFooter from "@/components/layout/client-footer"
 
 const products = Array.from({ length: 8 }, (_, i) => ({
     id: i + 1,
