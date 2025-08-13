@@ -1,0 +1,68 @@
+@url_dev=http://localhost:3055/v1/api
+
+
+### Create Product
+POST {{url_dev}}/product/create-product
+Content-Type: application/json
+x-client-id:689471fc659ad34ec9a2cc6b
+authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTQ5Nzk1MzUsImV4cCI6MTc1NTA2NTkzNX0.43F2IJJZNYg4gatZP0WPmsq-b51zmDCq4nRcff_FyRw
+
+{
+    "product_name": "Jo Malone Wood Sage & Sea Salt 100ml",
+    "product_thumb": "https://www.google.com/url?sa=i&url=https%3A%2F%2Fmissi.com.vn%2Fsan-pham%2Fjo-malone-wood-sage-sea-salt%2F%3Fsrsltid%3DAfmBOor-d6qWfCxW_tJY4wlzqE_QtxrHBeI8n8D0kDdHNekwooO2CyeW&psig=AOvVaw3O9UHEL2NnRq8Q5CcuXEOy&ust=1755067499207000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCMCy55nWhI8DFQAAAAAdAAAAABAE",
+    "product_description": "Tươi mát, thoáng đãng với muối biển và xô thơm.",
+    "product_price": 2500000,
+    "product_type": "Perfume",
+    "product_attributes": {
+      "fragrance_family": "Fresh Aromatic",
+      "top_note": "Ambrette Seeds",
+      "base_note": "Sea Salt",
+      "concentration": "Cologne",
+      "volume": 100,
+      "gender": "Female",
+      "longevity_hours": "4-6",
+      "sillage": "Soft-Moderate",
+      "launch_year": 2014
+    },
+    "product_categories": ["689ac94eac93b575fd97819f", "689ac94eac93b575fd97819b"],
+    "product_brand": "689ac945ac93b575fd978199",
+    "isDraft": true,
+    "isPublished": false
+  }
+
+
+### get products by category
+GET {{url_dev}}/product/category/689ac94eac93b575fd97819b?limit=50&page=1
+Content-Type: application/json
+
+### get all products ( published: true )
+GET {{url_dev}}/product/all?page=1
+Content-Type: application/json
+
+### get product by id
+GET {{url_dev}}/product/689ae2f98d25db5c08cff820
+Content-Type: application/json
+
+
+### get all products by brand
+GET {{url_dev}}/product/brand/Dior?page=1
+Content-Type: application/json
+
+### get all products ( role admin )
+
+GET {{url_dev}}/product/admin/all-products?page=1
+Content-Type: application/json
+x-client-id: 689471fc659ad34ec9a2cc6b
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTUwNzU0MzQsImV4cCI6MTc1NTE2MTgzNH0.2s9xC8vb1EHwwPoq-ms3W97Dssg9KStiqRd6ZpwEoac
+
+### set publish for product ( role admin )
+POST {{url_dev}}/product/publish/689ae3548d25db5c08cff826
+Content-Type: application/json
+x-client-id: 689471fc659ad34ec9a2cc6b
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTUwNzU0MzQsImV4cCI6MTc1NTE2MTgzNH0.2s9xC8vb1EHwwPoq-ms3W97Dssg9KStiqRd6ZpwEoac
+
+### set unpublish for product ( role admin )
+POST {{url_dev}}/product/unpublish/689ae3548d25db5c08cff826
+Content-Type: application/json
+x-client-id: 689471fc659ad34ec9a2cc6b
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTUwNzU0MzQsImV4cCI6MTc1NTE2MTgzNH0.2s9xC8vb1EHwwPoq-ms3W97Dssg9KStiqRd6ZpwEoac

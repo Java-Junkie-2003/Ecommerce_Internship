@@ -5,10 +5,12 @@ POST {{url_dev}}/auth/login
 Content-Type: application/json
 
 {
-    "username": "DemoAccount1",
-    "password": "user123"
+    "username": "admin1",
+    "password": "admin123"
 }
 
-
-# POST {{url_dev}}/auth/refreshtoken
-# refresh-token: 
+### refresh token
+POST {{url_dev}}/auth/refreshtoken
+Content-Type: application/json
+x-client-id: 689471fc659ad34ec9a2cc6b
+refresh-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTQ5Nzk1MzUsImV4cCI6MTc1NTE1MjMzNX0.AmhHv-CIBOOkKti9yKtTaAVYnVYr3ZzuMKX9Adm4Ye4
