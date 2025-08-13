@@ -47,15 +47,9 @@ class AuthenticationService {
         const now = dayjs(new Date())
         if (now.isAfter(updateAt.add(2, 'days')) || now.isSame(updateAt.add(2, 'days'))) {
             KeyTokenService.deleteKeyTokenById(foundUser._id)
-            return new AuthFailureError("Session has been expried. Please login again !!")
+            throw new AuthFailureError("Session has been expried. Please login again !!")
         } else if (keyStore && (now.isAfter(updateAt) && now.isBefore(updateAt.add(2, 'days')))) {
-            return {
-                user: getInfoData({ fields: ["_id", "user_name", "email", "phone", "isActive", "roles"], object: foundUser }),
-                tokens: {
-                    accessToken: keyStore.accessToken,
-                    refreshToken: keyStore.refreshToken
-                }
-            }
+            throw new BadRequestError("Token has been expried. Refresh token again !")
         }
     }
     static handleRefreshToken = async ({ keyStore, refreshToken, User }) => {
@@ -67,7 +61,7 @@ class AuthenticationService {
         if (keyStore.refreshToken !== refreshToken) throw new AuthFailureError('Invalid refresh token !')
         const foundUser = await findUserByUserName({ username, select: ['username', 'phone'] })
         if (!foundUser) throw new AuthFailureError("Something went wrong !")
-        const tokens = await createTokenPair({ userId, username }, keyStore.publicKey, keyStore.privateKey)
+        const tokens = await createTokenPair({ userId, username, roles: foundUser.roles }, keyStore.publicKey, keyStore.privateKey)
         await keyStore.updateOne({
             $set: {
                 refreshToken: tokens.refreshToken,
@@ -78,7 +72,7 @@ class AuthenticationService {
             }
         })
         return {
-            user: { ...foundUser },
+            user: getInfoData({ fields: ["_id", "user_name", "email", "phone", "isActive", "roles"], object: foundUser }),
             tokens
         }
     }
