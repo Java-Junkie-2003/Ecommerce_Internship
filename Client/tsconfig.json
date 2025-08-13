@@ -11,17 +11,17 @@
     "target": "ES2022",
     "module": "ES2022",
     "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
     "jsx": "react-jsx",
     "rootDirs": [".", "./.react-router/types"],
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./app/*"],
-      "@/*": ["./app/*"],
+      "@/*": ["./app/*"]
     },
     "esModuleInterop": true,
-    "verbatimModuleSyntax": true,
     "noEmit": true,
     "resolveJsonModule": true,
+    "verbatimModuleSyntax": false,
     "skipLibCheck": true,
     "strict": true
   }

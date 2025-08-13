@@ -1,14 +1,14 @@
 import { useState } from "react"
 import { Minus, Plus, Trash2, ShoppingCart, CreditCard, Truck, Home } from "lucide-react"
-import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
-import { Separator } from "~/components/ui/separator"
-import { Badge } from "~/components/ui/badge"
-import { Textarea } from "~/components/ui/textarea"
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group"
-import { Label } from "~/components/ui/label"
-import SiteHeader from "~/components/layout/client-header"
-import SiteFooter from "~/components/layout/client-footer"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
+import { Textarea } from "@/components/ui/textarea"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
+import SiteHeader from "@/components/layout/client-header"
+import SiteFooter from "@/components/layout/client-footer"
 
 interface CartItem {
     id: number
@@ -25,28 +25,28 @@ export default function Component() {
             name: "A LUXURY PERFUME EVERY EVER",
             price: 2000000,
             quantity: 1,
-            image: "/images/perfumes/irish-leather-eau-de-parfum-781.jpg",
+            image: "/images/perfumes/img__77884.png",
         },
         {
             id: 2,
             name: "A LUXURY PERFUME EVERY EVER",
             price: 2000000,
             quantity: 1,
-            image: "/images/perfumes/irish-leather-eau-de-parfum-781.jpg",
+            image: "/images/perfumes/img__77885.png",
         },
         {
             id: 3,
             name: "A LUXURY PERFUME EVERY EVER",
             price: 2000000,
             quantity: 1,
-            image: "/images/perfumes/irish-leather-eau-de-parfum-781.jpg",
+            image: "/images/perfumes/img__77886.png",
         },
         {
             id: 4,
             name: "A LUXURY PERFUME EVERY EVER",
             price: 2000000,
             quantity: 1,
-            image: "/images/perfumes/irish-leather-eau-de-parfum-781.jpg",
+            image: "/images/perfumes/img__77887.png",
         },
     ])
 

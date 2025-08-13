@@ -1,3 +1,4 @@
+
 import {
   isRouteErrorResponse,
   Links,
@@ -12,6 +13,10 @@ import "./app.css";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import { Button } from "./components/ui/button";
+import { getAccessToken, setAccessToken } from "./utils/token";
+import { useAppDispatch } from "./redux/hook";
+import { loadUserInfo } from "./redux/slices/user";
+
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -27,6 +32,14 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export default function App() {
+
+  // Check access token
+  const accessToken = getAccessToken();
+
+  if (accessToken) {
+    store.dispatch(loadUserInfo());
+  }
+
   return (
     <html lang="en">
       <head>

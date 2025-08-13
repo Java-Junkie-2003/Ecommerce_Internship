@@ -1,20 +1,24 @@
 import { useState } from "react";
 import { Search, ShoppingBag, User, Menu} from "lucide-react";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Badge } from "~/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
     Dialog,
     DialogContent,
     DialogTrigger,
     DialogClose,
-} from "~/components/ui/dialog";
+} from "@/components/ui/dialog";
 import { Link, useNavigate } from "react-router";
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
 
 export default function SiteHeader() {
     const [query, setQuery] = useState("");
     const navigate = useNavigate();
 
+    const dispatch = useAppDispatch();
+    const userData = useAppSelector((state) => state.user);
+    
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && query.trim()) {
             navigate(`/filter?q=${encodeURIComponent(query.trim())}`);
@@ -89,10 +93,12 @@ export default function SiteHeader() {
                             </Badge>
                         </Button>
                     </Link>
-                    <Button variant="ghost" size="icon">
-                        <User className="h-5 w-5" />
-                        <span className="sr-only">Tài khoản</span>
-                    </Button>
+                    <Link to={ userData.isLoggedIn ? "/account" : "/login"}>
+                        <Button variant="ghost" size="icon">
+                            <User className="h-5 w-5" />
+                            <span className="sr-only">Tài khoản</span>
+                        </Button>
+                    </Link>
 
                     {/* Mobile Menu */}
                     <Dialog>

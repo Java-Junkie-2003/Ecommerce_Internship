@@ -1,8 +1,8 @@
+
 import axios from 'axios';
-import { ENDPOINTS } from '~/utils/api.endpoints';
-import { getRefreshToken, setAccessToken, setRefreshToken, clearTokens } from '~/utils/token';
-import { getDeviceId } from '~/utils/fingerprint';
-import { AuthenticationError } from '~/lib/api/api.errors';
+import { ENDPOINTS } from '@/utils/api.endpoints';
+import { getRefreshToken, setAccessToken, setRefreshToken, clearTokens } from '@/utils/token';
+import { AuthenticationError } from '@/lib/api/api.errors';
 
 interface RefreshTokenResponse {
   data: {
@@ -16,8 +16,7 @@ export async function refreshToken(): Promise<string> {
     const refreshToken = getRefreshToken();
     if (!refreshToken) throw new AuthenticationError("No refresh token");
 
-    const deviceId = await getDeviceId();
-    const baseURL = process.env.NEXT_PUBLIC_API_URL;
+    const baseURL = process.env.VITE_PUBLIC_API_URL;
 
     const response = await axios.post<RefreshTokenResponse>(
       `${baseURL}${ENDPOINTS.AUTH.REFRESH}`,
@@ -25,7 +24,6 @@ export async function refreshToken(): Promise<string> {
       {
         headers: {
           Authorization: `Bearer ${refreshToken}`,
-          "X-Device-ID": deviceId,
           "Content-Type": "application/json",
         },
       }

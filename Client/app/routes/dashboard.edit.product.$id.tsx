@@ -1,5 +1,5 @@
 import { useParams } from "react-router";
-import AddEditProduct from "~/components/dashboard/add-edit-product";
+import AddEditProduct from "@/components/dashboard/add-edit-product";
 
 
 // Mock data for a product to edit (in a real app, you'd fetch this based on ID)

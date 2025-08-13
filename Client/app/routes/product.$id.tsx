@@ -14,13 +14,13 @@ import {
     Minus,
     Tag,
 } from "lucide-react"
-import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
-import { Badge } from "~/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
-import SiteFooter from "~/components/layout/client-footer"
-import SiteHeader from "~/components/layout/client-header"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import SiteFooter from "@/components/layout/client-footer"
+import SiteHeader from "@/components/layout/client-header"
 
 const productImages = [
     "/images/perfumes/irish-leather-eau-de-parfum-781.jpg",

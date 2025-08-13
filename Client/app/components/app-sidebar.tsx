@@ -19,8 +19,8 @@ import {
   Users,
 } from "lucide-react"
 
-import { NavMain } from "~/components/nav-main"
-import { NavUser } from "~/components/nav-user"
+import { NavMain } from "@/components/nav-main"
+import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
   SidebarContent,
@@ -30,7 +30,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "~/components/ui/sidebar"
+} from "@/components/ui/sidebar"
 import { useLocation } from "react-router"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
