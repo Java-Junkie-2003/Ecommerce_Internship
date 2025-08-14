@@ -1,8 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { User } from '@/types/model/user';
-import { RootState } from '../store';
 import Cookies from 'js-cookie';
-import { load } from '@fingerprintjs/fingerprintjs';
 
 interface UserState {
     userInfo: User | null;
@@ -36,7 +34,7 @@ const userSlice = createSlice({
                 state.userInfo = JSON.parse(userInfo);
                 state.isLoggedIn = true;
             }
-        },
+        }
     },
 });
 

@@ -2,6 +2,7 @@ import Cookies from "js-cookie";
 
 const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
+const USER_ID_KEY = "user_id";
 const EMAIL_KEY = "register_email";
 const REGISTER_KEY = "register_key";
 
@@ -143,6 +144,32 @@ export const hasToken = (): boolean => {
 export const clearTokens = (): void => {
   removeAccessToken();
   removeRefreshToken();
+  removeUserId();
+};
+
+// Save user ID to cookies
+export const setUserId = (userId: string, expires = 2): void => {
+  // Skip on server
+  if (isServer()) return;
+
+  Cookies.set(USER_ID_KEY, userId, {
+    expires,
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+  });
+};
+
+// Get user ID from cookies
+export const getUserId = (): string | null => {
+  // Skip on server
+  if (isServer()) return null;
+
+  return Cookies.get(USER_ID_KEY) || null;
+};
+
+// Remove user ID from cookies
+export const removeUserId = (): void => {
+  Cookies.remove(USER_ID_KEY, { path: "/" });
 };
 
 // Clear all registration data

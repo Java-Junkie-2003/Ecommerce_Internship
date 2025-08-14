@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import SiteHeader from "@/components/layout/client-header"
 import SiteFooter from "@/components/layout/client-footer"
 
@@ -50,6 +51,7 @@ export default function Component() {
         },
     ])
 
+    const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set())
     const [address, setAddress] = useState("")
     const [paymentMethod, setPaymentMethod] = useState("cod")
 
@@ -60,11 +62,44 @@ export default function Component() {
 
     const removeItem = (id: number) => {
         setCartItems((items) => items.filter((item) => item.id !== id))
+        setSelectedItems((selected) => {
+            const newSelected = new Set(selected)
+            newSelected.delete(id)
+            return newSelected
+        })
     }
 
-    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const removeSelectedItems = () => {
+        setSelectedItems(new Set())
+    }
+
+    const toggleSelectItem = (id: number) => {
+        setSelectedItems((selected) => {
+            const newSelected = new Set(selected)
+            if (newSelected.has(id)) {
+                newSelected.delete(id)
+            } else {
+                newSelected.add(id)
+            }
+            return newSelected
+        })
+    }
+
+    const toggleSelectAll = () => {
+        if (selectedItems.size === cartItems.length) {
+            setSelectedItems(new Set())
+        } else {
+            setSelectedItems(new Set(cartItems.map(item => item.id)))
+        }
+    }
+
+    const selectedCartItems = cartItems.filter(item => selectedItems.has(item.id))
+    const subtotal = selectedCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
     const shipping = 0 // Free shipping
     const total = subtotal + shipping
+
+    const isAllSelected = cartItems.length > 0 && selectedItems.size === cartItems.length
+    const isIndeterminate = selectedItems.size > 0 && selectedItems.size < cartItems.length
 
     return (
         <div className="min-h-screen">
@@ -81,6 +116,31 @@ export default function Component() {
                                     <ShoppingCart className="h-5 w-5" />
                                     GIỎ HÀNG ({cartItems.length} sản phẩm)
                                 </CardTitle>
+                                {cartItems.length > 0 && (
+                                    <div className="flex items-center gap-2 pt-2 h-8">
+                                        <Checkbox
+                                            checked={isAllSelected}
+                                            onCheckedChange={toggleSelectAll}
+                                            className={isIndeterminate ? "indeterminate" : ""}
+                                        />
+                                        <span className="text-sm text-gray-600">
+                                            Chọn tất cả ({selectedItems.size}/{cartItems.length})
+                                        </span>
+                                        {selectedItems.size > 0 && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="ml-auto"
+                                                onClick={() => {
+                                                    removeSelectedItems()
+                                                }}
+                                            >
+                                                <Trash2 className="h-4 w-4 mr-1" />
+                                                Xóa đã chọn
+                                            </Button>
+                                        )}
+                                    </div>
+                                )}
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 {cartItems.length === 0 ? (
@@ -93,6 +153,11 @@ export default function Component() {
                                     cartItems.map((item, index) => (
                                         <div key={item.id}>
                                             <div className="flex items-center gap-4 py-4">
+                                                <Checkbox
+                                                    checked={selectedItems.has(item.id)}
+                                                    onCheckedChange={() => toggleSelectItem(item.id)}
+                                                />
+
                                                 <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                                                     <img
                                                         src={item.image}
@@ -153,24 +218,35 @@ export default function Component() {
                         <Card>
                             <CardHeader>
                                 <CardTitle>ĐƠN HÀNG</CardTitle>
+                                {selectedItems.size > 0 && (
+                                    <p className="text-sm text-gray-600">
+                                        {selectedItems.size} sản phẩm được chọn
+                                    </p>
+                                )}
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="space-y-3">
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Tạm tính:</span>
-                                        <span>VND {subtotal.toLocaleString("vi-VN")} đ</span>
+                                {selectedItems.size === 0 ? (
+                                    <div className="text-center py-4">
+                                        <p className="text-gray-500">Chưa có sản phẩm nào được chọn</p>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Phí vận chuyển:</span>
-                                        <span className="text-green-600">Miễn phí</span>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Tạm tính:</span>
+                                            <span>VND {subtotal.toLocaleString("vi-VN")} đ</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Phí vận chuyển:</span>
+                                            <span className="text-green-600">Miễn phí</span>
+                                        </div>
+                                        <Separator />
+                                        <div className="flex justify-between text-lg font-semibold">
+                                            <span>Tổng:</span>
+                                            <span>VND {total.toLocaleString("vi-VN")} đ</span>
+                                        </div>
+                                        <p className="text-sm text-gray-500">* Đơn hàng đã bao gồm thuế VAT</p>
                                     </div>
-                                    <Separator />
-                                    <div className="flex justify-between text-lg font-semibold">
-                                        <span>Tổng:</span>
-                                        <span>VND {total.toLocaleString("vi-VN")} đ</span>
-                                    </div>
-                                    <p className="text-sm text-gray-500">* Đơn hàng đã bao gồm thuế VAT</p>
-                                </div>
+                                )}
                             </CardContent>
                         </Card>
 
@@ -179,7 +255,8 @@ export default function Component() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Home className="h-5 w-5" />
-                                    Địa chỉ giao hàng
+                                    Địa chỉ giao hàng 
+                                    <span className="text-sm text-gray-500">(bắt buộc)</span>
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -225,8 +302,14 @@ export default function Component() {
                         </Card>
 
                         {/* Checkout Button */}
-                        <Button className="w-full h-12 text-lg font-semibold" disabled={cartItems.length === 0 || !address.trim()}>
-                            Đặt hàng ngay
+                        <Button 
+                            className="w-full h-12 text-lg font-semibold" 
+                            disabled={selectedItems.size === 0 || !address.trim()}
+                        >
+                            {selectedItems.size === 0 
+                                ? "Chọn sản phẩm để đặt hàng" 
+                                : `Đặt hàng (${selectedItems.size} sản phẩm)`
+                            }
                         </Button>
 
                         {/* Security Badge */}
