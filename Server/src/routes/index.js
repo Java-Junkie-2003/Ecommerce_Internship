@@ -2,8 +2,10 @@ const express = require("express");
 const router = express.Router();
 
 
-router.use("/v1/api/product", require('./Product'))
-router.use("/v1/api", require("./Authenticate"));
+router.use("/brand", require("./Brand"))
+router.use("/category", require('./Category'))
+router.use("/product", require('./Product'))
+router.use("/auth", require("./Authenticate"));
 
 
 module.exports = router

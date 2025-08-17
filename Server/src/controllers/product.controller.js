@@ -73,6 +73,18 @@ class ProductController {
         }).send(res)
     }
 
+    findProductsByPriceRange = async (req, res, next) => {
+        const {minPrice, maxPrice, page} = req.query
+        new SuccessResponse({
+            message: "Successful",
+            metadata: await ProductSevice.findProductsByPriceRange({
+                maxPrice,
+                minPrice,
+                page
+            })
+        }).send(res)
+    }
+
 }
 
 

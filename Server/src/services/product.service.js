@@ -4,7 +4,8 @@ const { product, perfume } = require('../models/product.model')
 const { BadRequestError, NotFoundError, AuthFailureError, ForbiddenError } = require("../core/error.response");
 const { findAllProducts, findProduct, findAllDraftsForShop, 
 findAllProductByCategory, findAllProductByBrand, 
-publishProductByAdmin, findAllProductsForAdmin, unPublishProductByAdmin } = require('../models/repositories/product.repo')
+publishProductByAdmin, findAllProductsForAdmin,
+unPublishProductByAdmin, findProductsByPriceRange } = require('../models/repositories/product.repo')
 class ProductFactory {
 
     static productRegistry = {} // key-class
@@ -60,7 +61,10 @@ class ProductFactory {
     }
     static async findAllDraftForAdmin({ limit = 50, skip = 0 }) {
         const query = { isDraft: true }
-        return findAllDraftsForShop({ query, limit, skip })
+        return await findAllDraftsForShop({ query, limit, skip })
+    }
+    static async findProductsByPriceRange({maxPrice, minPrice, limit = 50, sort = 'ctime', page = 1 }){
+        return await findProductsByPriceRange({minPrice, maxPrice, limit, page, sort, select: ['product_name', 'product_thumb', 'product_price']})
     }
 }
 

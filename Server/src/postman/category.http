@@ -1,0 +1,7 @@
+@url_dev=http://localhost:3055/v1/api
+
+
+### get all category
+
+GET {{url_dev}}/category/all
+Content-Type: application/json
