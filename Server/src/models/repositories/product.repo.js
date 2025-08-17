@@ -3,6 +3,7 @@ const {Types} = require('mongoose')
 require('../brand.model')
 require('../category.model')
 const { getSelectData, getUnSelectData, convertToObjectId } = require('../../utils')
+const productModel = require('../product.model')
 const findAllProducts = async ({ limit, sort, page, filter, select }) => {
     const skip = (page - 1) * limit
     const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
@@ -113,6 +114,20 @@ const findAllProductsForAdmin = async ({ limit, sort, page, filter, select }) =>
     return products
 }
 
+const findProductsByPriceRange= async ({minPrice, maxPrice, limit, page, sort, select = []}) => {
+    const skip = (page - 1) * limit
+    const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
+    const products = await product.find({product_price: {$gte: minPrice, $lte: maxPrice}})
+    .populate("product_brand", "brand_name brand_icon -_id")
+    .populate("product_categories", "category_name -_id")
+    .sort(sortBy)
+    .skip(skip)
+    .limit(limit)
+    .select(getSelectData(select))
+    .lean()
+    return products
+}
+
 
 module.exports = {
     findAllProducts,
@@ -122,5 +137,6 @@ module.exports = {
     findAllProductByBrand,
     publishProductByAdmin,
     unPublishProductByAdmin,
-    findAllProductsForAdmin
+    findAllProductsForAdmin,
+    findProductsByPriceRange
 }

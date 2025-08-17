@@ -48,6 +48,12 @@ Content-Type: application/json
 GET {{url_dev}}/product/brand/Dior?page=1
 Content-Type: application/json
 
+
+
+### find all product by price range
+GET {{url_dev}}/product/ls-by-range?minPrice=2500000&maxPrice=3500000&page=1
+Content-Type: application/json
+
 ### get all products ( role admin )
 
 GET {{url_dev}}/product/admin/all-products?page=1
@@ -66,3 +72,5 @@ POST {{url_dev}}/product/unpublish/689ae3548d25db5c08cff826
 Content-Type: application/json
 x-client-id: 689471fc659ad34ec9a2cc6b
 authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTUwNzU0MzQsImV4cCI6MTc1NTE2MTgzNH0.2s9xC8vb1EHwwPoq-ms3W97Dssg9KStiqRd6ZpwEoac
+
+

@@ -5,13 +5,15 @@ const router = express.Router()
 const ProductController = require('../../controllers/product.controller')
 const {authentication, authenticatorForRoleAdmin} = require('../../auth/authUtils')
 const asyncHandler = require('../../helpers/asyncHandler')
+const productController = require('../../controllers/product.controller')
 
 
 
 router.get('/all', asyncHandler(ProductController.findAllProducts))
-router.get('/:productId', asyncHandler(ProductController.findProduct))
+router.get('/ls-by-range', asyncHandler(productController.findProductsByPriceRange))
 router.get('/category/:categoryId', asyncHandler(ProductController.findProductsByCategory))
 router.get('/brand/:brandName', asyncHandler(ProductController.findProductsByBrand))
+router.get('/:productId', asyncHandler(ProductController.findProduct))
 
 router.use(authentication)
 router.use(authenticatorForRoleAdmin)
