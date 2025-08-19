@@ -128,6 +128,11 @@ const findProductsByPriceRange= async ({minPrice, maxPrice, limit, page, sort, s
     return products
 }
 
+const updateProductById = async ({productId, bodyUpdate, model, isNew = true}) => {
+    return await model.findByIdAndUpdate(productId, bodyUpdate, {
+        new: isNew
+    })
+}
 
 module.exports = {
     findAllProducts,
@@ -138,5 +143,6 @@ module.exports = {
     publishProductByAdmin,
     unPublishProductByAdmin,
     findAllProductsForAdmin,
-    findProductsByPriceRange
+    findProductsByPriceRange,
+    updateProductById
 }

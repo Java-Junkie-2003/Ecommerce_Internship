@@ -2,10 +2,12 @@
 
 const { product, perfume } = require('../models/product.model')
 const { BadRequestError, NotFoundError, AuthFailureError, ForbiddenError } = require("../core/error.response");
-const { findAllProducts, findProduct, findAllDraftsForShop, 
-findAllProductByCategory, findAllProductByBrand, 
-publishProductByAdmin, findAllProductsForAdmin,
-unPublishProductByAdmin, findProductsByPriceRange } = require('../models/repositories/product.repo')
+const { findAllProducts, findProduct, findAllDraftsForShop,
+    findAllProductByCategory, findAllProductByBrand,
+    publishProductByAdmin, findAllProductsForAdmin,
+    unPublishProductByAdmin, findProductsByPriceRange,
+    updateProductById } = require('../models/repositories/product.repo');
+const { updateNestedObjectParser, removeUndefinedObject } = require('../utils');
 class ProductFactory {
 
     static productRegistry = {} // key-class
@@ -18,7 +20,11 @@ class ProductFactory {
         return new productClass(payload).createProduct()
     }
 
-
+    static async updateProduct(type, productId, payload) {
+        const productClass = ProductFactory.productRegistry[type]
+        if (!type) throw new BadRequestError(`Invalid type: ${type}`)
+        return new productClass(payload).updateProduct(productId)
+    }
 
     static async findAllProducts({ limit = 50, sort = 'ctime', page = 1, filter = { isPublished: true } }) {
         return await findAllProducts({
@@ -26,19 +32,19 @@ class ProductFactory {
             select: ['product_name', 'product_thumb', 'product_price']
         })
     }
-    static async findAllProductsForAdmin({ limit = 50, sort = 'ctime', page = 1, filter = {} }){
-         return await findAllProductsForAdmin({
+    static async findAllProductsForAdmin({ limit = 50, sort = 'ctime', page = 1, filter = {} }) {
+        return await findAllProductsForAdmin({
             limit, sort, page, filter,
             select: ['product_name', 'product_thumb', 'product_price']
         })
     }
 
-    static async publishProductByAdmin({productId}){
-        return await publishProductByAdmin({product_id: productId})
+    static async publishProductByAdmin({ productId }) {
+        return await publishProductByAdmin({ product_id: productId })
     }
 
-    static async unPublishProductByAdmin({productId}){
-        return await unPublishProductByAdmin({product_id: productId})
+    static async unPublishProductByAdmin({ productId }) {
+        return await unPublishProductByAdmin({ product_id: productId })
     }
 
     static async findAllProductByCategory({ categoryId, limit = 50, sort = 'ctime', page = 1 }) {
@@ -52,9 +58,11 @@ class ProductFactory {
             select: ['product_name', 'product_thumb', 'product_price']
         })
     }
-    static async findAllProductByBrand({brandName, limit = 50, sort='-ctime', page = 1}){
-        return await findAllProductByBrand({brand_name: brandName, limit, sort, page, 
-            select: ['product_name', 'product_thumb', 'product_price']})
+    static async findAllProductByBrand({ brandName, limit = 50, sort = '-ctime', page = 1 }) {
+        return await findAllProductByBrand({
+            brand_name: brandName, limit, sort, page,
+            select: ['product_name', 'product_thumb', 'product_price']
+        })
     }
     static async findProduct({ product_id, unSelect }) {
         return await findProduct({ product_id, unSelect })
@@ -63,8 +71,8 @@ class ProductFactory {
         const query = { isDraft: true }
         return await findAllDraftsForShop({ query, limit, skip })
     }
-    static async findProductsByPriceRange({maxPrice, minPrice, limit = 50, sort = 'ctime', page = 1 }){
-        return await findProductsByPriceRange({minPrice, maxPrice, limit, page, sort, select: ['product_name', 'product_thumb', 'product_price']})
+    static async findProductsByPriceRange({ maxPrice, minPrice, limit = 50, sort = 'ctime', page = 1 }) {
+        return await findProductsByPriceRange({ minPrice, maxPrice, limit, page, sort, select: ['product_name', 'product_thumb', 'product_price'] })
     }
 }
 
@@ -85,6 +93,10 @@ class Product {
     async createProduct(product_id) {
         return await product.create({ ...this, _id: product_id })
     }
+
+    async updateProduct(productId, bodyUpdate) {
+        return await updateProductById({ productId, bodyUpdate, model: product })
+    }
 }
 
 // define sub-class for different product
@@ -97,6 +109,20 @@ class Perfume extends Product {
         if (!newProduct) throw new BadRequestError("Invalid request !!!")
 
         return newProduct
+    }
+
+    async updateProduct(productId) {
+        const objectParams = removeUndefinedObject(this)
+
+        if (objectParams.product_attributes) {
+            await updateProductById({
+                productId,
+                bodyUpdate: updateNestedObjectParser(objectParams.product_attributes),
+                model: perfume
+            })
+        }
+        const updateProduct = await super.updateProduct(productId, updateNestedObjectParser(objectParams))
+        return updateProduct
     }
 }
 

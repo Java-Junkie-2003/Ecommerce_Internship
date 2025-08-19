@@ -31,6 +31,20 @@ authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1O
   }
 
 
+### update product ( bắt buộc phải truyền product_type vào )
+PATCH {{url_dev}}/product/update/689add80d0ba931366487e62
+Content-Type: application/json
+x-client-id: 689471fc659ad34ec9a2cc6b
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTU1NzE3MzMsImV4cCI6MTc1NTY1ODEzM30.RAeR6Ar6MlYrAuwZXQBYTedKm56PWEGQRtVbqZXENJ4
+
+{
+  "product_price": 2000000,
+  "product_type": "Perfume",
+  "product_attributes": {
+    "volume": 80
+  }
+}
+
 ### get products by category
 GET {{url_dev}}/product/category/689ac94eac93b575fd97819b?limit=50&page=1
 Content-Type: application/json
