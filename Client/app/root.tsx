@@ -13,9 +13,8 @@ import "./app.css";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import { Button } from "./components/ui/button";
-import { getAccessToken, setAccessToken } from "./utils/token";
-import { useAppDispatch } from "./redux/hook";
-import { loadUserInfo } from "./redux/slices/user";
+import { Toaster } from "./components/ui/sonner";
+import { UserLoader } from "./components/user-loader";
 
 
 export const links: Route.LinksFunction = () => [
@@ -32,14 +31,6 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export default function App() {
-
-  // Check access token
-  const accessToken = getAccessToken();
-
-  if (accessToken) {
-    store.dispatch(loadUserInfo());
-  }
-
   return (
     <html lang="en">
       <head>
@@ -48,9 +39,12 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="bg-gray-50! text-gray-900 antialiased">
+      <body>
         <Provider store={store}>
-          <Outlet />
+          <UserLoader>
+            <Outlet />
+            <Toaster />
+          </UserLoader>
         </Provider>
         <ScrollRestoration />
         <Scripts />

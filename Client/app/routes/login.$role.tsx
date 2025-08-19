@@ -12,13 +12,13 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ApiService } from "@/lib/api/api.service";
+import { login } from "@/lib/api/api.login";
 import { useAppDispatch } from "@/redux/hook";
 import { addUserInfo } from "@/redux/slices/user";
-import { LoginResponseDTO } from "@/types/dto/login.dto";
-import { getAccessToken, getRefreshToken, setAccessToken, setRefreshToken } from "@/utils/token";
+import { getAccessToken, getRefreshToken } from "@/utils/token";
 import { useState } from "react";
-import { ClientLoaderFunction, ClientLoaderFunctionArgs, LoaderFunctionArgs, redirect } from "react-router";
+import { redirect, useNavigate, useParams } from "react-router";
+import { toast } from "sonner";
 
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
     const token = getAccessToken();
@@ -26,10 +26,10 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
 
     if (token || refreshToken) {
 
-        if(params.role === "admin") {
-            return redirect("/admin");
-        } else {
+        if(params.role === "ADMIN") {
             return redirect("/dashboard");
+        } else {
+            return redirect("/");
         }
     }
 
@@ -43,23 +43,56 @@ const Page = () => {
 
     const dispatch = useAppDispatch();
 
+    const params = useParams();
+    const navigate = useNavigate();
+
     const handleLogin = async () => {
-        console.log("Logging in with:", { username, password });
-        const res: LoginResponseDTO = await ApiService.post("/auth/login", { username, password });
-        if (res.statusCode === 200) {
-            console.log("Login successful:", res);
+        try {
+            console.log("Logging in with:", { username, password });
+            
+            const { user, tokens } = await login({ username, password });
+            
+            console.log("Login successful:", { user, tokens });
 
-            const { user, tokens } = res.metadata;
+            // Map API response to Redux User structure
+            const mappedUser = {
+                _id: user._id || user.userId || "", // Use MongoDB ObjectId if available
+                user_name: user.username,
+                email: user.username, // Assuming username is email
+                phone: "", // Not provided in API response
+                isActive: true,
+                roles: user.roles
+            };
 
-            dispatch(addUserInfo(user));
+            // Update Redux store with user info
+            dispatch(addUserInfo(mappedUser));
 
-            setAccessToken(tokens.accessToken);
-            setRefreshToken(tokens.refreshToken);
+            toast.success("Đăng nhập thành công!");
 
-        } else {
-            console.error("Login failed:", res);
+            // Navigate based on user role
+            if (params.role === "ADMIN") {
+                navigate("/dashboard");
+            } else {
+                navigate("/");
+            }
 
+        } catch (error: any) {
+            console.error("Login failed:", error);
+            const errorMessage = error?.message || "Đăng nhập thất bại, vui lòng kiểm tra lại thông tin đăng nhập.";
+            toast.error(errorMessage);
         }
+    }
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            handleLogin();
+        }
+    }
+
+    const handleFormSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        handleLogin();
     }
 
 
@@ -89,7 +122,7 @@ const Page = () => {
                     </CardAction> */}
                 </CardHeader>
                 <CardContent>
-                    <form>
+                    <form onSubmit={handleFormSubmit}>
                         <div className="flex flex-col gap-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email</Label>
@@ -99,6 +132,7 @@ const Page = () => {
                                     placeholder="m@example.com"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
+                                    onKeyDown={handleKeyDown}
                                     required
                                 />
                             </div>
@@ -115,9 +149,10 @@ const Page = () => {
                                 <Input
                                     id="password"
                                     type="password"
-                                    required value={password}
-                                    onChange={(e) =>
-                                        setPassword(e.target.value)}
+                                    required 
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    onKeyDown={handleKeyDown}
                                 />
                             </div>
                         </div>

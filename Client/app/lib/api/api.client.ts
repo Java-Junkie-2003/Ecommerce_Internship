@@ -1,6 +1,6 @@
 
 import axios, { type AxiosInstance, type AxiosError } from "axios";
-// import { getAccessToken, getRefreshToken, setAccessToken, clearTokens } from '@/utils/token'; 
+import { attachInterceptors } from './api.interceptors';
 
 const API_CONFIG = { TIMEOUT: 30000 } as const;
 
@@ -20,10 +20,19 @@ class ApiClient {
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
       });
 
+      // Attach interceptors for token management
+      attachInterceptors(instance);
+
       ApiClient.instance = instance;
+      console.log('API Client initialized with interceptors');
     }
 
     return ApiClient.instance!;
+  }
+
+  // Method to clear the instance (useful for logout)
+  public static clearInstance(): void {
+    ApiClient.instance = null;
   }
 }
 

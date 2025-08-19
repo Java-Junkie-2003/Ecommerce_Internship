@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from "react-router";
+import { Navigate, Outlet, useLocation } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   Breadcrumb,
@@ -14,8 +14,22 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useEffect } from "react";
 
 export default function DashboardLayout() {
+
+  const user = useSelector((state: RootState) => state.user);
+
+  useEffect(() => {
+    if(!user.isLoggedIn) {
+      window.location.href = '/login/admin';
+    } else if (!user.userInfo?.roles.includes("ADMIN")) {
+      window.location.href = '/unauthorized';
+    }
+  }, []);
+
   const location = useLocation();
 
   const pageNameData: Record<"dashboard" | "categories" | "brands" | "products" | "customers", string> = {
