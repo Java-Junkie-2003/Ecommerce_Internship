@@ -14,7 +14,7 @@ class CategoryController {
         new SuccessResponse({
             message: "Get all category",
             metadata: await CategoryService.getAllCategory()
-        })
+        }).send(res)
     }
 }
 

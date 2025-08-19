@@ -20,6 +20,7 @@ router.use(authenticatorForRoleAdmin)
 
 router.get('/admin/all-products', asyncHandler(ProductController.findAllProductsForAdmin))
 router.post('/create-product', asyncHandler(ProductController.createProduct))
+router.patch('/update/:productId', asyncHandler(ProductController.updateProduct))
 router.post('/publish/:productId', asyncHandler(ProductController.publishProductForAdmin))
 router.post('/unpublish/:productId', asyncHandler(ProductController.unPublishProductForAdmin))
 

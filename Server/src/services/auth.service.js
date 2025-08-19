@@ -59,7 +59,7 @@ class AuthenticationService {
             throw new ForbiddenError("Something went wrong, please try again")
         }
         if (keyStore.refreshToken !== refreshToken) throw new AuthFailureError('Invalid refresh token !')
-        const foundUser = await findUserByUserName({ username, select: ['username', 'phone'] })
+        const foundUser = await findUserByUserName({ username, select: ['username', 'phone', 'roles'] })
         if (!foundUser) throw new AuthFailureError("Something went wrong !")
         const tokens = await createTokenPair({ userId, username, roles: foundUser.roles }, keyStore.publicKey, keyStore.privateKey)
         await keyStore.updateOne({
