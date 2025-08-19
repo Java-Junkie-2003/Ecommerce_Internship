@@ -3,7 +3,7 @@ const categoryModel = require('../category.model')
 
 
 const createCategory = async ({category_name}) =>{
-    const newCategory = await categoryModel.create(category_name)
+    const newCategory = await categoryModel.create({category_name})
     if(!newCategory) throw new BadRequestError("Invalid request !!")
     return newCategory;
 }

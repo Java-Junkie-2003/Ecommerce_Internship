@@ -1,0 +1,19 @@
+@url_dev=http://localhost:3055/v1/api
+
+### get all inventory
+GET {{url_dev}}/inventory?page=1
+Content-Type: application/json
+x-client-id: 689471fc659ad34ec9a2cc6b
+authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTU1Nzc0NzEsImV4cCI6MTc1NTY2Mzg3MX0.6RYfqFpHCNimJSVCnCCcXRVJR5ufR5r39pUVTuh6s8E
+
+
+### update stock for product
+
+POST {{url_dev}}/inventory/update-stock/689add80d0ba931366487e62
+Content-Type: application/json
+x-client-id:689471fc659ad34ec9a2cc6b
+authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTU1Nzc0NzEsImV4cCI6MTc1NTY2Mzg3MX0.6RYfqFpHCNimJSVCnCCcXRVJR5ufR5r39pUVTuh6s8E
+
+{
+    "stock": 100
+}

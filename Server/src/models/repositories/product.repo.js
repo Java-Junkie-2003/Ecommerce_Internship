@@ -101,17 +101,38 @@ const unPublishProductByAdmin =async ({ product_id }) => {
     await doc.save();      
     return 1;
 };
-const findAllProductsForAdmin = async ({ limit, sort, page, filter, select }) => {
+const findAllProductsForAdmin = async ({ limit, sort, page, filter = {}, select }) => {
     const skip = (page - 1) * limit
     const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
-    const products = await product.find(filter)
+    const [products, total] = await Promise.all([
+        product.find(filter)
         .sort(sortBy)
         .skip(skip)
         .limit(limit)
         .select(getSelectData(select))
-        .lean()
+        .lean(),
+        product.countDocuments(filter)
+    ])
+    
+    const totalPages = Math.max(1, Math.ceil(total/limit))
+    const hasNext = page < totalPages
+    const hasPrev = page > 1
 
-    return products
+
+    return {
+        products,
+        pagination: {
+            totalProduct: total,
+            count: product.length,
+            page: page,
+            limit,
+            totalPages,
+            hasNext,
+            hasPrev,
+            nextPage: hasNext ? page + 1 : null,
+            prevPage: hasPrev ? page - 1 : null
+        }
+    }
 }
 
 const findProductsByPriceRange= async ({minPrice, maxPrice, limit, page, sort, select = []}) => {
