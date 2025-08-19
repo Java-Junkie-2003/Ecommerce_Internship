@@ -48,9 +48,16 @@ class AuthenticationService {
         if (now.isAfter(updateAt.add(2, 'days')) || now.isSame(updateAt.add(2, 'days'))) {
             KeyTokenService.deleteKeyTokenById(foundUser._id)
             throw new AuthFailureError("Session has been expried. Please login again !!")
-        } else if (keyStore && (now.isAfter(updateAt) && now.isBefore(updateAt.add(2, 'days')))) {
+        } else if (keyStore && (now.isAfter(updateAt.add(1, 'day')) && now.isBefore(updateAt.add(2, 'days')))) {
             throw new BadRequestError("Token has been expried. Refresh token again !")
         }
+        return {
+                user: getInfoData({ fields: ["_id", "user_name", "email", "phone", "isActive", "roles"], object: foundUser }),
+                tokens: {
+                    accessToken: keyStore.accessToken,
+                    refreshToken: keyStore.refreshToken
+                }
+            }
     }
     static handleRefreshToken = async ({ keyStore, refreshToken, User }) => {
         const { userId, username } = User
