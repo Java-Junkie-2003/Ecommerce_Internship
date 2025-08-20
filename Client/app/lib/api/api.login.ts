@@ -7,6 +7,8 @@ import {
   clearTokens,
   getRefreshToken,
 } from "@/utils/token";
+import { ENDPOINTS } from "@/utils/api.endpoints";
+import { User } from "@/types/model/user";
 
 interface LoginRequest {
   username: string;
@@ -15,12 +17,7 @@ interface LoginRequest {
 
 interface LoginResponse {
   metadata: {
-    user: {
-      _id: string; // MongoDB ObjectId
-      userId?: string; // Alternative user ID field
-      username: string;
-      roles: string[];
-    };
+    user: User;
     tokens: {
       accessToken: string;
       refreshToken: string;
@@ -43,15 +40,14 @@ export const login = async (
     clearTokens();
 
     const response = await ApiService.post<LoginResponse>(
-      "/auth/login",
+      ENDPOINTS.AUTH.LOGIN,
       credentials
     );
 
     const { user, tokens } = response.metadata;
 
     // Store tokens and user ID in cookies
-    // Use _id (MongoDB ObjectId) if available, otherwise fall back to userId
-    const userIdToStore = user._id || user.userId;
+    const userIdToStore = user._id;
     if (!userIdToStore) {
       throw new Error("No valid user ID received from server");
     }
@@ -62,7 +58,7 @@ export const login = async (
 
     // call introspect token to check access token is expired or not
     const tokenInfo: ITokenInfo = await ApiService.get(
-      "/auth/introspect-token"
+      ENDPOINTS.AUTH.INTROSPECT_TOKEN
     );
     if (!tokenInfo.metadata?.is_valid || tokenInfo.code === 401) {
         // Call refresh token api
@@ -71,7 +67,8 @@ export const login = async (
           throw new Error("No refresh token available");
         }
 
-        const newTokens: RefreshTokenResponse = await ApiService.post("/auth/refreshtoken", 
+        const newTokens: RefreshTokenResponse = await ApiService.post(
+          ENDPOINTS.AUTH.REFRESH,
           {}, // Empty body since server expects headers
           {
             headers: {
@@ -104,7 +101,7 @@ export const logout = async (): Promise<void> => {
     console.log("Starting logout process...");
 
     // Call logout endpoint (this will use interceptors to add auth headers)
-    await ApiService.get<LogoutResponse>("/auth/logout");
+    await ApiService.get<LogoutResponse>(ENDPOINTS.AUTH.LOGOUT);
     console.log("Logout API call successful");
 
     // Only clear tokens if the API call was successful

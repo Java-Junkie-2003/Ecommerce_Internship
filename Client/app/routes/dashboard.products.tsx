@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Eye, Pencil, Trash2, ChevronLeft, ChevronRight, MoreHorizontal, Package, DollarSign, Tag, BookOpen, Palette, Ruler, Star, CheckCircle, XCircle, FileText, List } from 'lucide-react'
+import { Plus, Eye, Pencil, Trash2, ChevronLeft, ChevronRight, MoreHorizontal, Package, DollarSign, Tag, BookOpen, Palette, Ruler, Star, CheckCircle, XCircle, FileText, List, PlusCircle } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -281,7 +281,7 @@ export default function Component() {
     const averageRating = products.length > 0
         ? (products.reduce((sum, p) => sum + p.product_ratingAverage, 0) / products.length).toFixed(1)
         : "N/A"
-
+    const newProductsThisMonth = 2;
 
     return (
         <div className="flex-1 space-y-6 p-6">
@@ -299,47 +299,59 @@ export default function Component() {
 
             {/* Stats Cards */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Tổng sản phẩm</CardTitle>
-                        <Package className="h-4 w-4 text-muted-foreground" />
+                <Card className="relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-blue-50 to-white shadow-sm hover:shadow-md transition-all duration-300">
+                    <div className="absolute right-3 top-3 opacity-10 -rotate-12">
+                        <Package className="h-20 w-20 text-blue-400" />
+                    </div>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-700">Tổng sản phẩm</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{totalProducts}</div>
-                        <p className="text-xs text-muted-foreground">Sản phẩm trong kho</p>
+                        <div className="text-2xl font-bold text-gray-900">{totalProducts}</div>
+                        <p className="text-xs text-gray-500">Sản phẩm trong kho</p>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Đang mở bán</CardTitle>
-                        <CheckCircle className="h-4 w-4 text-green-600" />
+
+                <Card className="relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-green-50 to-white shadow-sm hover:shadow-md transition-all duration-300">
+                    <div className="absolute right-3 top-3 opacity-10 rotate-12">
+                        <CheckCircle className="h-20 w-20 text-green-400" />
+                    </div>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-700">Đang mở bán</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{publishedProducts}</div>
-                        <p className="text-xs text-muted-foreground">Đang hiển thị trên cửa hàng</p>
+                        <div className="text-2xl font-bold text-gray-900">{publishedProducts}</div>
+                        <p className="text-xs text-gray-500">Đang hiển thị trên cửa hàng</p>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Bản nháp</CardTitle>
-                        <FileText className="h-4 w-4 text-orange-600" />
+
+                <Card className="relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-orange-50 to-white shadow-sm hover:shadow-md transition-all duration-300">
+                    <div className="absolute right-3 top-3 opacity-10 -rotate-12">
+                        <FileText className="h-20 w-20 text-orange-400" />
+                    </div>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-700">Bản nháp</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{draftProducts}</div>
-                        <p className="text-xs text-muted-foreground">Sản phẩm đang được chỉnh sửa</p>
+                        <div className="text-2xl font-bold text-gray-900">{draftProducts}</div>
+                        <p className="text-xs text-gray-500">Sản phẩm đang được chỉnh sửa</p>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Giá trị tổng cộng</CardTitle>
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+
+                <Card className="relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-purple-50 to-white shadow-sm hover:shadow-md transition-all duration-300">
+                    <div className="absolute right-3 top-3 opacity-10 rotate-12">
+                        <PlusCircle className="h-20 w-20 text-purple-400" />
+                    </div>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-700">Sản phẩm mới</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{formatCurrency(totalProductValue.toFixed(2))}</div>
-                        <p className="text-xs text-muted-foreground">Tổng giá trị sản phẩm</p>
+                        <div className="text-2xl font-bold text-gray-900">{newProductsThisMonth}</div>
+                        <p className="text-xs text-gray-500">Được thêm trong tháng này</p>
                     </CardContent>
                 </Card>
             </div>
+
 
 
             {/* Products Table */}

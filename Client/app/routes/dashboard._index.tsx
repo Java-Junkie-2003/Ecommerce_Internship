@@ -206,47 +206,62 @@ export default function Component() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tổng đơn hàng</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+        {/* Tổng đơn hàng */}
+        <Card className="border border-gray-100 relative overflow-hidden bg-gradient-to-br from-blue-50 to-white shadow-sm hover:shadow-md transition">
+          {/* Icon background */}
+          <ShoppingCart className="absolute right-3 top-3 h-20 w-20 text-blue-200 opacity-30 rotate-12 pointer-events-none" />
+
+          <CardHeader className="relative z-10 pb-2">
+            <CardTitle className="text-sm font-medium text-blue-800">Tổng đơn hàng</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalOrders}</div>
+          <CardContent className="relative z-10">
+            <div className="text-2xl font-bold text-blue-900">{totalOrders}</div>
             <p className="text-xs text-muted-foreground">Tổng số đơn hàng</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Đơn hàng chờ xử lý</CardTitle>
-            <Hourglass className="h-4 w-4 text-yellow-600" />
+
+        {/* Đơn hàng chờ xử lý */}
+        <Card className="border border-gray-100 relative overflow-hidden bg-gradient-to-br from-yellow-50 to-white shadow-sm hover:shadow-md transition">
+          <Hourglass className="absolute right-3 top-3 h-20 w-20 text-yellow-300 opacity-30 -rotate-12 pointer-events-none" />
+
+          <CardHeader className="relative z-10 pb-2">
+            <CardTitle className="text-sm font-medium text-yellow-800">Đơn hàng chờ xử lý</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingOrders}</div>
+          <CardContent className="relative z-10">
+            <div className="text-2xl font-bold text-yellow-900">{pendingOrders}</div>
             <p className="text-xs text-muted-foreground">Đang chờ xác nhận</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Đơn hàng đã giao</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+
+        {/* Đơn hàng đã giao */}
+        <Card className="border border-gray-100 relative overflow-hidden bg-gradient-to-br from-green-50 to-white shadow-sm hover:shadow-md transition">
+          <CheckCircle className="absolute right-3 top-3 h-20 w-20 text-green-300 opacity-30 rotate-12 pointer-events-none" />
+
+          <CardHeader className="relative z-10 pb-2">
+            <CardTitle className="text-sm font-medium text-green-800">Đơn hàng đã giao</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{deliveredOrders}</div>
+          <CardContent className="relative z-10">
+            <div className="text-2xl font-bold text-green-900">{deliveredOrders}</div>
             <p className="text-xs text-muted-foreground">Đã hoàn thành</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tổng doanh thu</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+
+        {/* Tổng doanh thu */}
+        <Card className="border border-gray-100 relative overflow-hidden bg-gradient-to-br from-purple-50 to-white shadow-sm hover:shadow-md transition">
+          <DollarSign className="absolute right-3 top-3 h-20 w-20 text-purple-300 opacity-30 -rotate-12 pointer-events-none" />
+
+          <CardHeader className="relative z-10 pb-2">
+            <CardTitle className="text-sm font-medium text-purple-800">Tổng doanh thu</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalRevenue).replace("₫", "đ")}</div>
+          <CardContent className="relative z-10">
+            <div className="text-2xl font-bold text-purple-900">
+              {formatCurrency(totalRevenue).replace("₫", "đ")}
+            </div>
             <p className="text-xs text-muted-foreground">Giá trị đơn hàng</p>
           </CardContent>
         </Card>
       </div>
+
 
 
       {/* Order Table */}
@@ -259,7 +274,7 @@ export default function Component() {
               <TableHead>Ngày đặt</TableHead>
               <TableHead>Tổng tiền</TableHead>
               <TableHead>Trạng thái</TableHead>
-              <TableHead className="w-[50px]"></TableHead> {/* For actions */}
+              <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

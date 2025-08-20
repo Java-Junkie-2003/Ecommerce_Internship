@@ -1,5 +1,4 @@
-
-import { useState } from "react"
+import { use, useEffect, useState } from "react"
 import { Plus, Pencil, Trash2, Eye, MoreHorizontal } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,40 +15,33 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-
-interface Category {
-    id: string
-    name: string
-    description?: string
-}
-
-const initialCategories: Category[] = [
-    { id: "cat1", name: "Nước hoa nam", description: "Các loại nước hoa dành cho nam giới." },
-    { id: "cat2", name: "Nước hoa nữ", description: "Các loại nước hoa dành cho nữ giới." },
-    { id: "cat3", name: "Nước hoa unisex", description: "Các loại nước hoa phù hợp cho cả nam và nữ." },
-    { id: "cat4", name: "Nước hoa chiếc", description: "Nước hoa chiết, dung tích nhỏ gọn." },
-    { id: "cat5", name: "Nước hoa mini", description: "Các chai nước hoa dung tích nhỏ, tiện lợi mang theo." },
-]
+import { Category } from "@/types/model/category"
+import { useAppDispatch, useAppSelector } from "@/redux/hook"
+import { RootState } from "@/redux/store"
+import { createCategory, fetchCategories } from "@/redux/thunks/category.thunk"
+import { toast } from "sonner"
 
 export default function Component() {
-    const [categories, setCategories] = useState<Category[]>(initialCategories)
+
+    const category = useAppSelector((state: RootState) => state.category)
+    const categories = category.categories
+
+    const dispatch = useAppDispatch()
+
     const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false)
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
     const [currentCategory, setCurrentCategory] = useState<Category | null>(null)
     const [categoryName, setCategoryName] = useState("")
-    const [categoryDescription, setCategoryDescription] = useState("")
 
     const handleOpenAddModal = () => {
         setCurrentCategory(null) // Clear current category for add mode
         setCategoryName("")
-        setCategoryDescription("")
         setIsAddEditModalOpen(true)
     }
 
     const handleOpenEditModal = (category: Category) => {
         setCurrentCategory(category)
-        setCategoryName(category.name)
-        setCategoryDescription(category.description || "")
+        setCategoryName(category.category_name)
         setIsAddEditModalOpen(true)
     }
 
@@ -61,20 +53,18 @@ export default function Component() {
 
         if (currentCategory) {
             // Edit existing category
-            setCategories(
-                categories.map((cat) =>
-                    cat.id === currentCategory.id
-                        ? { ...cat, name: categoryName.trim(), description: categoryDescription.trim() }
-                        : cat,
-                ),
-            )
+
         } else {
             // Add new category
-            const newId = `cat${categories.length + 1}` // Simple ID generation
-            setCategories([
-                ...categories,
-                { id: newId, name: categoryName.trim(), description: categoryDescription.trim() },
-            ])
+            dispatch(createCategory({ category_name: categoryName })).unwrap()
+                .then(() => {
+                    console.log("Category created successfully");
+                    toast.success("Danh mục đã được tạo thành công.")
+                })
+                .catch((error) => {
+                    toast.error("Đã xảy ra lỗi khi tạo danh mục.")
+                    console.error("Error creating category:", error)
+                })
         }
         setIsAddEditModalOpen(false)
     }
@@ -86,11 +76,16 @@ export default function Component() {
 
     const handleDeleteCategory = () => {
         if (currentCategory) {
-            setCategories(categories.filter((cat) => cat.id !== currentCategory.id))
+            // setCategories(categories.filter((cat) => cat.id !== currentCategory.id))
             setIsDeleteConfirmOpen(false)
             setCurrentCategory(null)
         }
     }
+
+    useEffect(() => {
+        // Fetch categories from the server or perform any necessary side effects
+        dispatch(fetchCategories())
+    }, [])
 
     return (
         <div className="flex-1 space-y-6 p-6">
@@ -113,18 +108,14 @@ export default function Component() {
                         <TableRow>
                             <TableHead className="w-[100px]">ID</TableHead>
                             <TableHead>Tên danh mục</TableHead>
-                            <TableHead>Mô tả</TableHead>
-                            <TableHead className="w-[50px]"></TableHead> {/* For actions */}
+                            <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {categories.map((category) => (
-                            <TableRow key={category.id}>
-                                <TableCell className="font-medium">{category.id}</TableCell>
-                                <TableCell>{category.name}</TableCell>
-                                <TableCell className="text-muted-foreground max-w-[400px] truncate">
-                                    {category.description || "Không có mô tả"}
-                                </TableCell>
+                            <TableRow key={category._id}>
+                                <TableCell className="font-medium">{category._id}</TableCell>
+                                <TableCell>{category.category_name}</TableCell>
                                 <TableCell>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
@@ -137,10 +128,10 @@ export default function Component() {
                                                 <Pencil className="h-4 w-4 mr-2" />
                                                 Chỉnh sửa
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleOpenDeleteConfirm(category)} className="text-red-600">
+                                            {/* <DropdownMenuItem onClick={() => handleOpenDeleteConfirm(category)} className="text-red-600">
                                                 <Trash2 className="h-4 w-4 mr-2" />
                                                 Xóa
-                                            </DropdownMenuItem>
+                                            </DropdownMenuItem> */}
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </TableCell>
@@ -172,7 +163,7 @@ export default function Component() {
                                 placeholder="Ví dụ: Nước hoa nam"
                             />
                         </div>
-                        <div className="grid grid-cols-4 items-start gap-4">
+                        {/* <div className="grid grid-cols-4 items-start gap-4">
                             <Label htmlFor="categoryDescription" className="text-right pt-2">
                                 Mô tả
                             </Label>
@@ -183,7 +174,7 @@ export default function Component() {
                                 className="col-span-3 min-h-[80px]"
                                 placeholder="Mô tả ngắn về danh mục..."
                             />
-                        </div>
+                        </div> */}
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsAddEditModalOpen(false)}>
@@ -203,7 +194,7 @@ export default function Component() {
                         <DialogHeader>
                             <DialogTitle>Xác nhận xóa danh mục</DialogTitle>
                             <DialogDescription>
-                                Bạn có chắc chắn muốn xóa danh mục <span className="font-semibold">{currentCategory.name}</span> không?
+                                Bạn có chắc chắn muốn xóa danh mục <span className="font-semibold">{currentCategory.category_name}</span> không?
                                 Hành động này không thể hoàn tác.
                             </DialogDescription>
                         </DialogHeader>

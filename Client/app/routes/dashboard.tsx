@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useLocation } from "react-router";
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   Breadcrumb,
@@ -21,14 +21,17 @@ import { useEffect } from "react";
 export default function DashboardLayout() {
 
   const user = useSelector((state: RootState) => state.user);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if(!user.isLoggedIn) {
-      window.location.href = '/login/admin';
-    } else if (!user.userInfo?.roles.includes("ADMIN")) {
-      window.location.href = '/unauthorized';
+    if (user.status !== "loading") {
+      if (!user.isLoggedIn) {
+        navigate('/login/admin');
+      } else if (!user.userInfo?.roles.includes("ADMIN")) {
+        navigate('/unauthorized');
+      }
     }
-  }, []);
+  }, [user]);
 
   const location = useLocation();
 

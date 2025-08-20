@@ -29,17 +29,42 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useAppDispatch, useAppSelector } from "@/redux/hook"
+import { RootState } from "@/redux/store"
+import { useNavigate } from "react-router"
+import { logout } from "@/lib/api/api.login"
+import { removeUserInfo } from "@/redux/slices/user"
+import { toast } from "sonner"
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
-}) {
+export function NavUser() {
   const { isMobile } = useSidebar()
+
+  const user = useAppSelector((state: RootState) => state.user)
+  const userInfo = user.userInfo
+
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Only clear user info from Redux store if logout API call succeeded
+      dispatch(removeUserInfo());
+      toast.success("Đăng xuất thành công");
+      navigate("/");
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      // Don't clear local state if logout failed - keep user logged in
+      toast.error("Đăng xuất thất bại. Vui lòng thử lại.");
+
+      // Check if it's a server error that we should handle gracefully
+      if (error?.message?.includes('24 character hex string') ||
+        error?.message?.includes('ObjectId') ||
+        error?.status === 500) {
+        toast.error("Có lỗi từ máy chủ. Vui lòng thử lại sau hoặc liên hệ admin.");
+      }
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -51,8 +76,8 @@ export function NavUser({
               className="data-[state=open]:bg-white data-[state=open]:text-gray-900 data-[state=open]:shadow-lg data-[state=open]:border data-[state=open]:border-gray-200/50 hover:bg-sidebar-accent/80 transition-all duration-300 rounded-xl group/user relative overflow-hidden h-12 px-4 before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent before:-translate-x-full hover:before:translate-x-full before:transition-transform before:duration-700"
             >
               <div className="grid flex-1 text-left leading-tight">
-                <span className="truncate font-bold text-base text-sidebar-foreground group-hover/user:text-sidebar-accent-foreground transition-colors">{user.name}</span>
-                <span className="truncate text-xs text-sidebar-muted-foreground font-medium">{user.email}</span>
+                <span className="truncate font-bold text-base text-sidebar-foreground group-hover/user:text-sidebar-accent-foreground transition-colors">{userInfo?.user_name}</span>
+                <span className="truncate text-xs text-sidebar-muted-foreground font-medium">{userInfo?.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-5 opacity-60 group-hover/user:opacity-100 group-hover/user:scale-110 transition-all duration-300" />
             </SidebarMenuButton>
@@ -66,8 +91,8 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-4 px-4 py-4 text-left border-b border-gray-100">
                 <div className="grid flex-1 text-left leading-tight">
-                  <span className="truncate font-bold text-base text-gray-900">{user.name}</span>
-                  <span className="truncate text-sm text-gray-600 font-medium">{user.email}</span>
+                  <span className="truncate font-bold text-base text-gray-900">{userInfo?.user_name}</span>
+                  <span className="truncate text-sm text-gray-600 font-medium">{userInfo?.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -102,7 +127,9 @@ export function NavUser({
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator className="my-3 bg-gray-100" />
-              <DropdownMenuItem className="rounded-xl hover:bg-red-50 hover:text-red-700 transition-all duration-200 cursor-pointer group/item text-red-600 h-12 px-3">
+              <DropdownMenuItem className="rounded-xl hover:bg-red-50 hover:text-red-700 transition-all duration-200 cursor-pointer group/item text-red-600 h-12 px-3"
+                onClick={handleLogout}
+              >
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-red-100 group-hover/item:bg-red-200 transition-colors mr-3">
                   <LogOut className="size-4 text-red-600 group-hover/item:scale-110 transition-transform duration-200" />
                 </div>

@@ -20,22 +20,6 @@ import { useState } from "react";
 import { redirect, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
-export async function clientLoader({ params }: Route.ClientLoaderArgs) {
-    const token = getAccessToken();
-    const refreshToken = getRefreshToken();
-
-    if (token || refreshToken) {
-
-        if(params.role === "ADMIN") {
-            return redirect("/dashboard");
-        } else {
-            return redirect("/");
-        }
-    }
-
-    return null;
-}
-
 const Page = () => {
 
     const [username, setUsername] = useState("");
@@ -54,26 +38,22 @@ const Page = () => {
             
             console.log("Login successful:", { user, tokens });
 
-            // Map API response to Redux User structure
-            const mappedUser = {
-                _id: user._id || user.userId || "", // Use MongoDB ObjectId if available
-                user_name: user.username,
-                email: user.username, // Assuming username is email
-                phone: "", // Not provided in API response
-                isActive: true,
-                roles: user.roles
-            };
-
             // Update Redux store with user info
-            dispatch(addUserInfo(mappedUser));
+            dispatch(addUserInfo(user));
 
             toast.success("Đăng nhập thành công!");
 
-            // Navigate based on user role
-            if (params.role === "ADMIN") {
-                navigate("/dashboard");
+            // Navigate based on user role, delay 1s
+            if (params.role === "admin" && user.roles.includes("ADMIN")) {
+                console.log("Redirecting to dashboard for admin user", params.role);
+                setTimeout(() => {
+                    navigate("/dashboard");
+                }, 1000);
             } else {
-                navigate("/");
+                console.log("Redirecting to home page for regular user", params.role);
+                setTimeout(() => {
+                    navigate("/");
+                }, 1000);
             }
 
         } catch (error: any) {
