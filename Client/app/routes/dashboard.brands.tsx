@@ -3,7 +3,7 @@ import type { Route } from "../+types/root";
 
 "use client"
 
-import { useState } from "react"
+import { use, useEffect, useState } from "react"
 import { Plus, Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -18,104 +18,56 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-
-interface Brand {
-  id: string
-  name: string
-  logoUrl: string
-  description?: string
-}
-
-const initialBrands: Brand[] = [
-  {
-    id: "1",
-    name: "LANCÔME PARIS",
-    logoUrl: "/images/perfumes/irish-leather-eau-de-parfum-781.jpg",
-    description: "Thương hiệu mỹ phẩm và nước hoa cao cấp từ Pháp.",
-  },
-  {
-    id: "2",
-    name: "DIOR",
-    logoUrl: "/images/perfumes/irish-leather-eau-de-parfum-781.jpg",
-    description: "Thương hiệu thời trang và mỹ phẩm xa xỉ của Pháp.",
-  },
-  {
-    id: "3",
-    name: "CHANEL",
-    logoUrl: "/images/perfumes/irish-leather-eau-de-parfum-781.jpg",
-    description: "Biểu tượng của sự sang trọng và đẳng cấp.",
-  },
-  {
-    id: "4",
-    name: "GUCCI",
-    logoUrl: "/images/perfumes/irish-leather-eau-de-parfum-781.jpg",
-    description: "Thương hiệu thời trang Ý nổi tiếng toàn cầu.",
-  },
-  {
-    id: "5",
-    name: "VERSACE",
-    logoUrl: "/images/perfumes/irish-leather-eau-de-parfum-781.jpg",
-    description: "Thương hiệu thời trang cao cấp với phong cách độc đáo.",
-  },
-  {
-    id: "6",
-    name: "VALENTINO",
-    logoUrl: "/images/perfumes/irish-leather-eau-de-parfum-781.jpg",
-    description: "Thương hiệu thời trang và nước hoa lãng mạn.",
-  },
-]
+import { Brand } from "@/types/model/brand"
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
+import { RootState } from "@/redux/store";
+import { createBrand, fetchBrands } from "@/redux/thunks/brand.thunk";
+import { toast } from "sonner";
 
 export default function Component() {
-  const [brands, setBrands] = useState<Brand[]>(initialBrands)
+
+  const brand = useAppSelector((state: RootState) => state.brand)
+  const brands = brand.brands
+
+  const dispatch = useAppDispatch()
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
   const [currentBrand, setCurrentBrand] = useState<Brand | null>(null)
   const [newBrandName, setNewBrandName] = useState("")
   const [newBrandLogoUrl, setNewBrandLogoUrl] = useState("")
-  const [newBrandDescription, setNewBrandDescription] = useState("")
 
   const handleAddBrand = () => {
     if (newBrandName.trim() && newBrandLogoUrl.trim()) {
-      const newBrand: Brand = {
-        id: (brands.length + 1).toString(),
-        name: newBrandName.trim().toUpperCase(),
-        logoUrl: newBrandLogoUrl.trim(),
-        description: newBrandDescription.trim(),
-      }
-      setBrands([...brands, newBrand])
-      setIsAddModalOpen(false)
-      setNewBrandName("")
-      setNewBrandLogoUrl("")
-      setNewBrandDescription("")
+      dispatch(createBrand({
+        brand_name: newBrandName.trim().toUpperCase(),
+        brand_icon: newBrandLogoUrl.trim(),
+      })).unwrap()
+        .then(() => {
+          setIsAddModalOpen(false)
+          setNewBrandName("")
+          setNewBrandLogoUrl("")
+          toast.success("Thêm thương hiệu thành công")
+        })
+        .catch((error) => {
+          toast.error("Thêm thương hiệu thất bại")
+          console.error("Error adding brand:", error)
+        })
     }
   }
 
   const handleEditBrand = () => {
     if (currentBrand && newBrandName.trim() && newBrandLogoUrl.trim()) {
-      setBrands(
-        brands.map((brand) =>
-          brand.id === currentBrand.id
-            ? {
-                ...brand,
-                name: newBrandName.trim().toUpperCase(),
-                logoUrl: newBrandLogoUrl.trim(),
-                description: newBrandDescription.trim(),
-              }
-            : brand,
-        ),
-      )
       setIsEditModalOpen(false)
       setCurrentBrand(null)
       setNewBrandName("")
       setNewBrandLogoUrl("")
-      setNewBrandDescription("")
     }
   }
 
   const handleDeleteBrand = () => {
     if (currentBrand) {
-      setBrands(brands.filter((brand) => brand.id !== currentBrand.id))
       setIsDeleteConfirmOpen(false)
       setCurrentBrand(null)
     }
@@ -123,9 +75,8 @@ export default function Component() {
 
   const openEditModal = (brand: Brand) => {
     setCurrentBrand(brand)
-    setNewBrandName(brand.name)
-    setNewBrandLogoUrl(brand.logoUrl)
-    setNewBrandDescription(brand.description || "")
+    setNewBrandName(brand.brand_icon)
+    setNewBrandLogoUrl(brand.brand_icon)
     setIsEditModalOpen(true)
   }
 
@@ -133,6 +84,11 @@ export default function Component() {
     setCurrentBrand(brand)
     setIsDeleteConfirmOpen(true)
   }
+
+  useEffect(() => {
+    // Fetch brands from the server or perform any necessary side effects
+    dispatch(fetchBrands())
+  }, [])
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -155,7 +111,7 @@ export default function Component() {
 
         {/* Existing Brand Cards */}
         {brands.map((brand) => (
-          <Card key={brand.id} className="flex flex-col flex-wrap relative">
+          <Card key={brand._id} className="flex flex-col flex-wrap relative">
             <CardHeader className="flex flex-row items-center justify-between px-3 py-0 border-b relative">
               <Button
                 variant="outline"
@@ -177,13 +133,13 @@ export default function Component() {
             <CardContent className="flex flex-col items-center justify-center p-6 flex-grow">
               <div className="relative w-full h-32 mb-4 flex items-center justify-center">
                 <img
-                  src={brand.logoUrl}
-                  alt={brand.name}
+                  src={brand.brand_icon}
+                  alt={brand.brand_name}
                   className="w-full h-full object-contain"
                   loading="lazy"
                 />
               </div>
-              <h3 className="text-lg font-semibold text-center">{brand.name}</h3>
+              <h3 className="text-lg font-semibold text-center">{brand.brand_name}</h3>
             </CardContent>
           </Card>
         ))}
@@ -223,11 +179,15 @@ export default function Component() {
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        const url = URL.createObjectURL(file);
-                        setNewBrandLogoUrl(url);
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setNewBrandLogoUrl(reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
                       }
                     }}
                   />
+
                   <label htmlFor="logoUpload" className="cursor-pointer">
                     {newBrandLogoUrl ? (
                       <div className="space-y-2">
@@ -248,7 +208,7 @@ export default function Component() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-4 items-start gap-4">
+            {/* <div className="grid grid-cols-4 items-start gap-4">
               <Label htmlFor="description" className="text-right pt-2">
                 Mô tả
               </Label>
@@ -259,7 +219,7 @@ export default function Component() {
                 className="col-span-3 min-h-[80px]"
                 placeholder="Mô tả ngắn về thương hiệu..."
               />
-            </div>
+            </div> */}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>
@@ -276,7 +236,7 @@ export default function Component() {
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Chỉnh sửa thương hiệu</DialogTitle>
-              <DialogDescription>Cập nhật thông tin cho thương hiệu {currentBrand.name}.</DialogDescription>
+              <DialogDescription>Cập nhật thông tin cho thương hiệu {currentBrand.brand_name}.</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
@@ -301,7 +261,7 @@ export default function Component() {
                   className="col-span-3"
                 />
               </div>
-              <div className="grid grid-cols-4 items-start gap-4">
+              {/* <div className="grid grid-cols-4 items-start gap-4">
                 <Label htmlFor="editDescription" className="text-right pt-2">
                   Mô tả
                 </Label>
@@ -311,7 +271,7 @@ export default function Component() {
                   onChange={(e) => setNewBrandDescription(e.target.value)}
                   className="col-span-3 min-h-[80px]"
                 />
-              </div>
+              </div> */}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
@@ -330,7 +290,7 @@ export default function Component() {
             <DialogHeader>
               <DialogTitle>Xác nhận xóa thương hiệu</DialogTitle>
               <DialogDescription>
-                Bạn có chắc chắn muốn xóa thương hiệu <span className="font-semibold">{currentBrand.name}</span> không?
+                Bạn có chắc chắn muốn xóa thương hiệu <span className="font-semibold">{currentBrand.brand_name}</span> không?
                 Hành động này không thể hoàn tác.
               </DialogDescription>
             </DialogHeader>
@@ -350,7 +310,7 @@ export default function Component() {
 }
 
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
     { name: "description", content: "Welcome to React Router!" },

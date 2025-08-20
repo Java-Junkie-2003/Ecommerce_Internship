@@ -24,7 +24,6 @@ class ApiClient {
       attachInterceptors(instance);
 
       ApiClient.instance = instance;
-      console.log('API Client initialized with interceptors');
     }
 
     return ApiClient.instance!;

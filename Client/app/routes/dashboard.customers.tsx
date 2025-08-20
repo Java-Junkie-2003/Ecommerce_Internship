@@ -220,7 +220,7 @@ export default function Component() {
               <TableHead>Số điện thoại</TableHead>
               <TableHead>Địa chỉ</TableHead>
               <TableHead>Ngày tham gia</TableHead>
-              <TableHead className="w-[50px]"></TableHead> {/* For actions */}
+              <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

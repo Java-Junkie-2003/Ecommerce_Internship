@@ -1,7 +1,4 @@
 import ApiClient from '@/lib/api/api.client'
-
-console.log('api.service.ts loaded');
-console.log('ApiClient at import time:', ApiClient);
 const client =  () => ApiClient.getInstance();
 
 export const ApiService = {
