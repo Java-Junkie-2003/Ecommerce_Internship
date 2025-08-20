@@ -20,7 +20,7 @@ const getAllInventory = async ({limit, page, sort, select = []}) => {
     .sort(sortBy)
     .skip(skip)
     .limit(limit)
-    .populate("inven_product", "product_name, _id")
+    .populate("inven_product", "product_name _id")
     .select(getSelectData(select))
 }
 

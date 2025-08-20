@@ -1,5 +1,5 @@
 const { product } = require('../product.model')
-const {Types} = require('mongoose')
+const { Types } = require('mongoose')
 require('../brand.model')
 require('../category.model')
 const { getSelectData, getUnSelectData, convertToObjectId } = require('../../utils')
@@ -87,36 +87,38 @@ const publishProductByAdmin = async ({ product_id }) => {
     if (doc.isPublished && !doc.isDraft) return 0;
 
     doc.set({ isPublished: true, isDraft: false });
-    await doc.save();      
+    await doc.save();
     return 1;
 };
 
-const unPublishProductByAdmin =async ({ product_id }) => {
+const unPublishProductByAdmin = async ({ product_id }) => {
     if (!Types.ObjectId.isValid(product_id)) return null;
 
     const doc = await product.findById(product_id);
     if (!doc) return null;
 
     doc.set({ isPublished: false, isDraft: true });
-    await doc.save();      
+    await doc.save();
     return 1;
 };
 const findAllProductsForAdmin = async ({ limit, sort, page, filter = {}, select }) => {
-    const skip = (page - 1) * limit
+    const safeLimit = Math.max(1, Number(limit) || 50);
+    const safePage = Math.max(1, Number(page) || 1);
+    const skip = (safePage - 1) * safeLimit;
     const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
     const [products, total] = await Promise.all([
         product.find(filter)
-        .sort(sortBy)
-        .skip(skip)
-        .limit(limit)
-        .select(getSelectData(select))
-        .lean(),
+            .sort(sortBy)
+            .skip(skip)
+            .limit(safeLimit)
+            .select(getSelectData(select))
+            .lean(),
         product.countDocuments(filter)
     ])
-    
-    const totalPages = Math.max(1, Math.ceil(total/limit))
-    const hasNext = page < totalPages
-    const hasPrev = page > 1
+
+    const totalPages = Math.max(1, Math.ceil(total / safeLimit))
+    const hasNext = safePage < totalPages
+    const hasPrev = safePage > 1
 
 
     return {
@@ -124,32 +126,32 @@ const findAllProductsForAdmin = async ({ limit, sort, page, filter = {}, select 
         pagination: {
             totalProduct: total,
             count: product.length,
-            page: page,
-            limit,
+            page: safePage,
+            limit: safeLimit,
             totalPages,
             hasNext,
             hasPrev,
-            nextPage: hasNext ? page + 1 : null,
-            prevPage: hasPrev ? page - 1 : null
+            nextPage: hasNext ? safePage + 1 : null,
+            prevPage: hasPrev ? safePage - 1 : null
         }
     }
 }
 
-const findProductsByPriceRange= async ({minPrice, maxPrice, limit, page, sort, select = []}) => {
+const findProductsByPriceRange = async ({ minPrice, maxPrice, limit, page, sort, select = [] }) => {
     const skip = (page - 1) * limit
     const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
-    const products = await product.find({product_price: {$gte: minPrice, $lte: maxPrice}})
-    .populate("product_brand", "brand_name brand_icon -_id")
-    .populate("product_categories", "category_name -_id")
-    .sort(sortBy)
-    .skip(skip)
-    .limit(limit)
-    .select(getSelectData(select))
-    .lean()
+    const products = await product.find({ product_price: { $gte: minPrice, $lte: maxPrice } })
+        .populate("product_brand", "brand_name brand_icon -_id")
+        .populate("product_categories", "category_name -_id")
+        .sort(sortBy)
+        .skip(skip)
+        .limit(limit)
+        .select(getSelectData(select))
+        .lean()
     return products
 }
 
-const updateProductById = async ({productId, bodyUpdate, model, isNew = true}) => {
+const updateProductById = async ({ productId, bodyUpdate, model, isNew = true }) => {
     return await model.findByIdAndUpdate(productId, bodyUpdate, {
         new: isNew
     })
