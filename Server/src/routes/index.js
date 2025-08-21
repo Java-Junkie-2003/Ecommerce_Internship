@@ -7,5 +7,5 @@ router.use("/category", require('./Category'))
 router.use("/product", require('./Product'))
 router.use("/auth", require("./Authenticate"));
 router.use("/inventory", require("./Inventory"))
-
+router.use('/cart', require('./Cart'))
 module.exports = router

@@ -1,0 +1,40 @@
+@url_dev=http://localhost:3055/v1/api
+
+
+### add to cart
+POST {{url_dev}}/cart/add-to-cart
+Content-Type: application/json
+x-client-id: 689471fc659ad34ec9a2cc6d
+authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmQiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU1NjcxMzM1LCJleHAiOjE3NTU3NTc3MzV9.iVX3A1TEiKLfCUnngk5Q1BuLhBulD5Uirm7mPcfQPkk
+
+{
+    "productId": "689ae1d88d25db5c08cff814",
+    "quantity": 1
+}
+
+### update quantity of item in cart
+PUT {{url_dev}}/cart/update-cart
+Content-Type: application/json
+x-client-id: 689471fc659ad34ec9a2cc6d
+authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmQiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU1NjcxMzM1LCJleHAiOjE3NTU3NTc3MzV9.iVX3A1TEiKLfCUnngk5Q1BuLhBulD5Uirm7mPcfQPkk
+
+{
+    "productId": "689add80d0ba931366487e62",
+    "old_quantity": 2,
+    "quantity": 1
+}
+
+### delete item in cart
+
+DELETE  {{url_dev}}/cart/delete/689ae1d88d25db5c08cff814
+Content-Type: application/json
+x-client-id: 689471fc659ad34ec9a2cc6d
+authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmQiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU1NjcxMzM1LCJleHAiOjE3NTU3NTc3MzV9.iVX3A1TEiKLfCUnngk5Q1BuLhBulD5Uirm7mPcfQPkk
+
+
+### get list item in cart
+
+GET {{url_dev}}/cart
+Content-Type: application/json
+x-client-id: 689471fc659ad34ec9a2cc6d
+authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmQiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU1NjcxMzM1LCJleHAiOjE3NTU3NTc3MzV9.iVX3A1TEiKLfCUnngk5Q1BuLhBulD5Uirm7mPcfQPkk

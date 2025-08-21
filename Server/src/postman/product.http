@@ -73,7 +73,7 @@ Content-Type: application/json
 GET {{url_dev}}/product/admin/all-products?page=1&limit=10
 Content-Type: application/json
 x-client-id: 689471fc659ad34ec9a2cc6b
-authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTU1Nzc0NzEsImV4cCI6MTc1NTY2Mzg3MX0.6RYfqFpHCNimJSVCnCCcXRVJR5ufR5r39pUVTuh6s8E
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTU3NDIyMjAsImV4cCI6MTc1NTgyODYyMH0.B5iroPQWvN3WN_-ATPDtEXyGYKntF_NHYmuYcYi8Fy0
 
 ### set publish for product ( role admin )
 POST {{url_dev}}/product/publish/689ae3548d25db5c08cff826
