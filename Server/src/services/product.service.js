@@ -8,7 +8,7 @@ const { findAllProducts, findProduct, findAllDraftsForShop,
     unPublishProductByAdmin, findProductsByPriceRange,
     updateProductById } = require('../models/repositories/product.repo');
 const { updateNestedObjectParser, removeUndefinedObject } = require('../utils');
-const {  insertInventory } = require('../models/repositories/inventory.repo');
+const { insertInventory } = require('../models/repositories/inventory.repo');
 class ProductFactory {
 
     static productRegistry = {} // key-class
@@ -30,13 +30,13 @@ class ProductFactory {
     static async findAllProducts({ limit = 50, sort = 'ctime', page = 1, filter = { isPublished: true } }) {
         return await findAllProducts({
             limit, sort, page, filter,
-            select: ['product_name', 'product_thumb', 'product_price']
+            select: ['product_name', 'product_thumb', 'product_price', 'product_ratingAverage']
         })
     }
     static async findAllProductsForAdmin({ limit = 50, sort = 'ctime', page = 1, filter = {} }) {
         return await findAllProductsForAdmin({
             limit, sort, page, filter,
-            select: ['product_name', 'product_thumb', 'product_price']
+            select: ['product_name', 'product_thumb', 'product_price', 'product_categories', 'product_brand', 'isDraft', 'isPublished']
         })
     }
 
@@ -92,8 +92,8 @@ class Product {
             this.product_brand = product_brand
     }
     async createProduct(product_id) {
-        const newProduct =  await product.create({ ...this, _id: product_id })
-        if(newProduct){
+        const newProduct = await product.create({ ...this, _id: product_id })
+        if (newProduct) {
             await insertInventory({
                 productId: product_id,
                 stock: 1

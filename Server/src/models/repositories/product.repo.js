@@ -17,10 +17,10 @@ const findAllProducts = async ({ limit, sort, page, filter, select }) => {
     return products
 }
 
-const findProduct = async ({ product_id, unSelect }) => {
+const findProduct = async ({ product_id, unSelect = [] }) => {
     return await product.findById(product_id)
-        .populate("product_brand", "brand_name brand_icon -_id")
-        .populate("product_categories", "category_name -_id")
+        .populate("product_brand", "brand_name brand_icon _id")
+        .populate("product_categories", "category_name _id")
         .select(getUnSelectData(unSelect))
 }
 
@@ -101,13 +101,15 @@ const unPublishProductByAdmin = async ({ product_id }) => {
     await doc.save();
     return 1;
 };
-const findAllProductsForAdmin = async ({ limit, sort, page, filter = {}, select }) => {
+const findAllProductsForAdmin = async ({ limit, sort, page, filter = {}, select = [] }) => {
     const safeLimit = Math.max(1, Number(limit) || 50);
     const safePage = Math.max(1, Number(page) || 1);
     const skip = (safePage - 1) * safeLimit;
     const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
     const [products, total] = await Promise.all([
         product.find(filter)
+            .populate('product_categories', 'category_name _id')
+            .populate('product_brand', 'brand_name brand_icon -_id')
             .sort(sortBy)
             .skip(skip)
             .limit(safeLimit)
