@@ -1,7 +1,6 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
@@ -20,6 +19,16 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+
+        // Translucent base
+        translucent: "backdrop-blur-sm rounded-md transition-colors transition-background-color hover:text-white",
+      },
+      color: {
+        gray: "text-gray-700 bg-gray-200/20 hover:bg-gray-200 dark:text-gray-200",
+        blue: "text-blue-600 bg-blue-500/20 hover:bg-blue-500 dark:text-blue-300",
+        red: "text-red-600 bg-red-500/20 hover:bg-red-500 dark:text-red-300",
+        green: "text-green-600 bg-green-500/20 hover:bg-green-500 dark:text-green-300",
+        yellow: "text-yellow-600 bg-yellow-500/20 hover:bg-yellow-500 dark:text-yellow-300",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
@@ -28,9 +37,16 @@ const buttonVariants = cva(
         icon: "size-9",
       },
     },
+    compoundVariants: [
+      {
+        variant: "translucent",
+        color: ["gray", "blue", "red", "green", "yellow"],
+      },
+    ],
     defaultVariants: {
       variant: "default",
       size: "default",
+      color: "gray",
     },
   }
 )
@@ -39,6 +55,7 @@ function Button({
   className,
   variant,
   size,
+  color,
   asChild = false,
   ...props
 }: React.ComponentProps<"button"> &
@@ -50,7 +67,7 @@ function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, color, className }))}
       {...props}
     />
   )

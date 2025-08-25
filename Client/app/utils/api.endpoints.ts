@@ -14,5 +14,17 @@ export const ENDPOINTS = {
     BRAND: {
         FETCH_ALL: `${BASE_ENDPOINT}/brand/all`,
         CREATE: `${BASE_ENDPOINT}/brand/create-brand`,
+    },
+    ADMIN: {
+        PRODUCT: {
+            FETCH_ALL: (page: number, limit: number) => `${BASE_ENDPOINT}/product/admin/all-products?page=${page}&limit=${limit}`,
+            PUBLISH: (id: string) => `${BASE_ENDPOINT}/product/publish/${id}`,
+            UNPUBLISH: (id: string) => `${BASE_ENDPOINT}/product/unpublish/${id}`,
+            UPDATE: (id: string) => `${BASE_ENDPOINT}/product/update/${id}`,
+            CREATE: `${BASE_ENDPOINT}/product/create-product`,
+        }
+    },
+    PRODUCT: {
+        FETCH_ONE: (id: string) => `${BASE_ENDPOINT}/product/${id}`,
     }
 }

@@ -17,8 +17,13 @@ import {
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useEffect } from "react";
+import { useAppDispatch } from "@/redux/hook";
+import { fetchCategories } from "@/redux/thunks/category.thunk";
+import { fetchBrands } from "@/redux/thunks/brand.thunk";
 
 export default function DashboardLayout() {
+
+  const dispatch = useAppDispatch();
 
   const user = useSelector((state: RootState) => state.user);
   const navigate = useNavigate();
@@ -32,6 +37,15 @@ export default function DashboardLayout() {
       }
     }
   }, [user]);
+
+
+
+  useEffect(() => {
+    Promise.all([
+      dispatch(fetchCategories()),
+      dispatch(fetchBrands())
+    ]);
+  }, []);
 
   const location = useLocation();
 

@@ -12,100 +12,68 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Product, ProductAttributes } from "@/types/model/product"
+import { Brand } from "@/types/model/brand"
+import { Category } from "@/types/model/category"
+import { useAppDispatch, useAppSelector } from "@/redux/hook"
+import { RootState } from "@/redux/store"
+import { ApiService } from "@/lib/api"
+import { ENDPOINTS } from "@/utils/api.endpoints"
+import { DefaultDTO } from "@/types/dto"
+import { useNavigate } from "react-router"
+import { toast } from "sonner"
 
-interface ProductAttributes {
-    volume: string
-    gender: string
-    notes: string[]
-}
+export default function AddEditProduct({ productToEdit }: { productToEdit?: Product }) {
 
-interface Product {
-    id?: string // Optional for new products
-    product_name: string
-    product_thumb: string
-    product_description: string
-    product_price: string
-    product_type: string
-    product_attributes: ProductAttributes
-    product_ratingAverage: number
-    product_brand_id: string // Changed to ID to link to Brand interface
-    category_id: string // Changed to ID to link to Category interface
-    isDraft: boolean
-    isPublished: boolean
-}
+    const dispatch = useAppDispatch()
+    const navigate = useNavigate()
+    const category = useAppSelector((state: RootState) => state.category)
+    const brand = useAppSelector((state: RootState) => state.brand)
 
-interface Brand {
-    id: string
-    name: string
-    logoUrl: string
-}
+    const isCreateMode = !productToEdit;
 
-interface Category {
-    id: string
-    name: string
-}
+    const [brands, setBrands] = useState<Brand[]>([])
+    const [categories, setCategories] = useState<Category[]>([])
+    const [priceInput, setPriceInput] = useState<number | "">("")
 
-// Mock Data for Brands and Categories
-const mockBrands: Brand[] = [
-    { id: "brand1", name: "Lancôme Paris", logoUrl: "/placeholder.svg?height=30&width=30&text=LP" },
-    { id: "brand2", name: "Dior", logoUrl: "/placeholder.svg?height=30&width=30&text=DR" },
-    { id: "brand3", name: "Chanel", logoUrl: "/placeholder.svg?height=30&width=30&text=CH" },
-    { id: "brand4", name: "Gucci", logoUrl: "/placeholder.svg?height=30&width=30&text=GC" },
-    { id: "brand5", name: "Versace", logoUrl: "/placeholder.svg?height=30&width=30&text=VS" },
-]
+    useEffect(() => {
+        setBrands(brand.brands)
+        setCategories(category.categories)
+    }, [brand, category])
 
-const mockCategories: Category[] = [
-    { id: "cat1", name: "Nước hoa nam" },
-    { id: "cat2", name: "Nước hoa nữ" },
-    { id: "cat3", name: "Nước hoa unisex" },
-    { id: "cat4", name: "Nước hoa chiếc" },
-]
-
-// Mock initial product data for editing (if applicable)
-const initialProductData: Product = {
-    id: "PROD001",
-    product_name: "Eternal Bloom",
-    product_thumb: "/placeholder.svg?height=100&width=100&text=Eternal Bloom",
-    product_description: "A floral fragrance that captures the essence of springtime romance.",
-    product_price: "89.99",
-    product_type: "eau de parfum",
-    product_attributes: {
-        volume: "50ml",
-        gender: "female",
-        notes: ["rose", "jasmine", "vanilla"],
-    },
-    product_ratingAverage: 4.7,
-    product_brand_id: "brand1", // Linked to mockBrands
-    category_id: "cat2", // Linked to mockCategories
-    isDraft: false,
-    isPublished: true,
-}
-
-interface AddEditProductProps {
-    productToEdit?: Product // Optional prop for editing existing products
-}
-
-export default function AddEditProduct({ productToEdit }: AddEditProductProps) {
     const [product, setProduct] = useState<Product>(
         productToEdit || {
+            _id: "",
             product_name: "",
             product_thumb: "",
             product_description: "",
-            product_price: "",
-            product_type: "",
+            product_price: 0,
+            product_type: "Perfume",
             product_attributes: {
-                volume: "",
+                fragrance_family: "",
+                top_note: "",
+                base_note: "",
+                concentration: "",
+                volume: 0,
                 gender: "",
-                notes: [],
+                longevity_hours: "",
+                sillage: "",
+                launch_year: new Date().getFullYear(),
             },
-            product_ratingAverage: 0,
-            product_brand_id: "",
-            category_id: "",
+            product_ratingAverage: 5,
+            product_categories: [],
+            product_brand: {
+                _id: "",
+                brand_name: "",
+                brand_icon: "",
+            },
             isDraft: true,
             isPublished: false,
-        },
+            createdAt: "",
+            updatedAt: "",
+            __v: 0,
+        }
     )
-    const [notesInput, setNotesInput] = useState(product.product_attributes.notes.join(", "))
     const [imageFile, setImageFile] = useState<File | null>(null)
     const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(product.product_thumb)
     const [isSaving, setIsSaving] = useState(false)
@@ -131,19 +99,7 @@ export default function AddEditProduct({ productToEdit }: AddEditProductProps) {
             ...prev,
             product_attributes: {
                 ...prev.product_attributes,
-                [id]: value,
-            },
-        }))
-    }
-
-    const handleNotesChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setNotesInput(e.target.value)
-        const notesArray = e.target.value.split(",").map((note) => note.trim()).filter((note) => note)
-        setProduct((prev) => ({
-            ...prev,
-            product_attributes: {
-                ...prev.product_attributes,
-                notes: notesArray,
+                [id]: id === 'volume' || id === 'launch_year' ? Number(value) : value,
             },
         }))
     }
@@ -155,47 +111,39 @@ export default function AddEditProduct({ productToEdit }: AddEditProductProps) {
         }))
     }
 
-    const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0]
             setImageFile(file)
-            setImagePreviewUrl(URL.createObjectURL(file))
+
+            // Create object URL
+            const objectUrl = URL.createObjectURL(file)
+            setImagePreviewUrl(objectUrl)
         } else {
             setImageFile(null)
             setImagePreviewUrl(product.product_thumb || null) // Revert to original if no new file
         }
     }
 
-    // Simulate image upload to a cloud service
-    const uploadImageToCloud = async (file: File): Promise<string> => {
-        setIsSaving(true)
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const mockCloudUrl = `/uploaded-images/${Date.now()}-${file.name}`
-                console.log(`Simulating upload of ${file.name} to cloud. Mock URL: ${mockCloudUrl}`)
-                setIsSaving(false)
-                resolve(mockCloudUrl)
-            }, 1500) // Simulate network delay
-        })
+    const preSaveCheck = () => {
+        if (!product.product_name) {
+            setDialogTitle("Thiếu tên sản phẩm")
+            setDialogDescription("Vui lòng nhập tên sản phẩm.")
+            setDialogOpen(true)
+            return false
+        }
+        if (!product.product_price) {
+            setDialogTitle("Thiếu giá sản phẩm")
+            setDialogDescription("Vui lòng nhập giá sản phẩm.")
+            setDialogOpen(true)
+            return false
+        }
+        return true
     }
 
     const handleSave = async () => {
         setIsSaving(true)
         let finalThumbUrl = product.product_thumb
-
-        if (imageFile) {
-            // Only upload if a new file is selected
-            try {
-                finalThumbUrl = await uploadImageToCloud(imageFile)
-            } catch (error) {
-                console.error("Image upload failed:", error)
-                setDialogTitle("Lỗi tải ảnh")
-                setDialogDescription("Không thể tải ảnh lên. Vui lòng thử lại.")
-                setDialogOpen(true)
-                setIsSaving(false)
-                return
-            }
-        }
 
         const productToSave = {
             ...product,
@@ -204,40 +152,66 @@ export default function AddEditProduct({ productToEdit }: AddEditProductProps) {
 
         console.log("Product data to save:", productToSave)
 
-        // Simulate API call
-        setTimeout(() => {
+        if (!preSaveCheck()) {
             setIsSaving(false)
-            setDialogTitle(productToEdit ? "Cập nhật thành công" : "Thêm sản phẩm thành công")
-            setDialogDescription(
-                productToEdit
-                    ? `Sản phẩm "${productToSave.product_name}" đã được cập nhật.`
-                    : `Sản phẩm "${productToSave.product_name}" đã được thêm mới.`,
-            )
-            setDialogOpen(true)
-            // In a real app, you would navigate away or clear the form for new product
-            if (!productToEdit) {
-                setProduct({
-                    product_name: "",
-                    product_thumb: "",
-                    product_description: "",
-                    product_price: "",
-                    product_type: "",
-                    product_attributes: {
-                        volume: "",
-                        gender: "",
-                        notes: [],
-                    },
-                    product_ratingAverage: 0,
-                    product_brand_id: "",
-                    category_id: "",
-                    isDraft: true,
-                    isPublished: false,
-                })
-                setNotesInput("")
-                setImageFile(null)
-                setImagePreviewUrl(null)
+            return
+        } else {
+            try {
+                // Transform the product data for API request
+                
+                // Upload image to Cloudinary if a new image file is selected
+                if (imageFile) {
+                    const formData = new FormData()
+                    formData.append('file', imageFile)
+                    formData.append('upload_preset', 'ecommerce') // Replace with your actual upload preset name
+                    
+                    try {
+                        const cloudinaryResponse = await fetch(
+                            'https://api.cloudinary.com/v1_1/dqfpglgsr/image/upload', // Replace with your actual cloud name
+                            {
+                                method: 'POST',
+                                body: formData
+                            }
+                        )
+                        
+                        if (cloudinaryResponse.ok) {
+                            const cloudinaryData = await cloudinaryResponse.json()
+                            finalThumbUrl = cloudinaryData.secure_url
+                        } else {
+                            throw new Error('Failed to upload image to Cloudinary')
+                        }
+                    } catch (uploadError) {
+                        console.error('Error uploading image:', uploadError)
+                        toast.error("Có lỗi xảy ra khi tải ảnh lên.")
+                        setIsSaving(false)
+                        return
+                    }
+                }
+
+                const productForApi = {
+                    ...productToSave,
+                    product_thumb: finalThumbUrl,
+                    product_brand: productToSave.product_brand._id,
+                    product_categories: productToSave.product_categories.map(cat => cat._id)
+                }
+
+                if(isCreateMode) {
+                    const response = await ApiService.post<DefaultDTO>(ENDPOINTS.ADMIN.PRODUCT.CREATE, productForApi)
+                    console.log("Product created successfully:", response)
+                    toast.success("Tạo sản phẩm thành công.")
+                    // Navigate to the product management
+                    navigate(`/dashboard/products`)
+                } else {
+                    const response = await ApiService.patch<DefaultDTO>(ENDPOINTS.ADMIN.PRODUCT.UPDATE(productToEdit._id), productForApi)
+                    toast.success("Cập nhật sản phẩm thành công.")
+                    setIsSaving(false)
+                }
+            } catch (error) {
+                console.error("Error saving product:", error)
+                toast.error("Có lỗi xảy ra khi lưu sản phẩm.")
+                setIsSaving(false)
             }
-        }, 1000)
+        }
     }
 
     const pageTitle = productToEdit ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm mới"
@@ -286,7 +260,7 @@ export default function AddEditProduct({ productToEdit }: AddEditProductProps) {
                             />
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                             <div className="grid gap-2">
                                 <Label htmlFor="product_price">Giá sản phẩm (VND)</Label>
                                 <div className="relative">
@@ -299,7 +273,7 @@ export default function AddEditProduct({ productToEdit }: AddEditProductProps) {
                                             const value = e.target.value.replace(/[^\d]/g, '');
                                             setProduct((prev) => ({
                                                 ...prev,
-                                                product_price: value,
+                                                product_price: Number(value),
                                             }));
                                         }}
                                         placeholder="Ví dụ: 89,990"
@@ -310,20 +284,11 @@ export default function AddEditProduct({ productToEdit }: AddEditProductProps) {
                                     </span>
                                 </div>
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="product_type">Loại sản phẩm</Label>
-                                <Input
-                                    id="product_type"
-                                    value={product.product_type}
-                                    onChange={handleChange}
-                                    placeholder="Ví dụ: eau de parfum"
-                                />
-                            </div>
                         </div>
 
                         <div className="grid gap-2">
                             <Label htmlFor="product_thumb">Ảnh đại diện sản phẩm</Label>
-                            <div 
+                            <div
                                 className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
                                 onClick={() => document.getElementById('product_thumb_file')?.click()}
                                 onDragOver={(e) => {
@@ -388,45 +353,92 @@ export default function AddEditProduct({ productToEdit }: AddEditProductProps) {
                             <p className="text-xs text-muted-foreground">Chọn một ảnh từ máy tính của bạn.</p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="product_brand_id">Thương hiệu</Label>
+                        <div className="flex flex-col md:flex-row gap-4">
+                            <div className="flex flex-col gap-2 flex-1">
+                                <Label htmlFor="product_brand">Thương hiệu</Label>
                                 <Select
-                                    value={product.product_brand_id}
-                                    onValueChange={(value) => setProduct((prev) => ({ ...prev, product_brand_id: value }))}
+                                    value={product.product_brand._id}
+                                    onValueChange={(value) => {
+                                        const selectedBrand = brands.find(brand => brand._id === value);
+                                        if (selectedBrand) {
+                                            setProduct((prev) => ({
+                                                ...prev,
+                                                product_brand: {
+                                                    _id: selectedBrand._id,
+                                                    brand_name: selectedBrand.brand_name,
+                                                    brand_icon: selectedBrand.brand_icon,
+                                                },
+                                            }));
+                                        }
+                                    }}
                                 >
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Chọn thương hiệu" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {mockBrands.map((brand) => (
-                                            <SelectItem key={brand.id} value={brand.id}>
-                                                <div className="flex items-center gap-2">
-                                                    <img src={brand.logoUrl} alt={brand.name} className="w-6 h-6 rounded-full" />
-                                                    {brand.name}
-                                                </div>
+                                        {brands.map((brand) => (
+                                            <SelectItem key={brand._id} value={brand._id}>
+                                                <img src={brand.brand_icon} alt={brand.brand_name} className="w-6 h-6 mr-2" />
+                                                {brand.brand_name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="category_id">Danh mục</Label>
+                            <div className="flex flex-col gap-2 flex-1">
+                                <Label htmlFor="product_categories">Danh mục</Label>
                                 <Select
-                                    value={product.category_id}
-                                    onValueChange={(value) => setProduct((prev) => ({ ...prev, category_id: value }))}
+                                    value=""
+                                    onValueChange={(value) => {
+                                        const category = categories.find(cat => cat._id === value);
+                                        if (category && !product.product_categories.some(cat => cat._id === category._id)) {
+                                            setProduct((prev) => ({
+                                                ...prev,
+                                                product_categories: [...prev.product_categories, { _id: category._id, category_name: category.category_name }]
+                                            }));
+                                        }
+                                    }}
                                 >
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Chọn danh mục" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {mockCategories.map((category) => (
-                                            <SelectItem key={category.id} value={category.id}>
-                                                {category.name}
-                                            </SelectItem>
-                                        ))}
+                                        {categories
+                                            .filter(category => !product.product_categories.some(cat => cat._id === category._id))
+                                            .map((category) => (
+                                                <SelectItem key={category._id} value={category._id}>
+                                                    {category.category_name}
+                                                </SelectItem>
+                                            ))}
                                     </SelectContent>
                                 </Select>
+                                {product.product_categories.length > 0 && (
+                                    <div className="mt-2 flex flex-wrap gap-1">
+                                        {product.product_categories.map((category) => (
+                                            <div
+                                                key={category._id}
+                                                className="flex items-center bg-gray-200 text-gray-800 text-xs pe-1 ps-2 py-1 rounded-full"
+                                            >
+                                                <span>{category.category_name}</span>
+                                                <button
+                                                    type="button"
+                                                    className="ml-1 p-1 rounded-full hover:bg-gray-300 flex items-center justify-center"
+                                                    onClick={() =>
+                                                        setProduct((prev) => ({
+                                                            ...prev,
+                                                            product_categories: prev.product_categories.filter(
+                                                                (cat) => cat._id !== category._id
+                                                            ),
+                                                        }))
+                                                    }
+                                                >
+                                                    <X className="h-3 w-3" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
                             </div>
                         </div>
                     </CardContent>
@@ -442,43 +454,106 @@ export default function AddEditProduct({ productToEdit }: AddEditProductProps) {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="volume">Dung tích</Label>
+                                <Label htmlFor="fragrance_family">Họ hương</Label>
+                                <Input
+                                    id="fragrance_family"
+                                    value={product.product_attributes.fragrance_family}
+                                    onChange={handleAttributeChange}
+                                    placeholder="Ví dụ: Oriental, Fresh, Woody"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="top_note">Hương đầu</Label>
+                                <Input
+                                    id="top_note"
+                                    value={product.product_attributes.top_note}
+                                    onChange={handleAttributeChange}
+                                    placeholder="Ví dụ: Bergamot, Lemon"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="base_note">Hương cuối</Label>
+                                <Input
+                                    id="base_note"
+                                    value={product.product_attributes.base_note}
+                                    onChange={handleAttributeChange}
+                                    placeholder="Ví dụ: Musk, Sandalwood"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="concentration">Nồng độ</Label>
+                                <Input
+                                    id="concentration"
+                                    value={product.product_attributes.concentration}
+                                    onChange={handleAttributeChange}
+                                    placeholder="Ví dụ: Eau de Parfum, Eau de Toilette"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="volume">Dung tích (ml)</Label>
                                 <Input
                                     id="volume"
+                                    type="number"
                                     value={product.product_attributes.volume}
                                     onChange={handleAttributeChange}
-                                    placeholder="Ví dụ: 50ml"
+                                    placeholder="Ví dụ: 50"
                                 />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="gender">Giới tính</Label>
-                                <Input
-                                    id="gender"
+                                <Select
                                     value={product.product_attributes.gender}
+                                    onValueChange={(value) => setProduct((prev) => ({
+                                        ...prev,
+                                        product_attributes: {
+                                            ...prev.product_attributes,
+                                            gender: value,
+                                        },
+                                    }))}
+                                    
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Chọn giới tính" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Male">Nam</SelectItem>
+                                        <SelectItem value="Female">Nữ</SelectItem>
+                                        <SelectItem value="Unisex">Unisex</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="longevity_hours">Độ lưu hương</Label>
+                                <Input
+                                    id="longevity_hours"
+                                    value={product.product_attributes.longevity_hours}
                                     onChange={handleAttributeChange}
-                                    placeholder="Ví dụ: female"
+                                    placeholder="Ví dụ: 6-8 giờ"
                                 />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="notesInput">Hương (cách nhau bởi dấu phẩy)</Label>
+                                <Label htmlFor="sillage">Độ tỏa hương</Label>
                                 <Input
-                                    id="notesInput"
-                                    value={notesInput}
-                                    onChange={handleNotesChange}
-                                    placeholder="Ví dụ: rose, jasmine, vanilla"
+                                    id="sillage"
+                                    value={product.product_attributes.sillage}
+                                    onChange={handleAttributeChange}
+                                    placeholder="Ví dụ: Moderate, Strong"
                                 />
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                    {product.product_attributes.notes.map((note, index) => (
-                                        <Badge key={index} variant="secondary">
-                                            {note}
-                                        </Badge>
-                                    ))}
-                                </div>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="launch_year">Năm ra mắt</Label>
+                                <Input
+                                    id="launch_year"
+                                    type="number"
+                                    value={product.product_attributes.launch_year}
+                                    onChange={handleAttributeChange}
+                                    placeholder="Ví dụ: 2023"
+                                />
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    {/* <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Info className="h-5 w-5" /> Trạng thái & Đánh giá
@@ -525,7 +600,7 @@ export default function AddEditProduct({ productToEdit }: AddEditProductProps) {
                                 </div>
                             </div>
                         </CardContent>
-                    </Card>
+                    </Card> */}
                 </div>
             </div>
 
