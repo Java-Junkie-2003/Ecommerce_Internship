@@ -38,12 +38,36 @@ export default function Component() {
   const [newBrandName, setNewBrandName] = useState("")
   const [newBrandLogoUrl, setNewBrandLogoUrl] = useState("")
 
-  const handleAddBrand = () => {
-    if (newBrandName.trim() && newBrandLogoUrl.trim()) {
-      dispatch(createBrand({
-        brand_name: newBrandName.trim().toUpperCase(),
-        brand_icon: newBrandLogoUrl.trim(),
-      })).unwrap()
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+
+  const handleAddBrand = async () => {
+    if (newBrandName.trim() && logoFile) {
+
+      // upload brand logo
+      const formData = new FormData()
+      formData.append('file', logoFile)
+      formData.append('upload_preset', 'ecommerce')
+
+      fetch('https://api.cloudinary.com/v1_1/dqfpglgsr/image/upload', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          const logoUrl = data.secure_url
+          setNewBrandLogoUrl(logoUrl)
+        })
+        .catch((error) => {
+          toast.error("Có lỗi xảy ra khi tải ảnh lên.")
+          console.error("Error uploading logo:", error)
+        })
+        .finally(() => {
+          // Create brand after logo upload
+          dispatch(createBrand({
+            brand_name: newBrandName.trim().toUpperCase(),
+            brand_icon: newBrandLogoUrl.trim(),
+          })).unwrap()
+        })
         .then(() => {
           setIsAddModalOpen(false)
           setNewBrandName("")
@@ -84,11 +108,6 @@ export default function Component() {
     setCurrentBrand(brand)
     setIsDeleteConfirmOpen(true)
   }
-
-  useEffect(() => {
-    // Fetch brands from the server or perform any necessary side effects
-    dispatch(fetchBrands())
-  }, [])
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -179,11 +198,10 @@ export default function Component() {
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setNewBrandLogoUrl(reader.result as string);
-                        };
-                        reader.readAsDataURL(file);
+                        setLogoFile(file);
+                        // create object URL
+                        const objectUrl = URL.createObjectURL(file);
+                        setNewBrandLogoUrl(objectUrl);
                       }
                     }}
                   />
@@ -245,21 +263,52 @@ export default function Component() {
                 </Label>
                 <Input
                   id="editBrandName"
-                  value={newBrandName}
+                  value={currentBrand.brand_name}
                   onChange={(e) => setNewBrandName(e.target.value)}
                   className="col-span-3"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="editLogoUrl" className="text-right">
-                  URL Logo
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label className="text-right pt-2">
+                  Logo
                 </Label>
-                <Input
-                  id="editLogoUrl"
-                  value={newBrandLogoUrl}
-                  onChange={(e) => setNewBrandLogoUrl(e.target.value)}
-                  className="col-span-3"
-                />
+                <div className="col-span-3">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
+                    <input
+                      type="file"
+                      id="logoUpload"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setLogoFile(file);
+                          // create object URL
+                          const objectUrl = URL.createObjectURL(file);
+                          setNewBrandLogoUrl(objectUrl);
+                        }
+                      }}
+                    />
+
+                    <label htmlFor="logoUpload" className="cursor-pointer">
+                      {newBrandLogoUrl ? (
+                        <div className="space-y-2">
+                          <img
+                            src={newBrandLogoUrl}
+                            alt="Preview"
+                            className="w-20 h-20 object-contain mx-auto"
+                          />
+                          <p className="text-sm text-blue-600">Nhần vào để đổi ảnh</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <Plus className="w-8 h-8 mx-auto text-gray-400" />
+                          <p className="text-sm text-gray-600">Nhấn vào để tải lên logo</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                </div>
               </div>
               {/* <div className="grid grid-cols-4 items-start gap-4">
                 <Label htmlFor="editDescription" className="text-right pt-2">

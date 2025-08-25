@@ -82,11 +82,6 @@ export default function Component() {
         }
     }
 
-    useEffect(() => {
-        // Fetch categories from the server or perform any necessary side effects
-        dispatch(fetchCategories())
-    }, [])
-
     return (
         <div className="flex-1 space-y-6 p-6">
             {/* Header */}

@@ -7,24 +7,26 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const createBrand = createAsyncThunk(
     "brand/create",
-    async (brandData: Partial<Brand>, { rejectWithValue }) => {
+    async (brandData: Partial<Brand>) => {
         try {
             const response: DefaultDTO = await ApiService.post(ENDPOINTS.BRAND.CREATE, brandData);
             return response.metadata;
         } catch (error: any) {
-            return rejectWithValue(error.response);
+            console.error("Error creating brand:", error);
+            throw error;
         }
     }
 );
 
 export const fetchBrands = createAsyncThunk(
     "brand/fetchAll",
-    async (_, { rejectWithValue }) => {
+    async () => {
         try {
             const response: DefaultDTO = await ApiService.get(ENDPOINTS.BRAND.FETCH_ALL);
             return response.metadata;
         } catch (error: any) {
-            return rejectWithValue(error.response);
+            console.error("Error fetching brands:", error);
+            throw error;
         }
     }
 );
