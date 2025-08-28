@@ -17,7 +17,7 @@ const insertMoreAddress = async ({ userId, address, addressType }) => {
     return doc
 }
 const getAllAdressByUser = async ({ userId }) => {
-    const addressList = await addressModel.find({ user_id: convertToObjectId(userId) })
+    const addressList = await addressModel.findOne({ user_id: convertToObjectId(userId) })
         .select(getSelectData(['addresses']))
     return addressList
 }
