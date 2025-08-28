@@ -4,6 +4,8 @@ require('../brand.model')
 require('../category.model')
 const { getSelectData, getUnSelectData, convertToObjectId } = require('../../utils')
 const productModel = require('../product.model')
+const { findInvenByProductId } = require('./inventory.repo')
+const { NotFoundError, BadRequestError } = require('../../core/error.response')
 const findAllProducts = async ({ limit, sort, page, filter, select }) => {
     const skip = (page - 1) * limit
     const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
@@ -159,6 +161,22 @@ const updateProductById = async ({ productId, bodyUpdate, model, isNew = true })
     })
 }
 
+const checkProductByServer = async (products) => {
+    return await Promise.all(products.map(async product => {
+        const foundProduct = await findProduct({product_id: product.productId, unSelect: ['__v']})
+        if(foundProduct) {
+            const foundInventory = await findInvenByProductId({productId: foundProduct._id})
+            if(!foundInventory) throw new NotFoundError('Not found !!!')
+            if(product.quantity > foundInventory.inven_stock) throw new BadRequestError('Not enough quantity in stock')
+            return {
+                price: foundProduct.product_price,
+                quantity: product.quantity,
+                productId: foundProduct._id
+            }
+        }
+    }))
+}
+
 module.exports = {
     findAllProducts,
     findProduct,
@@ -169,5 +187,6 @@ module.exports = {
     unPublishProductByAdmin,
     findAllProductsForAdmin,
     findProductsByPriceRange,
-    updateProductById
+    updateProductById,
+    checkProductByServer
 }

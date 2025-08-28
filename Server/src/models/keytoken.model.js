@@ -7,16 +7,16 @@ const COLLECTION_NAME = 'keys';
 var keyTokenSchema = new Schema({
     user:{
         type: Schema.Types.ObjectId,
-        require: true,
+        required: true,
         ref: 'User'
     },
     privateKey:{
         type: String,
-        require: true
+        required: true
     },
     publicKey:{
         type: String,
-        require: true
+        required: true
     },
     refreshTokenUsed:{
         type: Array,

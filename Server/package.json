@@ -2,6 +2,7 @@
   "name": "server",
   "version": "1.0.0",
   "main": "server.js",
+  "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
@@ -20,7 +21,9 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
-    "mongoose": "^8.16.4"
+    "mongoose": "^8.16.4",
+    "redis": "^5.8.2",
+    "vnpay": "^2.4.1"
   },
   "devDependencies": {
     "compression": "^1.8.1",

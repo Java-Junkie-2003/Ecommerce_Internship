@@ -1,3 +1,4 @@
+const { convertToObjectId } = require('../../utils')
 const cart = require('../cart.model')
 
 const createUserCart = async ({ userId, product }) => {
@@ -45,10 +46,15 @@ const getListCart = async ({ userId })=>{
         cart_userId: userId
     }).lean()
 }
+
+const findCartById = async ({userId}) => {
+    return await cart.findOne({cart_userId: convertToObjectId(userId)})
+}
 module.exports = {
     createUserCart,
     updateCartQuantity,
     deleteCart,
     getListCart,
-    checkProductExist
+    checkProductExist,
+    findCartById
 }
