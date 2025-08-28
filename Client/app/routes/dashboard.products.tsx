@@ -154,7 +154,7 @@ export default function Component() {
             {/* Stats Cards */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-blue-50 to-white shadow-sm hover:shadow-md transition-all duration-300">
-                    <div className="absolute right-3 top-3 opacity-10 -rotate-12">
+                    <div className="absolute right-3 top-3 opacity-10 ">
                         <Package className="h-20 w-20 text-blue-400" />
                     </div>
                     <CardHeader className="pb-2">
@@ -167,7 +167,7 @@ export default function Component() {
                 </Card>
 
                 <Card className="relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-green-50 to-white shadow-sm hover:shadow-md transition-all duration-300">
-                    <div className="absolute right-3 top-3 opacity-10 rotate-12">
+                    <div className="absolute right-3 top-3 opacity-10 ">
                         <CheckCircle className="h-20 w-20 text-green-400" />
                     </div>
                     <CardHeader className="pb-2">
@@ -180,7 +180,7 @@ export default function Component() {
                 </Card>
 
                 <Card className="relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-orange-50 to-white shadow-sm hover:shadow-md transition-all duration-300">
-                    <div className="absolute right-3 top-3 opacity-10 -rotate-12">
+                    <div className="absolute right-3 top-3 opacity-10 ">
                         <FileText className="h-20 w-20 text-orange-400" />
                     </div>
                     <CardHeader className="pb-2">
@@ -193,7 +193,7 @@ export default function Component() {
                 </Card>
 
                 <Card className="relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-purple-50 to-white shadow-sm hover:shadow-md transition-all duration-300">
-                    <div className="absolute right-3 top-3 opacity-10 rotate-12">
+                    <div className="absolute right-3 top-3 opacity-10 ">
                         <PlusCircle className="h-20 w-20 text-purple-400" />
                     </div>
                     <CardHeader className="pb-2">

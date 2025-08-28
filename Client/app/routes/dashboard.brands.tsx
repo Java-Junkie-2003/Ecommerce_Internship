@@ -40,6 +40,13 @@ export default function Component() {
 
   const [logoFile, setLogoFile] = useState<File | null>(null)
 
+  // useEffect(() => {
+  //   setNewBrandName("")
+  //   setNewBrandLogoUrl("")
+  //   setLogoFile(null)
+  //   setCurrentBrand(null)
+  // }, [isAddModalOpen])
+
   const handleAddBrand = async () => {
     if (newBrandName.trim() && logoFile) {
 
@@ -264,7 +271,7 @@ export default function Component() {
                 <Input
                   id="editBrandName"
                   value={currentBrand.brand_name}
-                  onChange={(e) => setNewBrandName(e.target.value)}
+                  onChange={(e) => setCurrentBrand({ ...currentBrand, brand_name: e.target.value })}
                   className="col-span-3"
                 />
               </div>
@@ -285,16 +292,16 @@ export default function Component() {
                           setLogoFile(file);
                           // create object URL
                           const objectUrl = URL.createObjectURL(file);
-                          setNewBrandLogoUrl(objectUrl);
+                          setCurrentBrand({ ...currentBrand, brand_icon: objectUrl });
                         }
                       }}
                     />
 
                     <label htmlFor="logoUpload" className="cursor-pointer">
-                      {newBrandLogoUrl ? (
+                      {currentBrand.brand_icon ? (
                         <div className="space-y-2">
                           <img
-                            src={newBrandLogoUrl}
+                            src={currentBrand.brand_icon}
                             alt="Preview"
                             className="w-20 h-20 object-contain mx-auto"
                           />

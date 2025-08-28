@@ -91,10 +91,6 @@ const HomePage = () => {
     setBrands(reduxBrands.brands)
   }, [reduxBrands.status])
 
-  useEffect(() => {
-    dispatch(fetchBrands())
-  }, [])
-
   const testimonials = [
     {
       quote: "Mùi hương tinh tế và sang trọng, tôi hoàn toàn bị chinh phục. Dịch vụ khách hàng cũng rất tuyệt vời!",
