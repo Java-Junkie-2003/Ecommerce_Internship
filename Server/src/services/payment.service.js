@@ -1,6 +1,7 @@
 
 const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require('vnpay')
 const dayjs = require('dayjs')
+const crypto = require('crypto')
 class PaymentService {
     static async vnpayMethod({ totalPrice, userId }) {
         const amountVnd = Math.round(Number(totalPrice));
@@ -16,17 +17,17 @@ class PaymentService {
             hashAlgorithm: 'SHA512',
             loggerFn: ignoreLogger
         })
-
+         const vnp_TxnRef = dayjs().format('YYYYMMDDHHmmss') + crypto.randomInt(1000, 9999);
         const vnpayResponse = await vnpay.buildPaymentUrl({
             vnp_Amount: amountVnd,
             vnp_IpAddr: '127.0.0.1',
-            vnp_TxnRef: userId,
+            vnp_TxnRef: vnp_TxnRef,
             vnp_OrderInfo: `${userId}`,
             vnp_OrderType: ProductCode.Other,
-            vnp_ReturnUrl: 'http://localhost:5173/v1/api/check-payment',
+            vnp_ReturnUrl: 'http://localhost:5173/check-payment',
             vnp_Locale: VnpLocale.VN,
             vnp_CreateDate: dateFormat(new Date()),
-            vnp_ExpireDate: dateFormat(dayjs(new Date()).add(1, 'day').toDate())
+            vnp_ExpireDate: dateFormat(dayjs(new Date()).add(15, 'minute').toDate())
         })
 
         return vnpayResponse
