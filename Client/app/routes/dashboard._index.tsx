@@ -209,7 +209,7 @@ export default function Component() {
         {/* Tổng đơn hàng */}
         <Card className="border border-gray-100 relative overflow-hidden bg-gradient-to-br from-blue-50 to-white shadow-sm hover:shadow-md transition">
           {/* Icon background */}
-          <ShoppingCart className="absolute right-3 top-3 h-20 w-20 text-blue-200 opacity-30 rotate-12 pointer-events-none" />
+          <ShoppingCart className="absolute right-3 top-3 h-20 w-20 text-blue-200 opacity-30  pointer-events-none" />
 
           <CardHeader className="relative z-10 pb-2">
             <CardTitle className="text-sm font-medium text-blue-800">Tổng đơn hàng</CardTitle>
@@ -222,7 +222,7 @@ export default function Component() {
 
         {/* Đơn hàng chờ xử lý */}
         <Card className="border border-gray-100 relative overflow-hidden bg-gradient-to-br from-yellow-50 to-white shadow-sm hover:shadow-md transition">
-          <Hourglass className="absolute right-3 top-3 h-20 w-20 text-yellow-300 opacity-30 -rotate-12 pointer-events-none" />
+          <Hourglass className="absolute right-3 top-3 h-20 w-20 text-yellow-300 opacity-30  pointer-events-none" />
 
           <CardHeader className="relative z-10 pb-2">
             <CardTitle className="text-sm font-medium text-yellow-800">Đơn hàng chờ xử lý</CardTitle>
@@ -235,7 +235,7 @@ export default function Component() {
 
         {/* Đơn hàng đã giao */}
         <Card className="border border-gray-100 relative overflow-hidden bg-gradient-to-br from-green-50 to-white shadow-sm hover:shadow-md transition">
-          <CheckCircle className="absolute right-3 top-3 h-20 w-20 text-green-300 opacity-30 rotate-12 pointer-events-none" />
+          <CheckCircle className="absolute right-3 top-3 h-20 w-20 text-green-300 opacity-30  pointer-events-none" />
 
           <CardHeader className="relative z-10 pb-2">
             <CardTitle className="text-sm font-medium text-green-800">Đơn hàng đã giao</CardTitle>
@@ -248,7 +248,7 @@ export default function Component() {
 
         {/* Tổng doanh thu */}
         <Card className="border border-gray-100 relative overflow-hidden bg-gradient-to-br from-purple-50 to-white shadow-sm hover:shadow-md transition">
-          <DollarSign className="absolute right-3 top-3 h-20 w-20 text-purple-300 opacity-30 -rotate-12 pointer-events-none" />
+          <DollarSign className="absolute right-3 top-3 h-20 w-20 text-purple-300 opacity-30  pointer-events-none" />
 
           <CardHeader className="relative z-10 pb-2">
             <CardTitle className="text-sm font-medium text-purple-800">Tổng doanh thu</CardTitle>
@@ -296,25 +296,50 @@ export default function Component() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleViewDetails(order)}>
-                        <Eye className="h-4 w-4 mr-2" />
+                      <DropdownMenuItem className="ps-3" onClick={() => handleViewDetails(order)}>
+                        <Eye className="h-4 w-4 mr-" />
                         Xem chi tiết
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem className="p-0">
                         <Select
                           value={order.status}
                           onValueChange={(newStatus: OrderStatus) => handleUpdateOrderStatus(order.id, newStatus)}
                         >
-                          <SelectTrigger className="w-full h-auto py-1 px-2 text-sm border-none shadow-none focus:ring-0">
-                            <Package className="h-4 w-4 mr-2" />
+                          <SelectTrigger className="w-full text-sm border-none shadow-none focus:ring-0">
+                            {/* <Package className="h-4 w-4 mr-2" /> */}
                             <SelectValue placeholder="Cập nhật trạng thái" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="pending">Chờ xử lý</SelectItem>
-                            <SelectItem value="processing">Đang xử lý</SelectItem>
-                            <SelectItem value="shipped">Đang giao hàng</SelectItem>
-                            <SelectItem value="delivered">Đã giao hàng</SelectItem>
-                            <SelectItem value="cancelled">Đã hủy</SelectItem>
+                            <SelectItem value="pending">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4 text-yellow-600" />
+                                <span className="text-yellow-800">Chờ xử lý</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="processing">
+                              <div className="flex items-center gap-2">
+                                <Package className="h-4 w-4 text-blue-600" />
+                                <span className="text-blue-800">Đang xử lý</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="shipped">
+                              <div className="flex items-center gap-2">
+                                <Truck className="h-4 w-4 text-purple-600" />
+                                <span className="text-purple-800">Đang giao hàng</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="delivered">
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-600" />
+                                <span className="text-green-800">Đã giao hàng</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="cancelled">
+                              <div className="flex items-center gap-2">
+                                <XCircle className="h-4 w-4 text-red-600" />
+                                <span className="text-red-800">Đã hủy</span>
+                              </div>
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </DropdownMenuItem>
