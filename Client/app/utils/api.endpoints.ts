@@ -26,5 +26,11 @@ export const ENDPOINTS = {
     },
     PRODUCT: {
         FETCH_ONE: (id: string) => `${BASE_ENDPOINT}/product/${id}`,
+    },
+    CART: {
+        INIT: `${BASE_ENDPOINT}/cart`,
+        ADD: `${BASE_ENDPOINT}/cart/add-to-cart`,
+        UPDATE: `${BASE_ENDPOINT}/cart/update-cart`,
+        DELETE: (id: string) => `${BASE_ENDPOINT}/cart/delete/${id}`,
     }
 }

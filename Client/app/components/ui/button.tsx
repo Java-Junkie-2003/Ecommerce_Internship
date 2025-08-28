@@ -29,6 +29,7 @@ const buttonVariants = cva(
         red: "text-red-600 bg-red-500/20 hover:bg-red-500 dark:text-red-300",
         green: "text-green-600 bg-green-500/20 hover:bg-green-500 dark:text-green-300",
         yellow: "text-yellow-600 bg-yellow-500/20 hover:bg-yellow-500 dark:text-yellow-300",
+        default: "",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
@@ -46,7 +47,7 @@ const buttonVariants = cva(
     defaultVariants: {
       variant: "default",
       size: "default",
-      color: "gray",
+      color: "default",
     },
   }
 )
