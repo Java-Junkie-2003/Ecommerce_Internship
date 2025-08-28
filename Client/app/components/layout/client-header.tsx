@@ -9,17 +9,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { logout } from "@/lib/api/api.login";
 import { toast } from "sonner";
 import { removeUserInfo } from "@/redux/slices/user";
+import { initCart } from "@/redux/thunks/cart.thunk";
 
 export default function SiteHeader() {
     const [query, setQuery] = useState("")
-    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const navigate = useNavigate()
 
@@ -27,7 +26,8 @@ export default function SiteHeader() {
 
     // Get user authentication state from Redux
     const { userInfo, isLoggedIn } = useAppSelector((state) => state.user);
-    const cartItemCount = 3 // Mock cart count
+    const cartItemCount = useAppSelector((state) => state.cart.count);
+    const carts = useAppSelector((state) => state.cart.cartItems);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && query.trim()) {
@@ -63,6 +63,12 @@ export default function SiteHeader() {
             }
         }
     }
+
+    useEffect(() => {
+        if(isLoggedIn) {
+            dispatch(initCart())
+        }
+    }, [isLoggedIn]);
 
     return (
         <header className="border-b border-gray-200 px-4 py-4 bg-white sticky top-0 z-50">

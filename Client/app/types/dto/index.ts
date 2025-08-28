@@ -4,5 +4,4 @@ export interface DefaultDTO {
     statusCode?: number;
     message?: string;
     metadata?: any;
-    
 }

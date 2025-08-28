@@ -45,7 +45,7 @@ export function attachInterceptors(instance: AxiosInstance): void {
 
   // Response interceptor to handle token refresh and errors
   instance.interceptors.response.use(
-    (response: AxiosResponse) => {
+    (response: any) => {
       const config = response.config as ExtendedAxiosRequestConfig;
       
       // Log response timing
@@ -56,23 +56,24 @@ export function attachInterceptors(instance: AxiosInstance): void {
       
       return response;
     },
-    async (error: AxiosError) => {
+    async (error: any) => {
       const originalRequest = error.config as ExtendedAxiosRequestConfig;
 
-      // Handle 401 Unauthorized - Token refresh logic
-      if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      // Handle 401 Unauthorized - Token refresh logic, status or statusCode
+      if ((error.response?.status === 401 || error.response?.statusCode === 401) && originalRequest && !originalRequest._retry) {
         originalRequest._retry = true;
-        
+        console.log("[API] Token expired, attempting refresh...");
         try {
-          console.debug('[API] Attempting token refresh...');
+          
+          console.log('[API] Attempting token refresh...');
           const newToken = await refreshToken();
           
           // Update the authorization header with new token (no Bearer prefix)
           if (originalRequest.headers) {
             originalRequest.headers.authorization = newToken;
           }
-          
-          console.debug('[API] Token refreshed successfully, retrying request...');
+
+          console.log('[API] Token refreshed successfully, retrying request...');
           // Retry the original request with new token
           return instance(originalRequest);
         } catch (refreshError) {

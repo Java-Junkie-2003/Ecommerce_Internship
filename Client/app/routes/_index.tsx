@@ -8,15 +8,23 @@ import { Link } from "react-router"
 import SiteHeader from "@/components/layout/client-header"
 import SiteFooter from "@/components/layout/client-footer"
 import type { Route } from "../+types/root";
+import { useEffect, useState } from "react";
+import { useAppDispatch } from "@/redux/hook";
+import { fetchBrands } from "@/redux/thunks/brand.thunk";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { Brand } from "@/types/model/brand";
 
 export function meta({ }: Route.MetaArgs) {
-    return [
-        { title: "Trang chủ" },
-        { name: "description", content: "Khám phá bộ sưu tập nước hoa cao cấp" },
-    ];
+  return [
+    { title: "Trang chủ" },
+    { name: "description", content: "Khám phá bộ sưu tập nước hoa cao cấp" },
+  ];
 }
 
 const HomePage = () => {
+
+  const dispatch = useAppDispatch()
   const products = [
     {
       id: "77884",
@@ -76,11 +84,16 @@ const HomePage = () => {
     },
   ]
 
-  const brands = [
-    { name: "NOCTURE", logo: "/images/brands/nocture.png" },
-    { name: "FLEURÉ", logo: "/images/brands/Fleure.png" },
-    { name: "VELOUR", logo: "/images/brands/velour.png" },
-  ]
+  const reduxBrands = useSelector((state: RootState) => state.brand)
+
+  const [brands, setBrands] = useState<Brand[]>([])
+  useEffect(() => {
+    setBrands(reduxBrands.brands)
+  }, [reduxBrands.status])
+
+  useEffect(() => {
+    dispatch(fetchBrands())
+  }, [])
 
   const testimonials = [
     {
@@ -276,15 +289,24 @@ const HomePage = () => {
       </section>
 
       {/* Brand Partners Carousel (using grid for simplicity, but can be a carousel) */}
-      <section className="py-12 bg-white border-b border-gray-200">
+      <section className="py-12 bg-white border-b border-gray-200 overflow-hidden">
         <div className="container mx-auto px-4">
           <h2 className="text-center text-3xl font-bold mb-10 text-gray-900">Đối Tác Thương Hiệu</h2>
-          <div className="flex flex-wrap items-center justify-center gap-8 justify-evenly">
-            {brands.map((brand, index) => (
-              <div key={index} className="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity duration-300 transform hover:scale-105">
-                <img src={brand.logo || "/placeholder.svg"} alt={brand.name} className="object-contain h-20 w-auto" />
-              </div>
-            ))}
+          <div className="flex-nowrap inline-flex w-full">
+            <div className="flex items-center justify-center md:justify-start [&_li]:mx-8 [&_img]:max-w-none animate-scroll-x">
+              {brands.map((brand, index) => (
+                <div key={index} className="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity duration-300 transform hover:scale-105">
+                  <img src={brand.brand_icon || "/placeholder.svg"} alt={brand.brand_name} className="object-contain h-30 w-auto" />
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center justify-center md:justify-start [&_li]:mx-8 [&_img]:max-w-none animate-scroll-x">
+              {brands.map((brand, index) => (
+                <div key={index} className="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity duration-300 transform hover:scale-105">
+                  <img src={brand.brand_icon || "/placeholder.svg"} alt={brand.brand_name} className="object-contain h-30 w-auto" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

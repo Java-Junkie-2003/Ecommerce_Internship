@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { use, useEffect, useState } from "react"
 import { Minus, Plus, Trash2, ShoppingCart, CreditCard, Truck, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,96 +10,89 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import SiteHeader from "@/components/layout/client-header"
 import SiteFooter from "@/components/layout/client-footer"
+import { Cart } from "@/types/model/cart"
+import { useAppDispatch, useAppSelector } from "@/redux/hook"
+import { deleteFromCart, updateCart } from "@/redux/thunks/cart.thunk"
+import { toast } from "sonner"
 
-interface CartItem {
-    id: number
-    name: string
-    price: number
-    quantity: number
-    image: string
-}
 
 export default function Component() {
-    const [cartItems, setCartItems] = useState<CartItem[]>([
-        {
-            id: 1,
-            name: "A LUXURY PERFUME EVERY EVER",
-            price: 2000000,
-            quantity: 1,
-            image: "/images/perfumes/img__77884.png",
-        },
-        {
-            id: 2,
-            name: "A LUXURY PERFUME EVERY EVER",
-            price: 2000000,
-            quantity: 1,
-            image: "/images/perfumes/img__77885.png",
-        },
-        {
-            id: 3,
-            name: "A LUXURY PERFUME EVERY EVER",
-            price: 2000000,
-            quantity: 1,
-            image: "/images/perfumes/img__77886.png",
-        },
-        {
-            id: 4,
-            name: "A LUXURY PERFUME EVERY EVER",
-            price: 2000000,
-            quantity: 1,
-            image: "/images/perfumes/img__77887.png",
-        },
-    ])
 
-    const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set())
+    const dispatch = useAppDispatch()
+
+    const cart = useAppSelector((state) => state.cart)
+    const [cartItems, setCartItems] = useState<Cart[]>([])
+    useEffect(() => {
+        setCartItems(cart.cartItems)
+    }, [cart.status])
+
+    const [selectedItems, setSelectedItems] = useState<Cart[]>([])
     const [address, setAddress] = useState("")
     const [paymentMethod, setPaymentMethod] = useState("cod")
 
-    const updateQuantity = (id: number, newQuantity: number) => {
+    const updateQuantity = (id: string, newQuantity: number) => {
         if (newQuantity < 1) return
-        setCartItems((items) => items.map((item) => (item.id === id ? { ...item, quantity: newQuantity } : item)))
+
+        const currentItem = cartItems.find(item => item.productId === id)
+        if (!currentItem) return
+
+        try {
+            // Call API to update quantity
+            dispatch(updateCart({ productId: id, quantity: newQuantity, old_quantity: currentItem.quantity }))
+            setCartItems((items) => items.map((item) => (item.productId === id ? { ...item, quantity: newQuantity } : item)))
+        } catch (err) {
+            console.error(err)
+        }
+
     }
 
-    const removeItem = (id: number) => {
-        setCartItems((items) => items.filter((item) => item.id !== id))
-        setSelectedItems((selected) => {
-            const newSelected = new Set(selected)
-            newSelected.delete(id)
-            return newSelected
-        })
-    }
+    const removeItem = (id: string) => {
 
-    const removeSelectedItems = () => {
-        setSelectedItems(new Set())
-    }
+        const itemToRemove = cartItems.find(item => item.productId === id)
+        if (!itemToRemove) return
 
-    const toggleSelectItem = (id: number) => {
-        setSelectedItems((selected) => {
-            const newSelected = new Set(selected)
-            if (newSelected.has(id)) {
-                newSelected.delete(id)
-            } else {
-                newSelected.add(id)
-            }
-            return newSelected
-        })
-    }
-
-    const toggleSelectAll = () => {
-        if (selectedItems.size === cartItems.length) {
-            setSelectedItems(new Set())
-        } else {
-            setSelectedItems(new Set(cartItems.map(item => item.id)))
+        try {
+            // Call API to remove item
+            dispatch(deleteFromCart({ productId: id }))
+            setCartItems((items) => items.filter((item) => item.productId !== id))
+            setSelectedItems((selected) => {
+                const newSelected = selected.filter(item => item.productId !== id)
+                return newSelected
+            })
+        } catch (err) {
+            console.error(err)
+            toast.error("Failed to remove item from cart")
         }
     }
 
-    const selectedCartItems = cartItems.filter(item => selectedItems.has(item.id))
-    const subtotal = selectedCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const removeSelectedItems = () => {
+        setSelectedItems([])
+    }
+
+    const toggleSelectItem = (id: string) => {
+        setSelectedItems((selected) =>
+            selected.some(item => item.productId === id)
+                ? selected.filter(item => item.productId !== id)
+                : [...selected, ...(cartItems.filter(item => item.productId === id))]
+        )
+    }
+
+
+    const toggleSelectAll = () => {
+        if (selectedItems.length === cartItems.length) {
+            setSelectedItems([])
+        } else {
+            setSelectedItems(cartItems)
+        }
+    }
+
+    const selectedCartItems = cartItems.filter(item => selectedItems.includes(item))
+    const subtotal = selectedCartItems.reduce((sum, item) => sum + item.product_price * item.quantity, 0)
     const shipping = 0 // Free shipping
     const total = subtotal + shipping
 
-    const isAllSelected = cartItems.length > 0 && selectedItems.size === cartItems.length
-    const isIndeterminate = selectedItems.size > 0 && selectedItems.size < cartItems.length
+    const isAllSelected = cartItems.length > 0 && selectedItems.length === cartItems.length
+    const isIndeterminate = selectedItems.length > 0 && selectedItems.length < cartItems.length
 
     return (
         <div className="min-h-screen">
@@ -118,15 +111,20 @@ export default function Component() {
                                 </CardTitle>
                                 {cartItems.length > 0 && (
                                     <div className="flex items-center gap-2 pt-2 h-8">
-                                        <Checkbox
-                                            checked={isAllSelected}
-                                            onCheckedChange={toggleSelectAll}
-                                            className={isIndeterminate ? "indeterminate" : ""}
-                                        />
-                                        <span className="text-sm text-gray-600">
-                                            Chọn tất cả ({selectedItems.size}/{cartItems.length})
-                                        </span>
-                                        {selectedItems.size > 0 && (
+                                        <div
+                                            className="flex items-center gap-2 cursor-pointer select-none"
+                                            onClick={toggleSelectAll}
+                                        >
+                                            <Checkbox
+                                                checked={isAllSelected}
+                                                onCheckedChange={toggleSelectAll}
+                                                className={isIndeterminate ? "indeterminate" : ""}
+                                            />
+                                            <span className="text-sm text-gray-600">
+                                                Chọn tất cả ({selectedItems.length}/{cartItems.length})
+                                            </span>
+                                        </div>
+                                        {selectedItems.length > 0 && (
                                             <Button
                                                 variant="outline"
                                                 size="sm"
@@ -151,26 +149,26 @@ export default function Component() {
                                     </div>
                                 ) : (
                                     cartItems.map((item, index) => (
-                                        <div key={item.id}>
+                                        <div key={item.productId}>
                                             <div className="flex items-center gap-4 py-4">
                                                 <Checkbox
-                                                    checked={selectedItems.has(item.id)}
-                                                    onCheckedChange={() => toggleSelectItem(item.id)}
+                                                    checked={selectedItems.includes(item)}
+                                                    onCheckedChange={() => toggleSelectItem(item.productId)}
                                                 />
 
                                                 <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                                                     <img
-                                                        src={item.image}
-                                                        alt={item.name}
+                                                        src={item.product_thumb}
+                                                        alt={item.product_name}
                                                         className="w-full h-full object-cover"
                                                         loading="lazy"
                                                     />
                                                 </div>
 
                                                 <div className="flex-1 min-w-0">
-                                                    <h3 className="font-medium text-gray-900 truncate">{item.name}</h3>
+                                                    <h3 className="font-medium text-gray-900 truncate">{item.product_name}</h3>
                                                     <p className="text-lgtext-gray-900 mt-1">
-                                                        <span className="font-semibold">VND</span> {item.price.toLocaleString("vi-VN")} đ
+                                                        <span className="font-semibold">VND</span> {item.product_price.toLocaleString("vi-VN")} đ
                                                     </p>
                                                 </div>
 
@@ -180,7 +178,7 @@ export default function Component() {
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-8 w-8"
-                                                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                            onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                                                         >
                                                             <Minus className="h-4 w-4" />
                                                         </Button>
@@ -189,7 +187,7 @@ export default function Component() {
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-8 w-8"
-                                                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                                                         >
                                                             <Plus className="h-4 w-4" />
                                                         </Button>
@@ -199,7 +197,7 @@ export default function Component() {
                                                         variant="ghost"
                                                         size="icon"
                                                         className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                                        onClick={() => removeItem(item.id)}
+                                                        onClick={() => removeItem(item.productId)}
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
@@ -218,14 +216,14 @@ export default function Component() {
                         <Card>
                             <CardHeader>
                                 <CardTitle>ĐƠN HÀNG</CardTitle>
-                                {selectedItems.size > 0 && (
+                                {selectedItems.length > 0 && (
                                     <p className="text-sm text-gray-600">
-                                        {selectedItems.size} sản phẩm được chọn
+                                        {selectedItems.length} sản phẩm được chọn
                                     </p>
                                 )}
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                {selectedItems.size === 0 ? (
+                                {selectedItems.length === 0 ? (
                                     <div className="text-center py-4">
                                         <p className="text-gray-500">Chưa có sản phẩm nào được chọn</p>
                                     </div>
@@ -255,7 +253,7 @@ export default function Component() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Home className="h-5 w-5" />
-                                    Địa chỉ giao hàng 
+                                    Địa chỉ giao hàng
                                     <span className="text-sm text-gray-500">(bắt buộc)</span>
                                 </CardTitle>
                             </CardHeader>
@@ -302,13 +300,13 @@ export default function Component() {
                         </Card>
 
                         {/* Checkout Button */}
-                        <Button 
-                            className="w-full h-12 text-lg font-semibold" 
-                            disabled={selectedItems.size === 0 || !address.trim()}
+                        <Button
+                            className="w-full h-12 text-lg font-semibold"
+                            disabled={selectedItems.length === 0 || !address.trim()}
                         >
-                            {selectedItems.size === 0 
-                                ? "Chọn sản phẩm để đặt hàng" 
-                                : `Đặt hàng (${selectedItems.size} sản phẩm)`
+                            {selectedItems.length === 0
+                                ? "Chọn sản phẩm để đặt hàng"
+                                : `Đặt hàng (${selectedItems.length} sản phẩm)`
                             }
                         </Button>
 

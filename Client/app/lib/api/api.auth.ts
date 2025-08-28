@@ -35,6 +35,7 @@ export async function refreshToken(): Promise<string> {
         },
       }
     );
+    console.log("Refresh token response:", response.data);
 
     const { accessToken, refreshToken: newRefreshToken } = response.data.metadata.tokens;
     setAccessToken(accessToken);

@@ -1,8 +1,10 @@
+
 import Cookies from "js-cookie";
 
 const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
 const USER_ID_KEY = "user_id";
+const USER_INFO_KEY = "userInfo";
 const EMAIL_KEY = "register_email";
 const REGISTER_KEY = "register_key";
 
@@ -85,6 +87,10 @@ export const removeRefreshToken = (): void => {
   Cookies.remove(REFRESH_TOKEN_KEY, { path: "/" });
 };
 
+export const removeUserInfo = (): void => {
+  Cookies.remove(USER_INFO_KEY, { path: "/" });
+};
+
 // Save email to cookies
 export const setEmailInCookies = (email: string, expires = 7): void => {
   // Skip on server
@@ -145,6 +151,7 @@ export const clearTokens = (): void => {
   removeAccessToken();
   removeRefreshToken();
   removeUserId();
+  removeUserInfo();
 };
 
 // Save user ID to cookies
