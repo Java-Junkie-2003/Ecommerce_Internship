@@ -30,8 +30,34 @@ const updateStockForProduct = async({productId, stock, isNew = true}) =>{
         inven_stock: numStock
     }, {new: isNew})
 }
+const findInvenByProductId = async({productId}) => {
+    return await inventory.findOne({inven_product: productId}).lean()
+}
+
+const reservationInventory = async ({productId, quantity, userId}) => {
+    const query = {
+        inven_product: convertToObjectId(productId),
+        inven_stock: {$gte: quantity}
+    }, updateSet = {
+        $inc: {
+            inven_stock: -quantity
+        },
+        $push: {
+            inven_reservations: {
+                quantity,
+                user_id: userId,
+                createdOn: new Date()
+            }
+        }
+
+    }, options ={upsert: true, new: true}
+    
+    return await inventory.updateOne(query, updateSet, options)
+}
 module.exports = {
     insertInventory,
     getAllInventory,
-    updateStockForProduct
+    updateStockForProduct,
+    findInvenByProductId,
+    reservationInventory
 }

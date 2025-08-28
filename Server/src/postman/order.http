@@ -1,0 +1,29 @@
+@url_dev=http://localhost:3055/v1/api
+
+
+### create order
+POST {{url_dev}}/order/create
+Content-Type: application/json
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmQiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU2Mjg2OTM3LCJleHAiOjE3NTYzNzMzMzd9.q-TUstCpr3SAUOsgP8r6CEeF2JAjKhtfmUfMyQYxrjc
+x-client-id: 689471fc659ad34ec9a2cc6d
+
+{
+    "item_products": [
+         {
+            "quantity": 1,
+            "productId": "689add80d0ba931366487e62"
+         },
+         {
+            "quantity": 2,
+            "productId": "689ae1d88d25db5c08cff814"
+         }
+    ],
+    "addressId": "68ad1d2f273f732014d13265",
+    "payment_method": "COD"
+}
+
+### find all order by user
+GET {{url_dev}}/order/self?page=1
+Content-Type: application/json
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmQiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU2Mjg2OTM3LCJleHAiOjE3NTYzNzMzMzd9.q-TUstCpr3SAUOsgP8r6CEeF2JAjKhtfmUfMyQYxrjc
+x-client-id: 689471fc659ad34ec9a2cc6d

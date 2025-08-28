@@ -1,0 +1,8 @@
+@url_dev=http://localhost:3055/v1/api
+
+### payment method
+
+POST {{url_dev}}/payment?totalPrice=100000
+Content-Type: application/json
+authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmQiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU2Mjg2OTM3LCJleHAiOjE3NTYzNzMzMzd9.q-TUstCpr3SAUOsgP8r6CEeF2JAjKhtfmUfMyQYxrjc
+x-client-id: 689471fc659ad34ec9a2cc6d

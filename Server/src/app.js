@@ -22,6 +22,8 @@ app.use(
 require('./db/init.mongodb')
 // init router
 app.use('/v1/api', require('./routes'))
+
+
 // handle errors
 app.use((req, res, next)=>{
     const error = new Error('Not Found')

@@ -1,0 +1,40 @@
+@url_dev=http://localhost:3055/v1/api
+
+
+
+### insert address
+
+POST {{url_dev}}/address/add
+Content-Type: application/json
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmQiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU2MTc0NzM4LCJleHAiOjE3NTYyNjExMzh9.24rQYYrtOXSdZk4552Byd_mt_1P4Sc0gfPYOKuMWjck
+x-client-id: 689471fc659ad34ec9a2cc6d
+
+{
+    "address": "97F1, ABC Street, District 1, HCMC",
+    "addressType": "COMPANY"
+}
+
+### get all address by user
+
+GET {{url_dev}}/address
+Content-Type: application/json
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmQiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU2MTc0NzM4LCJleHAiOjE3NTYyNjExMzh9.24rQYYrtOXSdZk4552Byd_mt_1P4Sc0gfPYOKuMWjck
+x-client-id: 689471fc659ad34ec9a2cc6d
+
+### remove address
+
+DELETE {{url_dev}}/address/rm/68ad1f326567d5b78d580604
+Content-Type: application/json
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmQiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU2MTc0NzM4LCJleHAiOjE3NTYyNjExMzh9.24rQYYrtOXSdZk4552Byd_mt_1P4Sc0gfPYOKuMWjck
+x-client-id: 689471fc659ad34ec9a2cc6d
+
+
+### update address
+PUT {{url_dev}}/address/update/68ad1d2f273f732014d13265
+Content-Type: application/json
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmQiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU2MTc0NzM4LCJleHAiOjE3NTYyNjExMzh9.24rQYYrtOXSdZk4552Byd_mt_1P4Sc0gfPYOKuMWjck
+x-client-id: 689471fc659ad34ec9a2cc6d
+
+{
+    "addressType": "HOME"
+}

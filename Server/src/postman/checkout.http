@@ -1,0 +1,23 @@
+@url_dev=http://localhost:3055/v1/api
+
+
+### checkout review
+
+POST {{url_dev}}/checkout
+Content-Type: application/json
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmQiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU2MTc0NzM4LCJleHAiOjE3NTYyNjExMzh9.24rQYYrtOXSdZk4552Byd_mt_1P4Sc0gfPYOKuMWjck
+x-client-id: 689471fc659ad34ec9a2cc6d
+
+{
+    "item_products": [
+         {
+            "quantity": 1,
+            "productId": "689add80d0ba931366487e62"
+         },
+         {
+            "quantity": 2,
+            "productId": "689ae1d88d25db5c08cff814"
+         }
+    ],
+
+}
