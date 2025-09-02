@@ -49,6 +49,11 @@ authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1
 GET {{url_dev}}/product/category/689ac94eac93b575fd97819b?limit=50&page=1
 Content-Type: application/json
 
+
+### filter product
+GET {{url_dev}}/product/filter?categoryId=689ac94eac93b575fd97819b
+Content-Type: application/json
+
 ### get all products ( published: true )
 GET {{url_dev}}/product/all?page=1
 Content-Type: application/json
@@ -61,8 +66,6 @@ Content-Type: application/json
 ### get all products by brand
 GET {{url_dev}}/product/brand/Dior?page=1
 Content-Type: application/json
-
-
 
 ### find all product by price range
 GET {{url_dev}}/product/ls-by-range?minPrice=2500000&maxPrice=3500000&page=1
