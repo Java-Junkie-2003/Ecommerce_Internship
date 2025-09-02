@@ -96,6 +96,13 @@ class ProductController {
         }).send(res)
     }
 
+    filterProduct = async (req, res, next) => {
+        new SuccessResponse({
+            message: "Filter product by criteria",
+            metadata: await ProductSevice.filterProduct(req.query)
+        }).send(res)
+    }
+
 
 
 }

@@ -6,7 +6,8 @@ const { findAllProducts, findProduct, findAllDraftsForShop,
     findAllProductByCategory, findAllProductByBrand,
     publishProductByAdmin, findAllProductsForAdmin,
     unPublishProductByAdmin, findProductsByPriceRange,
-    updateProductById } = require('../models/repositories/product.repo');
+    updateProductById, 
+    filterProduct} = require('../models/repositories/product.repo');
 const { updateNestedObjectParser, removeUndefinedObject } = require('../utils');
 const { insertInventory } = require('../models/repositories/inventory.repo');
 class ProductFactory {
@@ -65,6 +66,20 @@ class ProductFactory {
             select: ['product_name', 'product_thumb', 'product_price']
         })
     }
+
+    static async filterProduct({categoryId, brandName, maxPrice, minPrice, limit = 20, sort = 'ctime', page = 1}){
+        return await filterProduct({
+            brand_name: brandName, 
+            categoryIds: [categoryId],
+            minPrice, 
+            maxPrice, 
+            page, 
+            limit, 
+            sort, 
+            select: ['product_name', 'product_thumb', 'product_price'] 
+        })
+    }
+
     static async findProduct({ product_id, unSelect }) {
         return await findProduct({ product_id, unSelect })
     }

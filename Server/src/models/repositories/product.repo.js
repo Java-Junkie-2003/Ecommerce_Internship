@@ -3,9 +3,10 @@ const { Types } = require('mongoose')
 require('../brand.model')
 require('../category.model')
 const { getSelectData, getUnSelectData, convertToObjectId } = require('../../utils')
-const productModel = require('../product.model')
 const { findInvenByProductId } = require('./inventory.repo')
 const { NotFoundError, BadRequestError } = require('../../core/error.response')
+const brandModel = require('../brand.model')
+const { sortBy } = require('lodash')
 const findAllProducts = async ({ limit, sort, page, filter, select }) => {
     const skip = (page - 1) * limit
     const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
@@ -163,11 +164,11 @@ const updateProductById = async ({ productId, bodyUpdate, model, isNew = true })
 
 const checkProductByServer = async (products) => {
     return await Promise.all(products.map(async product => {
-        const foundProduct = await findProduct({product_id: product.productId, unSelect: ['__v']})
-        if(foundProduct) {
-            const foundInventory = await findInvenByProductId({productId: foundProduct._id})
-            if(!foundInventory) throw new NotFoundError('Not found !!!')
-            if(product.quantity > foundInventory.inven_stock) throw new BadRequestError('Not enough quantity in stock')
+        const foundProduct = await findProduct({ product_id: product.productId, unSelect: ['__v'] })
+        if (foundProduct) {
+            const foundInventory = await findInvenByProductId({ productId: foundProduct._id })
+            if (!foundInventory) throw new NotFoundError('Not found !!!')
+            if (product.quantity > foundInventory.inven_stock) throw new BadRequestError('Not enough quantity in stock')
             return {
                 price: foundProduct.product_price,
                 quantity: product.quantity,
@@ -175,6 +176,100 @@ const checkProductByServer = async (products) => {
             }
         }
     }))
+}
+
+const filterProduct = async ({
+    brand_name,
+    categoryId,
+    categoryIds,
+    minPrice,
+    maxPrice,
+    isPublished = true,
+    page = 1,
+    limit = 20,
+    sort = '-ctime',
+    productType = 'Perfume',
+    select = []
+}) => {
+    const limitNum = Math.max(1, Number(limit) || 20);
+    const pageNum = Math.max(1, Number(page) || 1);
+    const skip = (pageNum - 1) * limitNum;
+
+    const filter = {}
+    if (typeof isPublished === 'boolean') filter.isPublished = isPublished
+    if (productType) filter.product_type = productType
+
+    if (minPrice != null || maxPrice != null) {
+        filter.product_price = {}
+        if (minPrice != null) filter.product_price.$gte = Number(minPrice)
+        if (maxPrice != null) filter.product_price.$lte = Number(maxPrice)
+    }
+
+    if (categoryIds && Array.isArray(categoryIds) && categoryIds.length) {
+        filter.product_categories = { $in: categoryIds.map(convertToObjectId) }
+    }
+    else if (categoryId) {
+        filter.product_categories = convertToObjectId(categoryId)
+    }
+
+    if (brand_name) {
+        const brand = await brandModel.findOne({ brand_name }).select('_id').lean()
+        if (!brand) {
+            return {
+                results: [],
+                pagination: {
+                    totalResult: 0,
+                    page: pageNum,
+                    limit: limitNum,
+                    totalPages: 1,
+                    hasNext: false,
+                    hasPrev: pageNum > 1
+                }
+            }
+        }
+        filter.product_brand = brand._id
+    }
+
+    const sortMap = {
+        ctime: { createdAt: 1 },
+        '-ctime': { createdAt: -1 },
+        price: { product_price: 1 },
+        '-price': { product_price: -1 },
+        name: { product_name: 1 },
+        '-name': { product_name: -1 },
+    }
+
+    const sortBy = sortMap[sort] || sortMap.ctime
+
+    const [results, total] = await Promise.all([
+        product.find(filter)
+        .populate('product_brand', 'brand_name brand_icon -_id')
+        .populate('product_categories', 'category_name -_id')
+        .sort(sortBy)
+        .skip(skip)
+        .limit(limitNum)
+        .select(getSelectData(select))
+        .lean()
+        .exec(),
+        product.countDocuments(filter)
+    ])
+
+    const totalPages = Math.max(1, Math.ceil(total/limitNum))
+    const hasNext = pageNum < totalPages
+    const hasPrev = pageNum > 1
+
+    return {
+        products: results,
+        pagination: {
+            totalResult: total,
+            page: pageNum,
+            limit: limitNum,
+            totalPages,
+            hasNext,
+            hasPrev
+        }
+
+    }
 }
 
 module.exports = {
@@ -188,5 +283,6 @@ module.exports = {
     findAllProductsForAdmin,
     findProductsByPriceRange,
     updateProductById,
-    checkProductByServer
+    checkProductByServer,
+    filterProduct
 }
