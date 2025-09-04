@@ -246,14 +246,15 @@ const filterProduct = async ({
         '-name': { product_name: -1 },
     }
 
+    const userSort = (sortMap[sort] || sortMap['-ctime'])
     const sortBy = useTextSearch
-        ? { score: { $meta: 'textScore' } }
-        : (sortMap[sort] || sortMap['-ctime']);
+        ? { score: { $meta: 'textScore' }, ...userSort }
+        : userSort
 
     const baseSelect = getSelectData(select)
     const projection = {
         ...baseSelect,
-        ...(useTextSearch ? {score: {$meta: 'textScore'}}: {})
+        ...(useTextSearch ? { score: { $meta: 'textScore' } } : {})
     }
 
     const [results, total] = await Promise.all([
@@ -282,8 +283,30 @@ const filterProduct = async ({
             hasNext,
             hasPrev
         }
-
     }
+}
+
+const textSearch = async ({ key_search }) => {
+    const regexSearch = new RegExp(key_search)
+    const results = product.find({
+        $text: { $search: regexSearch }
+    }, { score: { $meta: 'textScore' } })
+        .sort({ score: { $meta: 'textScore' } })
+        .select(getSelectData(['_id', 'product_name', 'product_thumb', 'product_price']))
+        .lean()
+    return results
+}
+
+const findProductsByBrandId = async ({ brandId, limit, sort }) => {
+    const sortBy = sort === 'ctime' ? { createdAt: 1 } : { createdAt: -1 }
+    const limitNum = Math.max(1, Number(limit) || 4);
+    return await product.find({ product_brand: convertToObjectId(brandId) })
+        .populate('product_brand', 'brand_name bran_icon -_id')
+        .populate('product_categories', 'category_name -_id')
+        .limit(limitNum)
+        .sort(sortBy)
+        .select(getUnSelectData(['product_attributes']))
+        .lean()
 }
 
 module.exports = {
@@ -298,5 +321,7 @@ module.exports = {
     findProductsByPriceRange,
     updateProductById,
     checkProductByServer,
-    filterProduct
+    filterProduct,
+    findProductsByBrandId,
+    textSearch
 }
