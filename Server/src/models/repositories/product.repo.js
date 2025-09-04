@@ -179,6 +179,7 @@ const checkProductByServer = async (products) => {
 }
 
 const filterProduct = async ({
+    key_search,
     brand_name,
     categoryId,
     categoryIds,
@@ -196,6 +197,7 @@ const filterProduct = async ({
     const skip = (pageNum - 1) * limitNum;
 
     const filter = {}
+
     if (typeof isPublished === 'boolean') filter.isPublished = isPublished
     if (productType) filter.product_type = productType
 
@@ -230,6 +232,11 @@ const filterProduct = async ({
         filter.product_brand = brand._id
     }
 
+    const useTextSearch = typeof key_search === 'string' && key_search.trim().length > 0;
+    if (useTextSearch) {
+        filter.$text = { $search: key_search.trim() };
+    }
+
     const sortMap = {
         ctime: { createdAt: 1 },
         '-ctime': { createdAt: -1 },
@@ -239,22 +246,29 @@ const filterProduct = async ({
         '-name': { product_name: -1 },
     }
 
-    const sortBy = sortMap[sort] || sortMap.ctime
+    const sortBy = useTextSearch
+        ? { score: { $meta: 'textScore' } }
+        : (sortMap[sort] || sortMap['-ctime']);
+
+    const baseSelect = getSelectData(select)
+    const projection = {
+        ...baseSelect,
+        ...(useTextSearch ? {score: {$meta: 'textScore'}}: {})
+    }
 
     const [results, total] = await Promise.all([
-        product.find(filter)
-        .populate('product_brand', 'brand_name brand_icon -_id')
-        .populate('product_categories', 'category_name -_id')
-        .sort(sortBy)
-        .skip(skip)
-        .limit(limitNum)
-        .select(getSelectData(select))
-        .lean()
-        .exec(),
+        product.find(filter, projection)
+            .populate('product_brand', 'brand_name brand_icon -_id')
+            .populate('product_categories', 'category_name -_id')
+            .sort(sortBy)
+            .skip(skip)
+            .limit(limitNum)
+            .lean()
+            .exec(),
         product.countDocuments(filter)
     ])
 
-    const totalPages = Math.max(1, Math.ceil(total/limitNum))
+    const totalPages = Math.max(1, Math.ceil(total / limitNum))
     const hasNext = pageNum < totalPages
     const hasPrev = pageNum > 1
 

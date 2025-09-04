@@ -35,12 +35,12 @@ const productSchema = new Schema({
         default: 4.5,
         min: [1, "Rating must be above 1.0"],
         max: [5, "Rating must be less 5.0"],
-        set: val => Math.round(val*10) / 10
+        set: val => Math.round(val * 10) / 10
     },
     product_categories: [
         {
             type: Schema.Types.ObjectId,
-            ref: 'Category',   
+            ref: 'Category',
         }
     ],
     product_brand: {
@@ -66,8 +66,10 @@ const productSchema = new Schema({
 })
 
 
-productSchema.index({product_type: 1})
-productSchema.index({product_brand: 1})
+productSchema.index({ product_type: 1 })
+productSchema.index({ product_brand: 1 })
+productSchema.index({ product_name: 'text', product_description: 'text' },
+{ default_language: 'none', weights: { product_name: 10, product_description: 2 } })
 
 const perfumeSchema = new Schema({
     fragrance_family: {
