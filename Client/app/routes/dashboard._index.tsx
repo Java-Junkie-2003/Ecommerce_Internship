@@ -285,7 +285,7 @@ export default function DashboardIndex() {
           </CardHeader>
           <CardContent className="relative z-10">
             <div className="text-2xl font-bold text-purple-900">
-              200000
+              20000
             </div>
             <p className="text-xs text-muted-foreground">Giá trị đơn hàng</p>
           </CardContent>
