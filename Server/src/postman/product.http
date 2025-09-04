@@ -51,7 +51,7 @@ Content-Type: application/json
 
 
 ### filter product
-GET {{url_dev}}/product/filter?categoryId=689ac94eac93b575fd97819b
+GET {{url_dev}}/product/filter?k=orchid&page=1
 Content-Type: application/json
 
 ### get all products ( published: true )

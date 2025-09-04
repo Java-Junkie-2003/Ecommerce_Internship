@@ -67,16 +67,17 @@ class ProductFactory {
         })
     }
 
-    static async filterProduct({categoryId, brandName, maxPrice, minPrice, limit = 20, sort = 'ctime', page = 1}){
+    static async filterProduct({k,categoryId, brandName, maxPrice, minPrice, limit = 20, sort = 'ctime', page = 1}){
         return await filterProduct({
+            key_search: k,
             brand_name: brandName, 
-            categoryIds: [categoryId],
+            categoryIds: categoryId ? [categoryId] : undefined,
             minPrice, 
             maxPrice, 
             page, 
             limit, 
             sort, 
-            select: ['product_name', 'product_thumb', 'product_price'] 
+            select: ['_id','product_name', 'product_thumb', 'product_price'] 
         })
     }
 
