@@ -14,21 +14,27 @@ import { Cart } from "@/types/model/cart"
 import { useAppDispatch, useAppSelector } from "@/redux/hook"
 import { deleteFromCart, updateCart } from "@/redux/thunks/cart.thunk"
 import { toast } from "sonner"
+import { Address, AddressType } from "@/types/model/address"
+import { ApiService } from "@/lib/api"
+import { AddressCreateDTO, AddressDTO } from "@/types/dto/address.dto"
+import { ENDPOINTS } from "@/utils/api.endpoints"
+import { setSelectedCartItems } from "@/redux/slices/cart"
+import { Link } from "react-router"
 
 
 export default function Component() {
 
     const dispatch = useAppDispatch()
 
-    const cart = useAppSelector((state) => state.cart)
-    const [cartItems, setCartItems] = useState<Cart[]>([])
-    useEffect(() => {
-        setCartItems(cart.cartItems)
-    }, [cart.status])
+    const addressTypes = Object.values(AddressType)
 
-    const [selectedItems, setSelectedItems] = useState<Cart[]>([])
-    const [address, setAddress] = useState("")
-    const [paymentMethod, setPaymentMethod] = useState("cod")
+    const cart = useAppSelector((state) => state.cart)
+    const cartItems = cart.cartItems
+
+    const selectedItems = useAppSelector((state) => state.cart.selectedCartItem)
+    const setSelectedItems = (items: Cart[]) => {
+        dispatch(setSelectedCartItems(items))
+    }
 
     const updateQuantity = (id: string, newQuantity: number) => {
         if (newQuantity < 1) return
@@ -39,7 +45,15 @@ export default function Component() {
         try {
             // Call API to update quantity
             dispatch(updateCart({ productId: id, quantity: newQuantity, old_quantity: currentItem.quantity }))
-            setCartItems((items) => items.map((item) => (item.productId === id ? { ...item, quantity: newQuantity } : item)))
+            // setCartItems((items) => items.map((item) => (item.productId === id ? { ...item, quantity: newQuantity } : item)))
+
+            // If selected item
+            if (selectedItems.some(item => item.productId === id)) {
+                const updatedItem = { ...currentItem, quantity: newQuantity }
+                const updatedSelectedItems = selectedItems.map((item) => (item.productId === id ? updatedItem : item))
+                setSelectedItems(updatedSelectedItems)
+            }
+
         } catch (err) {
             console.error(err)
         }
@@ -54,11 +68,9 @@ export default function Component() {
         try {
             // Call API to remove item
             dispatch(deleteFromCart({ productId: id }))
-            setCartItems((items) => items.filter((item) => item.productId !== id))
-            setSelectedItems((selected) => {
-                const newSelected = selected.filter(item => item.productId !== id)
-                return newSelected
-            })
+            // setCartItems((items) => items.filter((item) => item.productId !== id))
+            const newSelected = selectedItems.filter(item => item.productId !== id)
+            setSelectedItems(newSelected)
         } catch (err) {
             console.error(err)
             toast.error("Failed to remove item from cart")
@@ -70,11 +82,16 @@ export default function Component() {
     }
 
     const toggleSelectItem = (id: string) => {
-        setSelectedItems((selected) =>
-            selected.some(item => item.productId === id)
-                ? selected.filter(item => item.productId !== id)
-                : [...selected, ...(cartItems.filter(item => item.productId === id))]
-        )
+        const isItemSelected = selectedItems.some(item => item.productId === id)
+        if (isItemSelected) {
+            const newSelected = selectedItems.filter(item => item.productId !== id)
+            setSelectedItems(newSelected)
+        } else {
+            const itemToAdd = cartItems.find(item => item.productId === id)
+            if (itemToAdd) {
+                setSelectedItems([...selectedItems, itemToAdd])
+            }
+        }
     }
 
 
@@ -86,13 +103,13 @@ export default function Component() {
         }
     }
 
-    const selectedCartItems = cartItems.filter(item => selectedItems.includes(item))
-    const subtotal = selectedCartItems.reduce((sum, item) => sum + item.product_price * item.quantity, 0)
-    const shipping = 0 // Free shipping
+    const subtotal = selectedItems.reduce((sum, item) => sum + item.product_price * item.quantity, 0)
+    const shipping = 30000
     const total = subtotal + shipping
 
     const isAllSelected = cartItems.length > 0 && selectedItems.length === cartItems.length
     const isIndeterminate = selectedItems.length > 0 && selectedItems.length < cartItems.length
+
 
     return (
         <div className="min-h-screen">
@@ -100,6 +117,33 @@ export default function Component() {
             <SiteHeader />
 
             <div className="container mx-auto px-4 py-8 max-w-7xl">
+
+
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-foreground mb-2">Giỏ hàng</h1>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-medium">
+                                1
+                            </div>
+                            <span className="text-foreground font-medium">Giỏ hàng</span>
+                        </div>
+                        <div className="w-8 h-px bg-border"></div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-medium">
+                                2
+                            </div>
+                            <span>Thanh toán</span>
+                        </div>
+                        <div className="w-8 h-px bg-border"></div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-medium">
+                                3
+                            </div>
+                            <span>Hoàn thành</span>
+                        </div>
+                    </div>
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Shopping Cart */}
                     <div className="lg:col-span-2">
@@ -148,11 +192,13 @@ export default function Component() {
                                         <Button className="mt-4">Tiếp tục mua sắm</Button>
                                     </div>
                                 ) : (
-                                    cartItems.map((item, index) => (
+                                    cartItems.map((item, index) => {
+                                        // console.log("Selected cart items:", selectedItems.includes(item), selectedItems, item);
+                                        return (
                                         <div key={item.productId}>
                                             <div className="flex items-center gap-4 py-4">
                                                 <Checkbox
-                                                    checked={selectedItems.includes(item)}
+                                                    checked={selectedItems.find(sItem => sItem.productId === item.productId) !== undefined}
                                                     onCheckedChange={() => toggleSelectItem(item.productId)}
                                                 />
 
@@ -205,127 +251,73 @@ export default function Component() {
                                             </div>
                                             {index < cartItems.length - 1 && <Separator />}
                                         </div>
-                                    ))
+                                    )})
                                 )}
                             </CardContent>
                         </Card>
                     </div>
 
                     {/* Order Summary */}
-                    <div className="space-y-6">
-                        <Card>
+                    <div className="lg:col-span-1">
+                        <Card className="sticky top-8">
                             <CardHeader>
-                                <CardTitle>ĐƠN HÀNG</CardTitle>
-                                {selectedItems.length > 0 && (
-                                    <p className="text-sm text-gray-600">
-                                        {selectedItems.length} sản phẩm được chọn
-                                    </p>
-                                )}
+                                <CardTitle>Tóm tắt đơn hàng</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                {selectedItems.length === 0 ? (
-                                    <div className="text-center py-4">
-                                        <p className="text-gray-500">Chưa có sản phẩm nào được chọn</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Tạm tính:</span>
-                                            <span>VND {subtotal.toLocaleString("vi-VN")} đ</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Phí vận chuyển:</span>
-                                            <span className="text-green-600">Miễn phí</span>
-                                        </div>
-                                        <Separator />
-                                        <div className="flex justify-between text-lg font-semibold">
-                                            <span>Tổng:</span>
-                                            <span>VND {total.toLocaleString("vi-VN")} đ</span>
-                                        </div>
-                                        <p className="text-sm text-gray-500">* Đơn hàng đã bao gồm thuế VAT</p>
-                                    </div>
-                                )}
+                                <div className="flex justify-between text-sm">
+                                    <span>Số lượng sản phẩm:</span>
+                                    <span>{selectedItems.length} sản phẩm</span>
+                                </div>
+
+                                <div className="flex justify-between text-sm">
+                                    <span>Giá tạm tính:</span>
+                                    <span>{subtotal.toLocaleString("vi-VN")} đ</span>
+                                </div>
+
+                                <div className="flex justify-between text-sm">
+                                    <span>Phí vận chuyển:</span>
+                                    <span>{shipping.toLocaleString("vi-VN")} đ</span>
+                                </div>
+
+                                <Separator />
+
+                                <div className="flex justify-between font-semibold text-lg">
+                                    <span>Tổng cộng:</span>
+                                    <span className="text-red-600">{total.toLocaleString("vi-VN")} đ</span>
+                                </div>
+
+                                <Link to="/checkout">
+                                    <Button
+                                        className="w-full"
+                                        size="lg"
+                                        disabled={selectedItems.length === 0}
+                                        onClick={() => {
+                                            // Proceed to checkout with selectedItems
+
+                                        }}
+                                    >
+                                        <CreditCard className="h-4 w-4 mr-2" />
+                                        Thanh toán ({selectedItems.length})
+                                    </Button>
+                                </Link>
+
+                                {/* <div className="text-xs text-gray-500 text-center">
+                                    <Truck className="h-3 w-3 inline mr-1" />
+                                    Miễn phí vận chuyển cho đơn hàng từ 500.000đ
+                                </div> */}
                             </CardContent>
                         </Card>
-
-                        {/* Shipping Address */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Home className="h-5 w-5" />
-                                    Địa chỉ giao hàng
-                                    <span className="text-sm text-gray-500">(bắt buộc)</span>
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Textarea
-                                    placeholder="Vui lòng nhập địa chỉ giao hàng"
-                                    value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
-                                    className="min-h-[80px]"
-                                />
-                            </CardContent>
-                        </Card>
-
-                        {/* Payment Method */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <CreditCard className="h-5 w-5" />
-                                    Phương thức thanh toán
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
-                                        <RadioGroupItem value="cod" id="cod" />
-                                        <Label htmlFor="cod" className="flex-1 cursor-pointer">
-                                            <div className="flex items-center gap-2">
-                                                <Truck className="h-4 w-4" />
-                                                <span>Thanh toán khi nhận hàng (COD)</span>
-                                            </div>
-                                        </Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
-                                        <RadioGroupItem value="vnpay" id="vnpay" />
-                                        <Label htmlFor="vnpay" className="flex-1 cursor-pointer">
-                                            <div className="flex items-center gap-2">
-                                                <CreditCard className="h-4 w-4" />
-                                                <span>Thanh toán online VNPAY</span>
-                                            </div>
-                                        </Label>
-                                    </div>
-                                </RadioGroup>
-                            </CardContent>
-                        </Card>
-
-                        {/* Checkout Button */}
-                        <Button
-                            className="w-full h-12 text-lg font-semibold"
-                            disabled={selectedItems.length === 0 || !address.trim()}
-                        >
-                            {selectedItems.length === 0
-                                ? "Chọn sản phẩm để đặt hàng"
-                                : `Đặt hàng (${selectedItems.length} sản phẩm)`
-                            }
-                        </Button>
-
-                        {/* Security Badge */}
-                        <div className="text-center">
-                            <div className="inline-flex items-center gap-2 text-sm text-gray-500 bg-gray-100 px-3 py-2 rounded-full">
-                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                Thanh toán an toàn & bảo mật
-                            </div>
-                        </div>
                     </div>
                 </div>
 
                 {/* Continue Shopping */}
-                <div className="mt-8 text-center">
-                    <Button variant="outline" size="lg">
-                        ← Tiếp tục mua sắm
-                    </Button>
-                </div>
+                {/* <div className="mt-8 text-center">
+                    <Link to="/checkout">
+                        <Button variant="outline" size="lg">
+                            Tiếp tục thanh toán
+                        </Button>
+                    </Link>
+                </div> */}
             </div>
 
             {/* Footer */}

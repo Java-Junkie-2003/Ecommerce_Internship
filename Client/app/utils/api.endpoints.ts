@@ -22,7 +22,12 @@ export const ENDPOINTS = {
             UNPUBLISH: (id: string) => `${BASE_ENDPOINT}/product/unpublish/${id}`,
             UPDATE: (id: string) => `${BASE_ENDPOINT}/product/update/${id}`,
             CREATE: `${BASE_ENDPOINT}/product/create-product`,
-        }
+        },
+        ORDER: {
+            FETCH_ALL: (page: number) => `${BASE_ENDPOINT}/order/all-order?page=${page}`,
+            UPDATE_STATUS: (orderId: string) => `${BASE_ENDPOINT}/order/update-status/${orderId}`,
+            FETCH_ONE: (orderId: string) => `${BASE_ENDPOINT}/order/${orderId}`,
+        },
     },
     PRODUCT: {
         FETCH_ONE: (id: string) => `${BASE_ENDPOINT}/product/${id}`,
@@ -32,5 +37,19 @@ export const ENDPOINTS = {
         ADD: `${BASE_ENDPOINT}/cart/add-to-cart`,
         UPDATE: `${BASE_ENDPOINT}/cart/update-cart`,
         DELETE: (id: string) => `${BASE_ENDPOINT}/cart/delete/${id}`,
-    }
+    },
+    ADDRESS: {
+        FETCH_ALL: `${BASE_ENDPOINT}/address`,
+        CREATE: `${BASE_ENDPOINT}/address/add`,
+        UPDATE: (id: string) => `${BASE_ENDPOINT}/address/update/${id}`,
+        DELETE: (id: string) => `${BASE_ENDPOINT}/address/rm/${id}`,
+    },
+    CHECKOUT: `${BASE_ENDPOINT}/checkout`,
+    ORDER: {
+        CREATE: `${BASE_ENDPOINT}/order/create`,
+        FETCH_ALL: (page: number) => 
+            `${BASE_ENDPOINT}/order/self?page=${page}`
+    },
+    PAYMENT: (totalPrice: number) => `${BASE_ENDPOINT}/payment?totalPrice=${totalPrice}`,
+    PAYMENT_VERIFY: `${BASE_ENDPOINT}/payment/verify`,
 }
