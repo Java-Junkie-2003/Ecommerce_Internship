@@ -31,14 +31,14 @@ export default function SiteHeader() {
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && query.trim()) {
-            navigate(`/filter?q=${encodeURIComponent(query.trim())}`)
+            navigate(`/products?q=${encodeURIComponent(query.trim())}`)
             setIsSearchOpen(false)
         }
     }
 
     const handleSearch = () => {
         if (query.trim()) {
-            navigate(`/filter?q=${encodeURIComponent(query.trim())}`)
+            navigate(`/products?q=${encodeURIComponent(query.trim())}`)
             setIsSearchOpen(false)
         }
     }

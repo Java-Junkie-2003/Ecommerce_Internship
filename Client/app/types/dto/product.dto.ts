@@ -1,5 +1,5 @@
 import { DefaultDTO } from ".";
-import { Product } from "../model/product";
+import { FilteredProduct, Product } from "../model/product";
 
 export interface ProductDTO extends DefaultDTO {
     metadata: Product;
@@ -18,6 +18,20 @@ export interface GetAllProductAdminDTO extends DefaultDTO {
             hasPrev: boolean;
             nextPage: number | null;
             prevPage: number | null;
+        }
+    }
+}
+
+export interface FilteredProductDTO extends DefaultDTO {
+    metadata: {
+        products: FilteredProduct[];
+        pagination: {
+            totalResult: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+            hasNext: boolean;
+            hasPrev: boolean;
         }
     }
 }

@@ -31,6 +31,19 @@ export const ENDPOINTS = {
     },
     PRODUCT: {
         FETCH_ONE: (id: string) => `${BASE_ENDPOINT}/product/${id}`,
+        FILTER: (k?: string, categoryId?: string, brandName?: string, maxPrice?: number, minPrice?: number, limit?: number, sort?: string, page?: number) => {
+            // Construct query parameters
+            const params = new URLSearchParams();
+            if (k) params.append('k', k);
+            if (categoryId) params.append('categoryId', categoryId);
+            if (brandName) params.append('brandName', brandName);
+            if (maxPrice !== undefined) params.append('maxPrice', maxPrice.toString());
+            if (minPrice !== undefined) params.append('minPrice', minPrice.toString());
+            if (limit !== undefined) params.append('limit', limit.toString());
+            if (sort) params.append('sort', sort);
+            if (page !== undefined) params.append('page', page.toString());
+            return `${BASE_ENDPOINT}/product/filter?${params.toString()}`;
+        },
     },
     CART: {
         INIT: `${BASE_ENDPOINT}/cart`,

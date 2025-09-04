@@ -30,3 +30,18 @@ export interface Product {
     updatedAt: string;
     __v: number;
 }
+
+export interface FilteredProduct {
+    _id: string;
+    product_name: string;
+    product_thumb: string;
+    product_price: number;
+    product_categories: {
+        category_name: string;
+    }[];
+    product_brand: {
+        brand_name: string;
+        brand_icon: string;
+    };
+    score?: number;
+}
