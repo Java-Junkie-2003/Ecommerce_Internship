@@ -8,11 +8,13 @@ import { stat } from "fs";
 
 interface CartState extends RootState {
   cartItems: Cart[];
+  selectedCartItem: Cart[];
   count: number;
 }
 
 const initialState: CartState = {
     cartItems: [],
+    selectedCartItem: [],
     count: 0,
     status: "idle",
     error: null
@@ -25,6 +27,9 @@ const cartSlice = createSlice({
         resetStatus: (state) => {
             state.status = "idle";
             state.error = null;
+        },
+        setSelectedCartItems: (state, action: PayloadAction<Cart[]>) => {
+            state.selectedCartItem = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -79,5 +84,7 @@ const cartSlice = createSlice({
             });
     },
 });
+
+export const { resetStatus, setSelectedCartItems } = cartSlice.actions;
 
 export default cartSlice.reducer;

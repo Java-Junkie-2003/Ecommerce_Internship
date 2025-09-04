@@ -1,199 +1,229 @@
 
-import { useState } from "react"
-import { ChevronLeft, ChevronRight, MoreHorizontal, Eye, Truck, CheckCircle, XCircle, Clock, Package, DollarSign, Calendar, User, Mail, ShoppingCart, Hourglass } from 'lucide-react'
+import { useState, useEffect } from "react"
+import {
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  Eye,
+  Truck,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Package,
+  DollarSign,
+  Calendar,
+  User,
+  Mail,
+  ShoppingCart,
+  Hourglass,
+  RefreshCw,
+  CreditCard,
+  MapPin,
+  Edit
+} from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { ApiService } from "@/lib/api"
+import { OrderDTO } from "@/types/dto/order.dto"
+import { ProductDTO } from "@/types/dto/product.dto"
+import { ENDPOINTS } from "@/utils/api.endpoints"
+import { OrderStatus, PaymentStatus } from "@/types/model/order"
+import { Order } from "@/types/model/order"
+import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
-interface OrderItem {
-  productId: string
-  productName: string
-  quantity: number
-  price: number
-  image: string
-}
-
-type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled"
-
-interface Order {
-  id: string
-  customerName: string
-  customerEmail: string
-  orderDate: string
-  totalAmount: number
-  status: OrderStatus
-  items: OrderItem[]
-}
-
-const orders: Order[] = [
-  {
-    id: "ORD001",
-    customerName: "Nguyễn Văn An",
-    customerEmail: "nguyen.van.an@email.com",
-    orderDate: "2024-07-25",
-    totalAmount: 4000000,
-    status: "delivered",
-    items: [
-      {
-        productId: "P001",
-        productName: "A Luxury Perfume Era (Gold)",
-        quantity: 2,
-        price: 2000000,
-        image: "/placeholder.svg?height=60&width=60&text=Perfume",
-      },
-    ],
-  },
-  {
-    id: "ORD002",
-    customerName: "Trần Thị Bình",
-    customerEmail: "tran.thi.binh@email.com",
-    orderDate: "2024-07-24",
-    totalAmount: 2500000,
-    status: "shipped",
-    items: [
-      {
-        productId: "P002",
-        productName: "Elegant Floral Scent",
-        quantity: 1,
-        price: 2500000,
-        image: "/placeholder.svg?height=60&width=60&text=Perfume",
-      },
-    ],
-  },
-  {
-    id: "ORD003",
-    customerName: "Lê Văn Cường",
-    customerEmail: "le.van.cuong@email.com",
-    orderDate: "2024-07-23",
-    totalAmount: 6000000,
-    status: "processing",
-    items: [
-      {
-        productId: "P003",
-        productName: "Mystic Oud Perfume",
-        quantity: 3,
-        price: 2000000,
-        image: "/placeholder.svg?height=60&width=60&text=Perfume",
-      },
-    ],
-  },
-  {
-    id: "ORD004",
-    customerName: "Phạm Thị Dung",
-    customerEmail: "pham.thi.dung@email.com",
-    orderDate: "2024-07-22",
-    totalAmount: 1500000,
-    status: "pending",
-    items: [
-      {
-        productId: "P004",
-        productName: "Fresh Citrus Splash",
-        quantity: 1,
-        price: 1500000,
-        image: "/placeholder.svg?height=60&width=60&text=Perfume",
-      },
-    ],
-  },
-  {
-    id: "ORD005",
-    customerName: "Hoàng Văn Em",
-    customerEmail: "hoang.van.em@email.com",
-    orderDate: "2024-07-21",
-    totalAmount: 3000000,
-    status: "cancelled",
-    items: [
-      {
-        productId: "P005",
-        productName: "Ocean Breeze Fragrance",
-        quantity: 1,
-        price: 3000000,
-        image: "/placeholder.svg?height=60&width=60&text=Perfume",
-      },
-    ],
-  },
-  {
-    id: "ORD006",
-    customerName: "Vũ Thị Phương",
-    customerEmail: "vu.thi.phuong@email.com",
-    orderDate: "2024-07-20",
-    totalAmount: 8000000,
-    status: "delivered",
-    items: [
-      {
-        productId: "P001",
-        productName: "A Luxury Perfume Era (Gold)",
-        quantity: 4,
-        price: 2000000,
-        image: "/placeholder.svg?height=60&width=60&text=Perfume",
-      },
-    ],
-  },
-]
-
-export default function Component() {
-  const [currentPage, setCurrentPage] = useState(1)
+// Dashboard Index Component for Order Management
+export default function DashboardIndex() {
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
-  const [orderList, setOrderList] = useState<Order[]>(orders) // Use state for orders to allow status updates
-  const itemsPerPage = 8
+  const [selectedProducts, setSelectedProducts] = useState<ProductDTO[]>([])
+  const [productsLoading, setProductsLoading] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    delivering: 0,
+    delivered: 0,
+    cancelled: 0
+  })
 
-  const totalPages = Math.ceil(orderList.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedOrders = orderList.slice(startIndex, startIndex + itemsPerPage)
+  // Fetch orders data
+  const fetchOrders = async (page: number = 1, status: string = "all") => {
+    try {
+      setLoading(true)
+      const response = await ApiService.get<OrderDTO>(ENDPOINTS.ADMIN.ORDER.FETCH_ALL(page))
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN")
+      setOrders(response.metadata.orders)
+      setCurrentPage(response.metadata.pagination.page)
+      setTotalPages(response.metadata.pagination.totalPages)
+
+      // Calculate stats from orders
+      const allOrders = response.metadata.orders
+      setStats({
+        total: allOrders.length,
+        pending: allOrders.filter(order => order.order_status === OrderStatus.PENDING).length,
+        delivering: allOrders.filter(order => order.order_status === OrderStatus.DELIVERING).length,
+        delivered: allOrders.filter(order => order.order_status === OrderStatus.DELIVERIED).length,
+        cancelled: allOrders.filter(order => order.order_status === OrderStatus.CANCELED).length
+      })
+    } catch (error) {
+      console.error("Failed to fetch orders:", error)
+      toast.error("Không thể tải danh sách đơn hàng")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Fetch product details for order
+  const fetchProductDetails = async (order: Order) => {
+    if (!order.order_products?.length) return
+
+    try {
+      setProductsLoading(true)
+      const productPromises = order.order_products.map(item =>
+        ApiService.get<ProductDTO>(ENDPOINTS.PRODUCT.FETCH_ONE(item.productId))
+      )
+      const products = await Promise.all(productPromises)
+      setSelectedProducts(products)
+    } catch (error) {
+      console.error("Failed to fetch product details:", error)
+      toast.error("Không thể tải thông tin sản phẩm")
+      setSelectedProducts([])
+    } finally {
+      setProductsLoading(false)
+    }
+  }
+
+  // Update order status
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      await ApiService.put(ENDPOINTS.ADMIN.ORDER.UPDATE_STATUS(orderId), {
+        status: newStatus
+      })
+      toast.success("Cập nhật trạng thái đơn hàng thành công")
+      fetchOrders(currentPage, statusFilter)
+    } catch (error) {
+      console.error("Failed to update order status:", error)
+      toast.error("Không thể cập nhật trạng thái đơn hàng")
+    }
+  }
+
+  const handleViewDetails = async (order: Order) => {
+    setSelectedOrder(order)
+    setDialogOpen(true)
+    await fetchProductDetails(order)
+  }
+
+  const handleStatusChange = (orderId: string, newStatus: string) => {
+    updateOrderStatus(orderId, newStatus)
+  }
+
+  const handlePageChange = (page: number) => {
+    fetchOrders(page, statusFilter)
+  }
+
+  const handleStatusFilter = (status: string) => {
+    setStatusFilter(status)
+    setCurrentPage(1)
+    fetchOrders(1, status)
+  }
+
+  useEffect(() => {
+    fetchOrders()
+  }, [])
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case OrderStatus.PENDING:
+        return <Clock className="h-4 w-4" />
+      case OrderStatus.DELIVERING:
+        return <Truck className="h-4 w-4" />
+      case OrderStatus.DELIVERIED:
+        return <CheckCircle className="h-4 w-4" />
+      case OrderStatus.CANCELED:
+        return <XCircle className="h-4 w-4" />
+      default:
+        return <Package className="h-4 w-4" />
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case OrderStatus.PENDING:
+        return "bg-yellow-500"
+      case OrderStatus.DELIVERING:
+        return "bg-blue-500"
+      case OrderStatus.DELIVERIED:
+        return "bg-green-500"
+      case OrderStatus.CANCELED:
+        return "bg-red-500"
+      default:
+        return "bg-gray-500"
+    }
+  }
+
+  const getPaymentStatusColor = (status: string) => {
+    switch (status) {
+      case PaymentStatus.PENDING:
+        return "bg-yellow-500"
+      case PaymentStatus.PAID:
+        return "bg-green-500"
+      default:
+        return "bg-gray-500"
+    }
   }
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
     }).format(amount)
   }
 
-  const getStatusBadge = (status: OrderStatus) => {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  const getStatusBadge = (status: string) => {
     switch (status) {
-      case "pending":
+      case OrderStatus.PENDING:
         return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Chờ xử lý</Badge>
-      case "processing":
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Đang xử lý</Badge>
-      case "shipped":
-        return <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">Đang giao hàng</Badge>
-      case "delivered":
+      case OrderStatus.DELIVERING:
+        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Đang giao hàng</Badge>
+      case OrderStatus.DELIVERIED:
         return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Đã giao hàng</Badge>
-      case "cancelled":
+      case OrderStatus.CANCELED:
         return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Đã hủy</Badge>
       default:
         return <Badge variant="secondary">{status}</Badge>
     }
   }
 
-  const handleViewDetails = (order: Order) => {
-    setSelectedOrder(order)
-    setIsDetailModalOpen(true)
-  }
-
-  const handleUpdateOrderStatus = (orderId: string, newStatus: OrderStatus) => {
-    setOrderList((prevOrders) =>
-      prevOrders.map((order) => (order.id === orderId ? { ...order, status: newStatus } : order)),
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Đang tải...</span>
+      </div>
     )
-    if (selectedOrder && selectedOrder.id === orderId) {
-      setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null))
-    }
   }
-
-  // --- Stats Calculation ---
-  const totalOrders = orderList.length
-  const pendingOrders = orderList.filter(order => order.status === "pending").length
-  const deliveredOrders = orderList.filter(order => order.status === "delivered").length
-  const totalRevenue = orderList.reduce((sum, order) => sum + order.totalAmount, 0)
-  const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
 
 
   return (
@@ -201,7 +231,7 @@ export default function Component() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Quản lý đơn hàng</h1>
-        <p className="text-muted-foreground">Tổng cộng {orderList.length} đơn hàng</p>
+        <p className="text-muted-foreground">Tổng cộng {stats.total} đơn hàng</p>
       </div>
 
       {/* Stats Cards */}
@@ -215,7 +245,7 @@ export default function Component() {
             <CardTitle className="text-sm font-medium text-blue-800">Tổng đơn hàng</CardTitle>
           </CardHeader>
           <CardContent className="relative z-10">
-            <div className="text-2xl font-bold text-blue-900">{totalOrders}</div>
+            <div className="text-2xl font-bold text-blue-900">8</div>
             <p className="text-xs text-muted-foreground">Tổng số đơn hàng</p>
           </CardContent>
         </Card>
@@ -228,7 +258,7 @@ export default function Component() {
             <CardTitle className="text-sm font-medium text-yellow-800">Đơn hàng chờ xử lý</CardTitle>
           </CardHeader>
           <CardContent className="relative z-10">
-            <div className="text-2xl font-bold text-yellow-900">{pendingOrders}</div>
+            <div className="text-2xl font-bold text-yellow-900">10</div>
             <p className="text-xs text-muted-foreground">Đang chờ xác nhận</p>
           </CardContent>
         </Card>
@@ -241,7 +271,7 @@ export default function Component() {
             <CardTitle className="text-sm font-medium text-green-800">Đơn hàng đã giao</CardTitle>
           </CardHeader>
           <CardContent className="relative z-10">
-            <div className="text-2xl font-bold text-green-900">{deliveredOrders}</div>
+            <div className="text-2xl font-bold text-green-900">0</div>
             <p className="text-xs text-muted-foreground">Đã hoàn thành</p>
           </CardContent>
         </Card>
@@ -255,7 +285,7 @@ export default function Component() {
           </CardHeader>
           <CardContent className="relative z-10">
             <div className="text-2xl font-bold text-purple-900">
-              {formatCurrency(totalRevenue).replace("₫", "đ")}
+              20000
             </div>
             <p className="text-xs text-muted-foreground">Giá trị đơn hàng</p>
           </CardContent>
@@ -274,20 +304,27 @@ export default function Component() {
               <TableHead>Ngày đặt</TableHead>
               <TableHead>Tổng tiền</TableHead>
               <TableHead>Trạng thái</TableHead>
+              <TableHead>Thanh toán</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedOrders.map((order) => (
-              <TableRow key={order.id}>
-                <TableCell className="font-medium">{order.id}</TableCell>
+            {orders.map((order) => (
+              <TableRow key={order._id}>
+                <TableCell className="font-medium">{order._id}</TableCell>
                 <TableCell>
-                  <div className="font-medium">{order.customerName}</div>
-                  <div className="text-sm text-muted-foreground">{order.customerEmail}</div>
+                  <div className="font-medium">{order.order_userId || 'N/A'}</div>
+                  <div className="text-sm text-muted-foreground">{order.order_shipping?.address || 'N/A'}</div>
                 </TableCell>
-                <TableCell>{formatDate(order.orderDate)}</TableCell>
-                <TableCell className="font-medium"><span className="font-bold">VND</span> {formatCurrency(order.totalAmount).replace("₫", "đ")}</TableCell>
-                <TableCell>{getStatusBadge(order.status)}</TableCell>
+                <TableCell>{formatDate(order.createdAt)}</TableCell>
+                <TableCell className="font-medium">{formatCurrency(order.order_checkout.totalCheckout)}</TableCell>
+                <TableCell>{getStatusBadge(order.order_status)}</TableCell>
+                <TableCell>
+                  <Badge className={cn("text-white", getPaymentStatusColor(order.payment_status))}>
+                    {order.payment_status === PaymentStatus.PENDING && "Chờ thanh toán"}
+                    {order.payment_status === PaymentStatus.PAID && "Đã thanh toán"}
+                  </Badge>
+                </TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -297,44 +334,37 @@ export default function Component() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem className="ps-3" onClick={() => handleViewDetails(order)}>
-                        <Eye className="h-4 w-4 mr-" />
+                        <Eye className="h-4 w-4 mr-2" />
                         Xem chi tiết
                       </DropdownMenuItem>
                       <DropdownMenuItem className="p-0">
                         <Select
-                          value={order.status}
-                          onValueChange={(newStatus: OrderStatus) => handleUpdateOrderStatus(order.id, newStatus)}
+                          value={order.order_status}
+                          onValueChange={(newStatus: string) => handleStatusChange(order._id, newStatus)}
                         >
                           <SelectTrigger className="w-full text-sm border-none shadow-none focus:ring-0">
-                            {/* <Package className="h-4 w-4 mr-2" /> */}
                             <SelectValue placeholder="Cập nhật trạng thái" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="pending">
+                            <SelectItem value={OrderStatus.PENDING}>
                               <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4 text-yellow-600" />
                                 <span className="text-yellow-800">Chờ xử lý</span>
                               </div>
                             </SelectItem>
-                            <SelectItem value="processing">
+                            <SelectItem value={OrderStatus.DELIVERING}>
                               <div className="flex items-center gap-2">
-                                <Package className="h-4 w-4 text-blue-600" />
-                                <span className="text-blue-800">Đang xử lý</span>
+                                <Truck className="h-4 w-4 text-blue-600" />
+                                <span className="text-blue-800">Đang giao hàng</span>
                               </div>
                             </SelectItem>
-                            <SelectItem value="shipped">
-                              <div className="flex items-center gap-2">
-                                <Truck className="h-4 w-4 text-purple-600" />
-                                <span className="text-purple-800">Đang giao hàng</span>
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="delivered">
+                            <SelectItem value={OrderStatus.DELIVERIED}>
                               <div className="flex items-center gap-2">
                                 <CheckCircle className="h-4 w-4 text-green-600" />
                                 <span className="text-green-800">Đã giao hàng</span>
                               </div>
                             </SelectItem>
-                            <SelectItem value="cancelled">
+                            <SelectItem value={OrderStatus.CANCELED}>
                               <div className="flex items-center gap-2">
                                 <XCircle className="h-4 w-4 text-red-600" />
                                 <span className="text-red-800">Đã hủy</span>
@@ -355,14 +385,14 @@ export default function Component() {
       {/* Navigation */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          Trang {currentPage} / {totalPages} - Hiển thị {paginatedOrders.length} đơn hàng
+          Trang {currentPage} / {totalPages} - Hiển thị {orders.length} đơn hàng
         </div>
 
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
@@ -387,7 +417,7 @@ export default function Component() {
                   key={pageNumber}
                   variant={currentPage === pageNumber ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setCurrentPage(pageNumber)}
+                  onClick={() => handlePageChange(pageNumber)}
                   className="w-8 h-8 p-0"
                 >
                   {pageNumber}
@@ -399,7 +429,7 @@ export default function Component() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
           >
             Sau
@@ -410,11 +440,10 @@ export default function Component() {
 
       {/* Order Detail Modal */}
       {selectedOrder && (
-        <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>Chi tiết đơn hàng #{selectedOrder.id}</DialogTitle>
-              <DialogDescription>Thông tin chi tiết về đơn hàng này.</DialogDescription>
+              <DialogTitle>Chi tiết đơn hàng #{selectedOrder._id}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
@@ -423,28 +452,37 @@ export default function Component() {
                   <div className="space-y-1 text-sm">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>Ngày đặt: {formatDate(selectedOrder.orderDate)}</span>
+                      <span>Ngày đặt: {formatDate(selectedOrder.createdAt)}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
-                      <span>Tổng tiền: {formatCurrency(selectedOrder.totalAmount).replace("₫", "đ")}</span>
+                      <span>Tổng tiền: {formatCurrency(selectedOrder.order_checkout.totalCheckout)}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Package className="h-4 w-4 text-muted-foreground" />
-                      <span>Trạng thái: {getStatusBadge(selectedOrder.status)}</span>
+                      <span>Trạng thái: {getStatusBadge(selectedOrder.order_status)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="h-4 w-4 text-muted-foreground" />
+                      <span>Thanh toán:
+                        <Badge className={cn("ml-2 text-white", getPaymentStatusColor(selectedOrder.payment_status))}>
+                          {selectedOrder.payment_status === PaymentStatus.PENDING && "Chờ thanh toán"}
+                          {selectedOrder.payment_status === PaymentStatus.PAID && "Đã thanh toán"}
+                        </Badge>
+                      </span>
                     </div>
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Thông tin khách hàng</h4>
+                  <h4 className="font-semibold mb-2">Thông tin giao hàng</h4>
                   <div className="space-y-1 text-sm">
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <span>Tên: {selectedOrder.customerName}</span>
+                      <span>Mã khách hàng: {selectedOrder.order_userId}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span>Email: {selectedOrder.customerEmail}</span>
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span>Địa chỉ: {selectedOrder.order_shipping?.address || 'N/A'}</span>
                     </div>
                   </div>
                 </div>
@@ -454,22 +492,42 @@ export default function Component() {
 
               <div>
                 <h4 className="font-semibold mb-2">Sản phẩm trong đơn hàng</h4>
-                <div className="space-y-3">
-                  {selectedOrder.items.map((item) => (
-                    <div key={item.productId} className="flex items-center gap-4">
-                      <img src={item.image || "/placeholder.svg"} alt={item.productName} className="w-16 h-16 object-cover rounded-md" />
-                      <div className="flex-1">
-                        <p className="font-medium">{item.productName}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {item.quantity} x {formatCurrency(item.price).replace("₫", "đ")}
-                        </p>
-                      </div>
-                      <span className="font-semibold">
-                        {formatCurrency(item.quantity * item.price).replace("₫", "đ")}
-                      </span>
+                {productsLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                    <span>Đang tải thông tin sản phẩm...</span>
+                  </div>
+                ) : (
+                  <ScrollArea className="h-48">
+                    <div className="space-y-3">
+                      {selectedOrder.order_products.map((item, index) => {
+                        const productData = selectedProducts[index]
+                        const product = productData?.metadata
+                        return (
+                          <div key={item.productId} className="flex items-center gap-4 p-2 border rounded">
+                            <img
+                              src={product?.product_thumb || "/placeholder.svg"}
+                              alt={product?.product_name || "Product"}
+                              className="w-16 h-16 object-cover rounded-md"
+                              onError={(e) => {
+                                e.currentTarget.src = "/placeholder.svg"
+                              }}
+                            />
+                            <div className="flex-1">
+                              <p className="font-medium">{product?.product_name || `Product ${item.productId}`}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {item.quantity} x {formatCurrency(item.price)}
+                              </p>
+                            </div>
+                            <span className="font-semibold">
+                              {formatCurrency(item.quantity * item.price)}
+                            </span>
+                          </div>
+                        )
+                      })}
                     </div>
-                  ))}
-                </div>
+                  </ScrollArea>
+                )}
               </div>
 
               <Separator className="my-4" />
@@ -477,34 +535,29 @@ export default function Component() {
               <div>
                 <h4 className="font-semibold mb-2">Cập nhật trạng thái đơn hàng</h4>
                 <Select
-                  value={selectedOrder.status}
-                  onValueChange={(newStatus: OrderStatus) => handleUpdateOrderStatus(selectedOrder.id, newStatus)}
+                  value={selectedOrder.order_status}
+                  onValueChange={(newStatus: string) => updateOrderStatus(selectedOrder._id, newStatus)}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Chọn trạng thái mới" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pending">
+                    <SelectItem value={OrderStatus.PENDING}>
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-yellow-600" /> Chờ xử lý
                       </div>
                     </SelectItem>
-                    <SelectItem value="processing">
+                    <SelectItem value={OrderStatus.DELIVERING}>
                       <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4 text-blue-600" /> Đang xử lý
+                        <Truck className="h-4 w-4 text-blue-600" /> Đang giao hàng
                       </div>
                     </SelectItem>
-                    <SelectItem value="shipped">
-                      <div className="flex items-center gap-2">
-                        <Truck className="h-4 w-4 text-purple-600" /> Đang giao hàng
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="delivered">
+                    <SelectItem value={OrderStatus.DELIVERIED}>
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-600" /> Đã giao hàng
                       </div>
                     </SelectItem>
-                    <SelectItem value="cancelled">
+                    <SelectItem value={OrderStatus.CANCELED}>
                       <div className="flex items-center gap-2">
                         <XCircle className="h-4 w-4 text-red-600" /> Đã hủy
                       </div>
