@@ -71,8 +71,15 @@ Content-Type: application/json
 GET {{url_dev}}/product/ls-by-range?minPrice=2500000&maxPrice=3500000&page=1
 Content-Type: application/json
 
-### get all products ( role admin )
+### find related products by brand id
+GET {{url_dev}}/product/related?brandId=689ae40a2fd6d6f7c96bfbeb
+Content-Type: application/json
 
+### search products by text
+GET {{url_dev}}/product/search?key_search=Ocean
+Content-Type: application/json
+
+### get all products ( role admin )
 GET {{url_dev}}/product/admin/all-products?page=1&limit=10
 Content-Type: application/json
 x-client-id: 689471fc659ad34ec9a2cc6b

@@ -6,8 +6,8 @@ const { findAllProducts, findProduct, findAllDraftsForShop,
     findAllProductByCategory, findAllProductByBrand,
     publishProductByAdmin, findAllProductsForAdmin,
     unPublishProductByAdmin, findProductsByPriceRange,
-    updateProductById, 
-    filterProduct} = require('../models/repositories/product.repo');
+    updateProductById,
+    filterProduct, findProductsByBrandId, textSearch } = require('../models/repositories/product.repo');
 const { updateNestedObjectParser, removeUndefinedObject } = require('../utils');
 const { insertInventory } = require('../models/repositories/inventory.repo');
 class ProductFactory {
@@ -67,17 +67,17 @@ class ProductFactory {
         })
     }
 
-    static async filterProduct({k,categoryId, brandName, maxPrice, minPrice, limit = 20, sort = 'ctime', page = 1}){
+    static async filterProduct({ k, categoryId, brandName, maxPrice, minPrice, limit = 20, sort = 'ctime', page = 1 }) {
         return await filterProduct({
             key_search: k,
-            brand_name: brandName, 
+            brand_name: brandName,
             categoryIds: categoryId ? [categoryId] : undefined,
-            minPrice, 
-            maxPrice, 
-            page, 
-            limit, 
-            sort, 
-            select: ['_id','product_name', 'product_thumb', 'product_price'] 
+            minPrice,
+            maxPrice,
+            page,
+            limit,
+            sort,
+            select: ['_id', 'product_name', 'product_thumb', 'product_price']
         })
     }
 
@@ -90,6 +90,12 @@ class ProductFactory {
     }
     static async findProductsByPriceRange({ maxPrice, minPrice, limit = 50, sort = 'ctime', page = 1 }) {
         return await findProductsByPriceRange({ minPrice, maxPrice, limit, page, sort, select: ['product_name', 'product_thumb', 'product_price'] })
+    }
+    static async findProductsByBrandId({brandId, limit = 4, sort = 'ctime'}){
+        return await findProductsByBrandId({brandId, limit, sort})
+    }
+    static async searchByText({key_search}){
+        return await textSearch({key_search})
     }
 }
 

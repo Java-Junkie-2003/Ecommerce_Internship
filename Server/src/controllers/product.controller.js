@@ -102,8 +102,20 @@ class ProductController {
             metadata: await ProductSevice.filterProduct(req.query)
         }).send(res)
     }
+    
+    findProductsByBrandId = async (req, res, next) => {
+        new SuccessResponse({
+            message: "Find products by brand",
+            metadata: await ProductSevice.findProductsByBrandId(req.query)
+        }).send(res)
+    }
 
-
+    searchByText = async (req, res, next) => {
+        new SuccessResponse({
+            message: "Search by text",
+            metadata: await ProductSevice.searchByText(req.query)
+        }).send(res)
+    }
 
 }
 
