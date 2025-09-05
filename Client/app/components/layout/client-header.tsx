@@ -7,22 +7,132 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
-import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Menu, Search, ShoppingBag, User, X, Loader2 } from "lucide-react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { logout } from "@/lib/api/api.login";
 import { toast } from "sonner";
 import { removeUserInfo } from "@/redux/slices/user";
 import { initCart } from "@/redux/thunks/cart.thunk";
+import { ApiService } from "@/lib/api";
+import { ENDPOINTS } from "@/utils/api.endpoints";
+import { SearchProductDTO } from "@/types/dto/product.dto";
+
+// Custom debounce hook
+const useDebounce = (value: string, delay: number) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+
+    return debouncedValue;
+};
 
 export default function SiteHeader() {
     const [query, setQuery] = useState("")
     const [isSearchOpen, setIsSearchOpen] = useState(false)
+    const [searchResults, setSearchResults] = useState<SearchProductDTO['metadata']>([])
+    const [isSearching, setIsSearching] = useState(false)
+    const [showResults, setShowResults] = useState(false)
+    const searchRef = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
 
+    // Debounce search query
+    const debouncedQuery = useDebounce(query, 300)
+
+    // Search function
+    const performSearch = useCallback(async (searchQuery: string) => {
+        if (!searchQuery.trim()) {
+            setSearchResults([])
+            setShowResults(false)
+            return
+        }
+
+        setIsSearching(true)
+        try {
+            const response = await ApiService.get<SearchProductDTO>(
+                ENDPOINTS.PRODUCT.SEARCH(searchQuery.trim())
+            )
+            setSearchResults(response.metadata || [])
+            setShowResults(true)
+        } catch (error) {
+            console.error('Search error:', error)
+            setSearchResults([])
+            setShowResults(false)
+        } finally {
+            setIsSearching(false)
+        }
+    }, [])
+
+    // Effect for debounced search
+    useEffect(() => {
+        if (debouncedQuery) {
+            performSearch(debouncedQuery)
+        } else {
+            setSearchResults([])
+            setShowResults(false)
+        }
+    }, [debouncedQuery, performSearch])
+
+    // Close search results when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+                setShowResults(false)
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [])
+
     const dispatch = useAppDispatch()
+
+    const brands = useAppSelector((state) => state.brand.brands)
+    const categories = useAppSelector((state) => state.category.categories)
+
+    // nav link list is use random brand and category, 8 item (brands/categories) in total
+    const [navLinks, setNavLinks] = useState<{ name: string; href: string }[]>([])
+
+    useEffect(() => {
+        const links: { name: string; href: string }[] = [];
+        if (categories.length > 0) {
+            // get random 4 categories
+            const shuffledCategories = [...categories].sort(() => 0.5 - Math.random());
+            const selectedCategories = shuffledCategories.slice(0, 4);
+            selectedCategories.forEach((cat: any) => {
+                if (cat && cat.category_name) {
+                    links.push({ name: cat.category_name.toUpperCase(), href: `/products?category=${encodeURIComponent(cat._id)}` });
+                }
+            });
+        }
+        if (brands.length > 0) {
+            // get random 4 brands
+            const shuffledBrands = [...brands].sort(() => 0.5 - Math.random());
+            const selectedBrands = shuffledBrands.slice(0, 4);
+            selectedBrands.forEach((brand: any) => {
+                if (brand && brand.brand_name) {
+                    links.push({ name: brand.brand_name.toUpperCase(), href: `/products?brandName=${encodeURIComponent(brand.brand_name.toLowerCase())}` });
+                }
+            });
+        }
+        // push Thương hiệu link at last
+        // links.push({ name: "THƯƠNG HIỆU", href: `/products` });
+        setNavLinks(links);
+    }, [brands, categories]);
+
 
     // Get user authentication state from Redux
     const { userInfo, isLoggedIn } = useAppSelector((state) => state.user);
@@ -33,6 +143,10 @@ export default function SiteHeader() {
         if (e.key === "Enter" && query.trim()) {
             navigate(`/products?q=${encodeURIComponent(query.trim())}`)
             setIsSearchOpen(false)
+            setShowResults(false)
+        }
+        if (e.key === "Escape") {
+            setShowResults(false)
         }
     }
 
@@ -40,7 +154,21 @@ export default function SiteHeader() {
         if (query.trim()) {
             navigate(`/products?q=${encodeURIComponent(query.trim())}`)
             setIsSearchOpen(false)
+            setShowResults(false)
         }
+    }
+
+    const handleResultClick = (productId: string) => {
+        navigate(`/product/${productId}`)
+        setShowResults(false)
+        setQuery("")
+    }
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(amount)
     }
 
     const handleLogout = async () => {
@@ -54,9 +182,9 @@ export default function SiteHeader() {
             console.error("Logout error:", error);
             // Don't clear local state if logout failed - keep user logged in
             toast.error("Đăng xuất thất bại. Vui lòng thử lại.");
-            
+
             // Check if it's a server error that we should handle gracefully
-            if (error?.message?.includes('24 character hex string') || 
+            if (error?.message?.includes('24 character hex string') ||
                 error?.message?.includes('ObjectId') ||
                 error?.status === 500) {
                 toast.error("Có lỗi từ máy chủ. Vui lòng thử lại sau hoặc liên hệ admin.");
@@ -65,7 +193,7 @@ export default function SiteHeader() {
     }
 
     useEffect(() => {
-        if(isLoggedIn) {
+        if (isLoggedIn) {
             dispatch(initCart())
         }
     }, [isLoggedIn]);
@@ -80,15 +208,93 @@ export default function SiteHeader() {
                     <span className="text-gray-900 font-semibold">.</span>
                 </Link>
                 {/* Desktop Search */}
-                <div className="relative hidden sm:block w-120">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <div className="relative hidden sm:block w-120" ref={searchRef}>
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
+                    {isSearching && (
+                        <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 animate-spin z-10" />
+                    )}
                     <Input
                         value={query}
-                        onChange={(e) => setQuery(e.target.value)}
+                        onChange={(e) => {
+                            setQuery(e.target.value)
+                            if (e.target.value.trim()) {
+                                setShowResults(true)
+                            }
+                        }}
                         onKeyDown={handleKeyDown}
+                        onFocus={() => {
+                            if (query.trim() && searchResults.length > 0) {
+                                setShowResults(true)
+                            }
+                        }}
                         placeholder="Tìm kiếm..."
-                        className="pl-10 w-full"
+                        className="pl-10 pr-10 w-full"
                     />
+                    
+                    {/* Search Results Dropdown */}
+                    {showResults && (query.trim() || searchResults.length > 0) && (
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                            {isSearching && (
+                                <div className="p-4 text-center text-gray-500">
+                                    <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
+                                    Đang tìm kiếm...
+                                </div>
+                            )}
+                            
+                            {!isSearching && searchResults.length === 0 && query.trim() && (
+                                <div className="p-4 text-center text-gray-500">
+                                    Không tìm thấy sản phẩm nào
+                                </div>
+                            )}
+                            
+                            {!isSearching && searchResults.length > 0 && (
+                                <>
+                                    <ScrollArea className="max-h-96">
+                                        {searchResults.slice(0, 5).map((product) => (
+                                            <div
+                                                key={product._id}
+                                                className="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                                                onClick={() => handleResultClick(product._id)}
+                                            >
+                                                <img
+                                                    src={product.product_thumb || "/placeholder.svg"}
+                                                    alt={product.product_name}
+                                                    className="w-12 h-12 object-cover rounded"
+                                                    onError={(e) => {
+                                                        e.currentTarget.src = "/placeholder.svg"
+                                                    }}
+                                                />
+                                                <div className="ml-3 flex-1">
+                                                    <h4 className="text-sm font-medium text-gray-900 line-clamp-1">
+                                                        {product.product_name}
+                                                    </h4>
+                                                    <p className="text-sm text-gray-600">
+                                                        {formatCurrency(product.product_price)}
+                                                    </p>
+                                                    {product.score && (
+                                                        <p className="text-xs text-gray-400">
+                                                            Độ phù hợp: {Math.round(product.score * 100)}%
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </ScrollArea>
+                                    
+                                    {query.trim() && (
+                                        <div className="p-3 border-t border-gray-100">
+                                            <button
+                                                onClick={handleSearch}
+                                                className="w-full text-center text-sm text-blue-600 hover:text-blue-800 font-medium"
+                                            >
+                                                Xem tất cả kết quả cho "{query}"
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Actions */}
@@ -112,13 +318,54 @@ export default function SiteHeader() {
                                 </DialogClose>
                             </div>
                             <div className="space-y-4">
-                                <Input
-                                    value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
-                                    onKeyDown={handleKeyDown}
-                                    placeholder="Tìm kiếm sản phẩm..."
-                                    className="w-full"
-                                />
+                                <div className="relative">
+                                    <Input
+                                        value={query}
+                                        onChange={(e) => setQuery(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                        placeholder="Tìm kiếm sản phẩm..."
+                                        className="w-full"
+                                    />
+                                    {isSearching && (
+                                        <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 animate-spin" />
+                                    )}
+                                </div>
+                                
+                                {/* Mobile Search Results */}
+                                {query.trim() && searchResults.length > 0 && (
+                                    <ScrollArea className="max-h-60">
+                                        <div className="space-y-2">
+                                            {searchResults.slice(0, 3).map((product) => (
+                                                <div
+                                                    key={product._id}
+                                                    className="flex items-center p-2 hover:bg-gray-50 cursor-pointer rounded"
+                                                    onClick={() => {
+                                                        handleResultClick(product._id)
+                                                        setIsSearchOpen(false)
+                                                    }}
+                                                >
+                                                    <img
+                                                        src={product.product_thumb || "/placeholder.svg"}
+                                                        alt={product.product_name}
+                                                        className="w-10 h-10 object-cover rounded"
+                                                        onError={(e) => {
+                                                            e.currentTarget.src = "/placeholder.svg"
+                                                        }}
+                                                    />
+                                                    <div className="ml-3 flex-1">
+                                                        <h4 className="text-sm font-medium text-gray-900 line-clamp-1">
+                                                            {product.product_name}
+                                                        </h4>
+                                                        <p className="text-xs text-gray-600">
+                                                            {formatCurrency(product.product_price)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
+                                )}
+                                
                                 <Button onClick={handleSearch} className="w-full">
                                     Tìm kiếm
                                 </Button>
@@ -240,27 +487,15 @@ export default function SiteHeader() {
 
             {/* Desktop Nav */}
             <nav className="hidden lg:flex items-center justify-center space-x-8 max-w-7xl mx-auto pt-4">
-                <Link to="/products?category=nam" className="text-sm font-medium hover:text-gray-600 transition-colors">
-                    NƯỚC HOA NAM
-                </Link>
-                <Link to="/products?category=nu" className="text-sm font-medium hover:text-gray-600 transition-colors">
-                    NƯỚC HOA NỮ
-                </Link>
-                <Link to="/brands" className="text-sm font-medium hover:text-gray-600 transition-colors">
-                    THƯƠNG HIỆU
-                </Link>
-                <Link to="/about" className="text-sm font-medium hover:text-gray-600 transition-colors">
-                    VỀ CHÚNG TÔI
-                </Link>
-                <Link to="/contact" className="text-sm font-medium hover:text-gray-600 transition-colors">
-                    LIÊN HỆ
-                </Link>
-                <Link to="/faq" className="text-sm font-medium hover:text-gray-600 transition-colors">
-                    HỎI ĐÁP
-                </Link>
-                <Link to="/terms" className="text-sm font-medium hover:text-gray-600 transition-colors">
-                    ĐIỀU KHOẢN SỬ DỤNG
-                </Link>
+                {navLinks.map((link) => (
+                    <Link
+                        key={link.name}
+                        to={link.href}
+                        className="text-sm font-medium text-gray-700 hover:text-gray-900"
+                    >
+                        {link.name}
+                    </Link>
+                ))}
 
             </nav>
         </header>

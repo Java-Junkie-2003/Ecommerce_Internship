@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useSearchParams } from "react-router"
+import { useState, useEffect, use } from "react"
+import { useNavigate, useSearchParams } from "react-router"
 import { Search, Filter, Grid, List, ShoppingCart, RefreshCw, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,7 +19,8 @@ import { Category } from "@/types/model/category"
 import { Brand } from "@/types/model/brand"
 import { toast } from "sonner"
 import { useSelector } from "react-redux"
-import { useAppSelector } from "@/redux/hook"
+import { useAppDispatch, useAppSelector } from "@/redux/hook"
+import { addToCart } from "@/redux/thunks/cart.thunk"
 
 export function meta() {
     return [
@@ -29,6 +30,11 @@ export function meta() {
 }
 
 export default function FilterPage() {
+
+    const navigate = useNavigate()
+    const dispatch = useAppDispatch()
+    const isLoggedIn = useAppSelector(state => state.user.isLoggedIn)
+
     // Get URL search parameters
     const [searchParams, setSearchParams] = useSearchParams()
 
@@ -267,7 +273,7 @@ export default function FilterPage() {
                                 {brands.map((brand) => (
                                     <Button
                                         key={brand._id}
-                                        variant={selectedBrand === brand.brand_name ? "default" : "outline"}
+                                        variant={selectedBrand === brand.brand_name ? "secondary" : "outline"}
                                         className="flex items-center gap-2 px-4 py-2 h-auto"
                                         onClick={() => handleBrandChange(brand.brand_name)}
                                     >
@@ -501,61 +507,96 @@ export default function FilterPage() {
                 {/* Products Grid */}
                 {!loading && (
                     <div
-                        className={`grid gap-6 ${viewMode === "grid"
-                            ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                        className={`grid gap-8 ${viewMode === "grid"
+                            ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
                             : "grid-cols-1"
                             }`}
                     >
-                        {products.filter(product => product && product._id).map((product) => (
-                            <Card key={product._id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
-                                <div className="relative">
-                                    <div className="aspect-square overflow-hidden bg-gray-100">
-                                        <img
-                                            src={product.product_thumb || "/placeholder.svg"}
-                                            alt={product.product_name || "Sản phẩm"}
-                                            loading="lazy"
-                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                            onError={(e) => {
-                                                e.currentTarget.src = "/placeholder.svg"
-                                            }}
-                                        />
-                                    </div>
+                        {products.map((product) => (
+                            <div
+                                key={product._id}
+                                className={`relative flex flex-col rounded-2xl border border-gray-200 bg-white overflow-hidden transition-all duration-300 hover:shadow-2xl ${viewMode === "list" ? "md:flex-row" : ""
+                                    }`}
+                            >
+                                {/* Image */}
+                                <div
+                                    className={`relative ${viewMode === "list" ? "w-56 h-56" : "aspect-square"
+                                        } bg-gray-50 group`}
+                                >
+                                    <img
+                                        src={product.product_thumb || "/placeholder.svg"}
+                                        alt={product.product_name}
+                                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                    />
+
                                     {product.score && (
-                                        <div className="absolute top-3 left-3">
-                                            <Badge className="bg-black text-white">
-                                                Phù hợp: {Math.round(product.score * 100)}%
-                                            </Badge>
-                                        </div>
+                                        <span className="absolute top-3 left-3 text-xs px-2 py-1 rounded-full bg-black/80 text-white">
+                                            {Math.round(product.score * 100)}%
+                                        </span>
                                     )}
+
+                                    {/* Overlay Xem chi tiết */}
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                                        <button
+                                            onClick={() => navigate(`/product/${product._id}`)}
+                                            className="px-4 py-2 text-sm font-medium rounded-full bg-white text-black hover:bg-gray-100 transition-colors"
+                                        >
+                                            Xem chi tiết
+                                        </button>
+                                    </div>
                                 </div>
 
-                                <CardContent className="p-4">
-                                    <div className="mb-2">
-                                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                                            <span>{product.product_brand?.brand_name || 'Không có thương hiệu'}</span>
-                                            <span>•</span>
-                                            <span>{product.product_categories[0]?.category_name || 'Không có danh mục'}</span>
-                                        </div>
+                                {/* Content */}
+                                <div className="flex flex-col flex-1 p-5">
+                                    {/* Brand + Category */}
+                                    <div className="flex items-center gap-2 text-[10px] md:text-xs text-gray-500 mb-2">
+                                        {product.product_brand?.brand_icon && (
+                                            <img
+                                                src={product.product_brand.brand_icon}
+                                                alt={product.product_brand.brand_name}
+                                                className="w-4 h-4 object-contain"
+                                            />
+                                        )}
+                                        <span>{product.product_brand?.brand_name || "No brand"}</span>
+                                        <span>•</span>
+                                        <span>{product.product_categories?.[0]?.category_name || "No category"}</span>
                                     </div>
 
-                                    <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                                        {product.product_name || 'Tên sản phẩm không có'}
+                                    {/* Title */}
+                                    <h3
+                                        className={`font-medium text-gray-900 ${viewMode === "grid" ? "line-clamp-2 mb-3" : "text-lg mb-2"
+                                            }`}
+                                    >
+                                        {product.product_name}
                                     </h3>
 
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <span className="text-lg font-bold text-gray-900">
-                                            {product.product_price ? formatCurrency(product.product_price) : 'Giá không có'}
+                                    {/* Price + CTA */}
+                                    <div className="mt-auto flex items-center justify-between gap-3">
+                                        <span className="text-sm md:text-lg font-semibold text-gray-900">
+                                            {product.product_price ? formatCurrency(product.product_price) : "Liên hệ"}
                                         </span>
+                                        <button
+                                            onClick={() => {
+                                                if (isLoggedIn) {
+                                                    dispatch(addToCart({ productId: product._id, quantity: 1 }))
+                                                    toast.success("Đã thêm vào giỏ hàng")
+                                                } else {
+                                                    toast.error("Vui lòng đăng nhập để mua hàng")
+                                                    navigate("/login/user")
+                                                }
+                                            }}
+                                            className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-full bg-black text-white hover:bg-gray-800 transition-all"
+                                        >
+                                            <ShoppingCart className="h-4 w-4 mr-0 md:mr-2" />
+                                            <span className="hidden md:inline">Mua</span>
+                                        </button>
                                     </div>
+                                </div>
+                            </div>
 
-                                    <Button className="w-full bg-black hover:bg-gray-800" size="sm">
-                                        <ShoppingCart className="h-4 w-4 mr-2" />
-                                        Thêm vào giỏ
-                                    </Button>
-                                </CardContent>
-                            </Card>
                         ))}
                     </div>
+
                 )}
 
                 {/* Empty State */}
