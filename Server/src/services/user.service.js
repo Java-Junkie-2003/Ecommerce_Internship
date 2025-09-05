@@ -2,8 +2,8 @@ const { BadRequestError, NotFoundError } = require("../core/error.response");
 const { getAllUserForAdmin, findUserByUserName, findUserByPhoneNumber, findUserById } = require('../models/repositories/user.repo')
 class UserService {
 
-    static async getAllUserForAdmin() {
-        return await getAllUserForAdmin()
+    static async getAllUserForAdmin({userId, limit = 10, page = 1, sort = 'ctime'}) {
+        return await getAllUserForAdmin({userId, limit, page, sort})
     }
 
     static async getUserForAdmin({ userName, phoneNumber }) {
