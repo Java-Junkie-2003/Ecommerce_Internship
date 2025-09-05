@@ -43,7 +43,7 @@ export default function App() {
         <Provider store={store}>
           <UserLoader>
             <Outlet />
-            <Toaster />
+            <Toaster position="top-right" richColors />
           </UserLoader>
         </Provider>
         <ScrollRestoration />

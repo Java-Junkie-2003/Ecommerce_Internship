@@ -40,7 +40,7 @@ import type { Route } from "../+types/root"
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Quản lý đơn hàng" },
+    { title: "Quản lý đơn hàng - Admin" },
     { name: "description", content: "Quản lý và theo dõi tất cả đơn hàng" },
   ];
 }

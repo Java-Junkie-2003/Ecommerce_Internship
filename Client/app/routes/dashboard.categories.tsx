@@ -55,7 +55,7 @@ export default function Component() {
 
     const handleSaveCategory = () => {
         if (!categoryName.trim()) {
-            alert("Tên danh mục không được để trống.")
+            toast.warning("Tên danh mục không được để trống.")
             return
         }
 
