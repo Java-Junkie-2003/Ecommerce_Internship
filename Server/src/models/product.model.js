@@ -66,7 +66,7 @@ const productSchema = new Schema({
 })
 
 
-productSchema.index({ product_type: 1 })
+productSchema.index({ product_type: 1, 'product_attributes.gender': 1, isPublished: 1 })
 productSchema.index({ product_brand: 1 })
 productSchema.index({ product_name: 'text', product_description: 'text' },
 { default_language: 'none', weights: { product_name: 10, product_description: 2 } })

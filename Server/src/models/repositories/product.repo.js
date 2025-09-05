@@ -2,11 +2,10 @@ const { product } = require('../product.model')
 const { Types } = require('mongoose')
 require('../brand.model')
 require('../category.model')
-const { getSelectData, getUnSelectData, convertToObjectId } = require('../../utils')
+const { getSelectData, getUnSelectData, convertToObjectId, ensureArray, normalizeGender } = require('../../utils')
 const { findInvenByProductId } = require('./inventory.repo')
 const { NotFoundError, BadRequestError } = require('../../core/error.response')
 const brandModel = require('../brand.model')
-const { sortBy } = require('lodash')
 const findAllProducts = async ({ limit, sort, page, filter, select }) => {
     const skip = (page - 1) * limit
     const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
@@ -185,6 +184,7 @@ const filterProduct = async ({
     categoryIds,
     minPrice,
     maxPrice,
+    gender,
     isPublished = true,
     page = 1,
     limit = 20,
@@ -212,6 +212,15 @@ const filterProduct = async ({
     }
     else if (categoryId) {
         filter.product_categories = convertToObjectId(categoryId)
+    }
+
+    if (gender !== undefined && gender !== null && gender !== '' && gender !== 'All') {
+        const genders = ensureArray(gender).map(normalizeGender).filter(Boolean);
+        if (genders.length === 1) {
+            filter['product_attributes.gender'] = genders[0];
+        } else if (genders.length > 1) {
+            filter['product_attributes.gender'] = { $in: genders };
+        }
     }
 
     if (brand_name) {
