@@ -27,3 +27,9 @@ GET {{url_dev}}/order/self?page=1
 Content-Type: application/json
 authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmQiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU2Mjg2OTM3LCJleHAiOjE3NTYzNzMzMzd9.q-TUstCpr3SAUOsgP8r6CEeF2JAjKhtfmUfMyQYxrjc
 x-client-id: 689471fc659ad34ec9a2cc6d
+
+### find all order (admin)
+GET {{url_dev}}/order/all-order?page=1
+Content-Type: application/json
+authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTcwNDI2NTEsImV4cCI6MTc1NzEyOTA1MX0.IzOWs0i7gFWQZlPYOdSxHuaejvHM3TpFCFzb_vAaf8E
+x-client-id: 689471fc659ad34ec9a2cc6b

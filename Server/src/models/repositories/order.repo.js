@@ -42,6 +42,7 @@ const findAllOrdersByAdmin = async ({ limit, page, sort, unSelect = [] }) => {
     const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
     const [orders, total] = await Promise.all([
         orderModel.find()
+            .populate('order_userId', 'user_name phone -_id')
             .sort(sortBy)
             .skip(skip)
             .limit(safeLimit)
