@@ -16,42 +16,6 @@ import { useSelector } from "react-redux"
 import { RootState } from "@/redux/store"
 import { toast } from "sonner"
 
-interface UserProfile {
-  id: string
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  dateOfBirth: string
-  gender: string
-  address: string
-  city: string
-  district: string
-  ward: string
-  avatar: string
-  joinDate: string
-  totalOrders: number
-  totalSpent: number
-}
-
-const mockUserProfile: UserProfile = {
-  id: "USER001",
-  firstName: "Nguyễn",
-  lastName: "Văn An",
-  email: "nguyen.van.an@email.com",
-  phone: "0901234567",
-  dateOfBirth: "1990-05-15",
-  gender: "male",
-  address: "123 Đường Lê Lợi",
-  city: "TP. Hồ Chí Minh",
-  district: "Quận 1",
-  ward: "Phường Bến Nghé",
-  avatar: "/placeholder.svg?height=120&width=120",
-  joinDate: "2023-01-15",
-  totalOrders: 12,
-  totalSpent: 25000000,
-}
-
 export default function UserProfile() {
   const userInfo = useSelector((state: RootState) => state.user.userInfo)
   const [profile, setProfile] = useState<User | null>(null)

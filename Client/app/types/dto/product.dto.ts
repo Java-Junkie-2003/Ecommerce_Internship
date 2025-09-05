@@ -35,3 +35,6 @@ export interface FilteredProductDTO extends DefaultDTO {
         }
     }
 }
+export interface RelatedProductDTO extends DefaultDTO {
+    metadata: FilteredProduct[];
+}

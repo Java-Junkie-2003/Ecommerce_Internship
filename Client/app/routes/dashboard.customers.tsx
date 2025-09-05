@@ -8,6 +8,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
+export function meta() {
+    return [
+        { title: "Quản lý khách hàng" },
+        { name: "description", content: "Quản lý và theo dõi khách hàng của bạn" },
+    ]
+}
+
+
 interface Customer {
   id: string
   name: string

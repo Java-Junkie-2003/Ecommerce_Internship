@@ -44,6 +44,7 @@ export const ENDPOINTS = {
             if (page !== undefined) params.append('page', page.toString());
             return `${BASE_ENDPOINT}/product/filter?${params.toString()}`;
         },
+        RELATED: (brandId: string) => `${BASE_ENDPOINT}/product/related?brandId=${brandId}`,
     },
     CART: {
         INIT: `${BASE_ENDPOINT}/cart`,

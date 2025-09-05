@@ -41,7 +41,10 @@ export interface FilteredProduct {
     }[];
     product_brand: {
         brand_name: string;
-        brand_icon: string;
+        brand_icon?: string;
     };
     score?: number;
+    createdAt?: string;
+    updatedAt?: string;
+    __v?: number;
 }

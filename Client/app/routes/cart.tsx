@@ -20,7 +20,14 @@ import { AddressCreateDTO, AddressDTO } from "@/types/dto/address.dto"
 import { ENDPOINTS } from "@/utils/api.endpoints"
 import { setSelectedCartItems } from "@/redux/slices/cart"
 import { Link } from "react-router"
+import { Route } from "../+types/root"
 
+export function meta(meta: Route.MetaArgs) {
+    return [
+        { title: "Giỏ hàng" },
+        { name: "description", content: "Xem và quản lý giỏ hàng của bạn" },
+    ]
+}
 
 export default function Component() {
 

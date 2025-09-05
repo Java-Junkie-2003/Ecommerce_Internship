@@ -5,7 +5,12 @@ import { ApiService } from "@/lib/api";
 import { ENDPOINTS } from "@/utils/api.endpoints";
 import { ProductDTO } from "@/types/dto/product.dto";
 
-
+export function meta() {
+    return [
+        { title: "Chỉnh sửa sản phẩm" },
+        { name: "description", content: "Chỉnh sửa thông tin sản phẩm của bạn" },
+    ]
+}
 
 export default function EditProductPage() {
   const params = useParams();
