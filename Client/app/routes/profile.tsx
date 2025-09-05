@@ -16,6 +16,13 @@ import { useSelector } from "react-redux"
 import { RootState } from "@/redux/store"
 import { toast } from "sonner"
 
+export function meta() {
+  return [
+    { title: "Thông tin cá nhân" },
+    { name: "description", content: "Quản lý thông tin cá nhân và cài đặt tài khoản của bạn" },
+  ]
+}
+
 export default function UserProfile() {
   const userInfo = useSelector((state: RootState) => state.user.userInfo)
   const [profile, setProfile] = useState<User | null>(null)

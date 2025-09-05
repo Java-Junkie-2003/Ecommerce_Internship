@@ -14,6 +14,10 @@ import { fetchBrands } from "@/redux/thunks/brand.thunk";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { Brand } from "@/types/model/brand";
+import { FilteredProduct } from "@/types/model/product";
+import { FilteredProductDTO } from "@/types/dto/product.dto";
+import { ENDPOINTS } from "@/utils/api.endpoints";
+import { ApiService } from "@/lib/api";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -25,64 +29,31 @@ export function meta({ }: Route.MetaArgs) {
 const HomePage = () => {
 
   const dispatch = useAppDispatch()
-  const products = [
-    {
-      id: "77884",
-      name: "A Luxury Perfume Era",
-      price: "2.000.000 đ",
-      image: "/images/perfumes/img__77884.png",
-      rating: 4.8,
-    },
-    {
-      id: "77885",
-      name: "Elegant Floral Scent",
-      price: "1.850.000 đ",
-      image: "/images/perfumes/img__77885.png",
-      rating: 4.5,
-    },
-    {
-      id: "77886",
-      name: "Mystic Oud Elixir",
-      price: "2.500.000 đ",
-      image: "/images/perfumes/img__77886.png",
-      rating: 4.9,
-    },
-    {
-      id: "77887",
-      name: "Fresh Citrus Splash",
-      price: "1.500.000 đ",
-      image: "/images/perfumes/img__77887.png",
-      rating: 4.2,
-    },
-    {
-      id: "77888",
-      name: "Velvet Rose Infusion",
-      price: "2.100.000 đ",
-      image: "/images/perfumes/img__77888.png",
-      rating: 4.7,
-    },
-    {
-      id: "77889",
-      name: "Spiced Amber Dream",
-      price: "1.950.000 đ",
-      image: "/images/perfumes/img__77889.png",
-      rating: 4.6,
-    },
-    {
-      id: "77890",
-      name: "Oceanic Breeze",
-      price: "1.700.000 đ",
-      image: "/images/perfumes/img__77890.png",
-      rating: 4.3,
-    },
-    {
-      id: "77891",
-      name: "Midnight Jasmine",
-      price: "2.300.000 đ",
-      image: "/images/perfumes/img__77891.png",
-      rating: 4.9,
-    },
-  ]
+
+  const [products, setProducts] = useState<FilteredProduct[]>([])
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      // Fetch product data from API
+      try {
+        const response = await ApiService.get<FilteredProductDTO>(ENDPOINTS.PRODUCT.FILTER(
+          undefined, // searchQuery
+          undefined, // selectedCategory
+          undefined, // selectedBrand
+          undefined, // maxPrice
+          undefined, // minPrice
+          4,         // limit
+          undefined, // sortBy
+          1          // currentPage
+        ))
+        setProducts(response.metadata.products || [])
+      } catch (error) {
+        console.error("Error fetching products:", error)
+      }
+    }
+
+    fetchProducts()
+  }, [])
 
   const reduxBrands = useSelector((state: RootState) => state.brand)
 
@@ -231,14 +202,18 @@ const HomePage = () => {
             <div className="w-32 h-1 bg-gray-900 mx-auto mt-6 rounded-full"></div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {products.slice(0, 4).map((product) => ( // Show first 4 as new arrivals
-              <Link to={`/product/${product.id}`} key={product.id} className="group block">
+            {products.map((product) => ( // Show first 4 as new arrivals
+              <Link
+                to={`/product/${product._id}`}
+                key={product._id}
+                className="group block"
+              >
                 <Card className="overflow-hidden rounded-2xl border border-gray-100 shadow-md hover:shadow-xl transition-shadow duration-300 group relative aspect-[3/4]">
                   {/* Ảnh nền */}
                   <div
                     className="absolute inset-0 bg-cover bg-center"
                     style={{
-                      backgroundImage: `url(${product.image || "/placeholder.svg"})`,
+                      backgroundImage: `url(${product.product_thumb || "/placeholder.svg"})`,
                     }}
                   />
 
@@ -247,23 +222,22 @@ const HomePage = () => {
 
                   {/* Nội dung overlay */}
                   <CardContent className="relative z-10 flex flex-col justify-end h-full p-5 text-white text-center">
-                    <h3 className="text-lg font-medium mb-1 line-clamp-2 tracking-wide">
-                      {product.name}
-                    </h3>
-
-                    {/* Rating */}
-                    <div className="flex items-center justify-center gap-1 mb-2">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-4 w-4 ${i < Math.floor(product.rating) ? "fill-white text-white" : "text-white/40"}`}
-                        />
-                      ))}
-                      <span className="text-sm text-white/80">({product.rating})</span>
+                    {/* Brand + Category */}
+                    <div className="flex items-center justify-center gap-2 text-xs text-white/70 mb-2">
+                      <span>{product.product_brand.brand_name || "No brand"}</span>
+                      <span>•</span>
+                      <span>{product.product_categories?.map(cat => cat.category_name).join(", ") || "No category"}</span>
                     </div>
 
+                    {/* Tên sản phẩm */}
+                    <h3 className="text-lg font-medium mb-2 line-clamp-2 tracking-wide">
+                      {product.product_name}
+                    </h3>
+
                     {/* Giá */}
-                    <p className="text-xl font-semibold text-white mb-3">{product.price}</p>
+                    <p className="text-xl font-semibold text-white mb-4">
+                      {product.product_price}
+                    </p>
 
                     {/* Nút CTA */}
                     <Button className="w-full rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium py-2.5 transition-colors">
@@ -271,9 +245,8 @@ const HomePage = () => {
                     </Button>
                   </CardContent>
                 </Card>
-
-
               </Link>
+
             ))}
           </div>
           <div className="text-center mt-12">

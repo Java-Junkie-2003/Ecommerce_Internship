@@ -38,3 +38,13 @@ export interface FilteredProductDTO extends DefaultDTO {
 export interface RelatedProductDTO extends DefaultDTO {
     metadata: FilteredProduct[];
 }
+
+export interface SearchProductDTO extends DefaultDTO {
+    metadata: {
+        _id: string;
+        product_name: string;
+        product_thumb: string;
+        product_price: number;
+        score: number;
+    }[];
+}
