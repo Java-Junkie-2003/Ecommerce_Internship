@@ -12,7 +12,6 @@ const getAllCategory = async () => {
     return await categoryModel.find()
 }
 
-
 module.exports = {
     createCategory,
     getAllCategory
