@@ -39,6 +39,13 @@ import { Order } from "@/types/model/order"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
+export function meta() {
+    return [
+        { title: "Quản lý đơn hàng" },
+        { name: "description", content: "Quản lý và theo dõi các đơn hàng của bạn" },
+    ]
+}
+
 // Dashboard Index Component for Order Management
 export default function DashboardIndex() {
   const [orders, setOrders] = useState<Order[]>([])

@@ -27,6 +27,13 @@ import { deleteFromCart } from "@/redux/thunks/cart.thunk"
 import { DefaultDTO } from "@/types/dto"
 import { setSelectedCartItems } from "@/redux/slices/cart"
 
+export function meta() {
+    return [
+        { title: "Thanh toán" },
+        { name: "description", content: "Xem và quản lý giỏ hàng của bạn" },
+    ]
+}
+
 export default function Checkout() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()

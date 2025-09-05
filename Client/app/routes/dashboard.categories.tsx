@@ -20,6 +20,14 @@ import { useAppDispatch, useAppSelector } from "@/redux/hook"
 import { RootState } from "@/redux/store"
 import { createCategory, fetchCategories } from "@/redux/thunks/category.thunk"
 import { toast } from "sonner"
+import { Route } from "../+types/root"
+
+export function meta({ }: Route.MetaArgs) {
+    return [
+        { title: "Quản lý danh mục" }, 
+        { name: "description", content: "Quản lý và theo dõi các danh mục của bạn" },
+    ]
+}
 
 export default function Component() {
 

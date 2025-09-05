@@ -21,6 +21,13 @@ import { toast } from "sonner"
 import { useSelector } from "react-redux"
 import { useAppSelector } from "@/redux/hook"
 
+export function meta() {
+    return [
+        { title: "Tất cả sản phẩm" },
+        { name: "description", content: "Khám phá tất cả sản phẩm có sẵn trên cửa hàng của chúng tôi" },
+    ]
+}
+
 export default function FilterPage() {
     // Get URL search parameters
     const [searchParams, setSearchParams] = useSearchParams()

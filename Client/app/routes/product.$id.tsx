@@ -22,45 +22,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import SiteFooter from "@/components/layout/client-footer"
 import SiteHeader from "@/components/layout/client-header"
 import { Link, useParams } from "react-router"
-import { Product } from "@/types/model/product"
+import { FilteredProduct, Product } from "@/types/model/product"
 import { ApiService } from "@/lib/api"
-import { ProductDTO } from "@/types/dto/product.dto"
+import { FilteredProductDTO, ProductDTO, RelatedProductDTO } from "@/types/dto/product.dto"
 import { ENDPOINTS } from "@/utils/api.endpoints"
 import { useAppDispatch } from "@/redux/hook"
 import { addToCart } from "@/redux/thunks/cart.thunk"
 import { toast } from "sonner"
-
-
-const relatedProducts = [
-    {
-        id: 1,
-        name: "Luxury Perfume Collection",
-        price: 1800000,
-        image: "/placeholder.svg?height=200&width=200",
-        rating: 4.8,
-    },
-    {
-        id: 2,
-        name: "Premium Fragrance Set",
-        price: 2200000,
-        image: "/placeholder.svg?height=200&width=200",
-        rating: 4.9,
-    },
-    {
-        id: 3,
-        name: "Exclusive Scent Edition",
-        price: 2500000,
-        image: "/placeholder.svg?height=200&width=200",
-        rating: 4.7,
-    },
-    {
-        id: 4,
-        name: "Designer Perfume Line",
-        price: 1900000,
-        image: "/placeholder.svg?height=200&width=200",
-        rating: 4.6,
-    },
-]
 
 const reviews = [
     {
@@ -99,6 +67,7 @@ export default function Component() {
     const [product, setProduct] = useState<Product | null>(null)
 
     const [productImages, setProductImages] = useState<string[]>([])
+    const [relatedProducts, setRelatedProducts] = useState<FilteredProduct[]>([])
 
     useEffect(() => {
         // Fetch product details using productId
@@ -115,7 +84,22 @@ export default function Component() {
 
         fetchProduct()
     }, [productId])
+    
+    useEffect(() => {
+        // Fetch related products based on brand ID
+        const fetchRelatedProducts = async () => {
+            if (product) {
+                try {
+                    const response = await ApiService.get<RelatedProductDTO>(ENDPOINTS.PRODUCT.RELATED(product.product_brand._id))
+                    setRelatedProducts(response.metadata)
+                } catch (error) {
+                    console.error("Failed to fetch related products:", error)
+                }
+            }
+        }
 
+        fetchRelatedProducts()
+    }, [product])
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
     const [quantity, setQuantity] = useState(1)
@@ -480,32 +464,22 @@ export default function Component() {
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {relatedProducts.map((product) => (
-                                <div key={product.id} className="group cursor-pointer">
-                                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-3">
-                                        <img
-                                            src={product.image}
-                                            alt={product.name}
-                                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <h4 className="font-medium text-sm line-clamp-2">{product.name}</h4>
-                                        <div className="flex items-center gap-1">
-                                            <div className="flex">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <Star
-                                                        key={i}
-                                                        className={`h-3 w-3 ${i < Math.floor(product.rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                                                            }`}
-                                                    />
-                                                ))}
-                                            </div>
-                                            <span className="text-xs text-gray-500">({product.rating})</span>
+                            {relatedProducts.filter(item => item._id !== productId)?.map((product) => (
+                                <Link to={`/product/${product._id}`} key={product._id}>
+                                    <div className="group cursor-pointer">
+                                        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-3">
+                                            <img
+                                                src={product.product_thumb || "/placeholder.svg?height=400&width=400"}
+                                                alt={product.product_name}
+                                                className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
+                                            />
                                         </div>
-                                        <p className="font-semibold text-gray-900">VND {product.price.toLocaleString("vi-VN")} đ</p>
+                                        <div className="space-y-1">
+                                            <h4 className="font-medium text-sm line-clamp-2">{product.product_name}</h4>
+                                            <p className="font-semibold text-gray-900">VND {product.product_price.toLocaleString("vi-VN")} đ</p>
+                                        </div>
                                     </div>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     </CardContent>

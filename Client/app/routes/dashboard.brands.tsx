@@ -24,6 +24,7 @@ import { RootState } from "@/redux/store";
 import { createBrand, fetchBrands } from "@/redux/thunks/brand.thunk";
 import { toast } from "sonner";
 
+
 export default function Component() {
 
   const brand = useAppSelector((state: RootState) => state.brand)
@@ -365,10 +366,9 @@ export default function Component() {
   )
 }
 
-
 export function meta({ }: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "Quản lý thương hiệu" },
+    { name: "description", content: "Quản lý và theo dõi các thương hiệu của bạn" },
   ];
 }

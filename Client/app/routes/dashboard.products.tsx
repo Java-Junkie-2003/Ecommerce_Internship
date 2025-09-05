@@ -18,6 +18,12 @@ import TableSkeleton from "@/components/skeleton/dashboard/table"
 import { cn } from "@/lib/utils"
 import { useNavigate } from "react-router"
 
+export function meta() {
+    return [
+        { title: "Quản lý sản phẩm" },
+        { name: "description", content: "Quản lý và theo dõi các sản phẩm của bạn" },
+    ]
+}
 
 export default function Component() {
 
