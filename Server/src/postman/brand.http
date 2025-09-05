@@ -1,0 +1,16 @@
+@url_dev=http://localhost:3055/v1/api
+
+
+PUT {{url_dev}}/brand/update/689ac945ac93b575fd978195
+Content-Type: application/json
+authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTcwNDI2NTEsImV4cCI6MTc1NzEyOTA1MX0.IzOWs0i7gFWQZlPYOdSxHuaejvHM3TpFCFzb_vAaf8E
+x-client-id: 689471fc659ad34ec9a2cc6b
+
+{
+    "brand_name": "Dior"
+}
+### unpublish brand
+POST {{url_dev}}/brand/unpublish/689ac945ac93b575fd978195
+Content-Type: application/json
+authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTcwNDI2NTEsImV4cCI6MTc1NzEyOTA1MX0.IzOWs0i7gFWQZlPYOdSxHuaejvHM3TpFCFzb_vAaf8E
+x-client-id: 689471fc659ad34ec9a2cc6b
