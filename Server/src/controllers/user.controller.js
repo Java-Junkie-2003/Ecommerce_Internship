@@ -14,6 +14,12 @@ class UserController {
             metadata: await UserService.getUserForAdmin(req.query)
         }).send(res)
     }
+    getUserById = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Get user by id for admin',
+            metadata: await UserService.getUserById(req.params)
+        }).send(res)
+    }
 }
 
 module.exports = new UserController()

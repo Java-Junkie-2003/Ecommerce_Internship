@@ -9,6 +9,7 @@ router.use(authenticatorForRoleAdmin)
 
 router.get('',asyncHandler(UserController.getUserForAdmin))
 router.get('/all', asyncHandler(UserController.getAllUserForAdmin))
+router.get('/find/:userId', asyncHandler(UserController.getUserById))
 
 
 module.exports = router
