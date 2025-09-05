@@ -1,5 +1,5 @@
 const userModel = require("../user.model")
-const { getSelectData, convertToObjectId } = require('../../utils')
+const { getSelectData, convertToObjectId, getUnSelectData } = require('../../utils')
 const { NotFoundError } = require("../../core/error.response")
 
 const findUserByPhoneNumber = async ({ phone, select }) => {
@@ -12,12 +12,16 @@ const findUserByUserName = async ({username, select ={}}) => {
     .lean()
 }
 
-const findUserById = async ({userId}) => {
-    return await userModel.findById({_id: userId}).lean();
+const findUserById = async ({userId, select = []}) => {
+    return await userModel.findById({_id: userId})
+    .select(getSelectData(select))
+    .lean();
 }
 
 const getAllUserForAdmin = async () => {
-    return await userModel.find({}).lean()
+    return await userModel.find({})
+    .select(getUnSelectData(['isActive', 'password']))
+    .lean()
 }
 
 
