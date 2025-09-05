@@ -28,6 +28,11 @@ export const ENDPOINTS = {
             UPDATE_STATUS: (orderId: string) => `${BASE_ENDPOINT}/order/update-status/${orderId}`,
             FETCH_ONE: (orderId: string) => `${BASE_ENDPOINT}/order/${orderId}`,
         },
+        CUSTOMER: {
+            FETCH_ALL: (page?: number, limit?: number) => `${BASE_ENDPOINT}/user/all?page=${page}&limit=${limit}`,
+            FETCH_BY_USERNAME: (userName: string) => `${BASE_ENDPOINT}/user?userName=${userName}`,
+            FETCH_BY_ID: (userId: string) => `${BASE_ENDPOINT}/user/find/${userId}`,
+        }
     },
     PRODUCT: {
         FETCH_ONE: (id: string) => `${BASE_ENDPOINT}/product/${id}`,
