@@ -1,6 +1,5 @@
 "use client";
 
-
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Star, ArrowRight, Quote } from 'lucide-react'
@@ -42,6 +41,7 @@ const HomePage = () => {
           undefined, // selectedBrand
           undefined, // maxPrice
           undefined, // minPrice
+          undefined, // gender
           4,         // limit
           undefined, // sortBy
           1          // currentPage
@@ -118,7 +118,7 @@ const HomePage = () => {
         <div className="container mx-auto px-4">
           <h2 className="text-center text-4xl font-bold text-gray-900 mb-12">Bộ Sưu Tập Nổi Bật</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Link to="/products?category=nu" className="group block relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+            <Link to="/products?gender=female" className="group block relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
               <img
                 src="/images/landing/female.jpg"
                 alt="Nước hoa nữ"
@@ -134,7 +134,7 @@ const HomePage = () => {
                 </div>
               </div>
             </Link>
-            <Link to="/products?category=nam" className="group block relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+            <Link to="/products?gender=male" className="group block relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
               <img
                 src="/images/landing/male.jpg"
                 alt="Nước hoa nam"
@@ -150,7 +150,7 @@ const HomePage = () => {
                 </div>
               </div>
             </Link>
-            <Link to="/products?category=unisex" className="group block relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+            <Link to="/products?genderD=unisex" className="group block relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
               <img src="/images/landing/unisex.jpg" alt="Nước hoa unisex" className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300 flex items-center justify-center">
                 <div className="text-center text-white space-y-2">

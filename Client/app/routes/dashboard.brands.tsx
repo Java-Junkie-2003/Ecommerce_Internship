@@ -139,7 +139,7 @@ export default function Component() {
         {/* Existing Brand Cards */}
         {brands.map((brand) => (
           <Card key={brand._id} className="flex flex-col flex-wrap relative">
-            <CardHeader className="flex flex-row items-center justify-between px-3 py-0 border-b relative">
+            {/* <CardHeader className="flex flex-row items-center justify-between px-3 py-0 border-b relative">
               <Button
                 variant="outline"
                 size="sm"
@@ -156,7 +156,7 @@ export default function Component() {
               >
                 <Trash2 className="h-4 w-4 mr-1" /> Xóa
               </Button>
-            </CardHeader>
+            </CardHeader> */}
             <CardContent className="flex flex-col items-center justify-center p-6 flex-grow">
               <div className="relative w-full h-32 mb-4 flex items-center justify-center">
                 <img

@@ -12,10 +12,10 @@ import { ApiService } from "@/lib/api"
 import { CustomerDTO } from "@/types/dto/customer.dto"
 
 export function meta() {
-    return [
-        { title: "Quản lý khách hàng" },
-        { name: "description", content: "Quản lý và theo dõi khách hàng của bạn" },
-    ]
+  return [
+    { title: "Quản lý khách hàng" },
+    { name: "description", content: "Quản lý và theo dõi khách hàng của bạn" },
+  ]
 }
 
 
@@ -25,9 +25,9 @@ export default function Component() {
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
-  const itemsPerPage = 8
+  const itemsPerPage = 10
 
-  const totalPages = Math.ceil(customers.length / itemsPerPage)
+  const [totalPages, setTotalPages] = useState(0)
   const startIndex = (currentPage - 1) * itemsPerPage
   const paginatedCustomers = customers.slice(startIndex, startIndex + itemsPerPage)
 
@@ -53,19 +53,22 @@ export default function Component() {
   // Placeholder for average orders per customer (needs order data integration)
   const averageOrdersPerCustomer = 2
 
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        const response = await ApiService.get<CustomerDTO>('/user/all?page=1&limit=10')
-        setCustomers(response.metadata)
-      } catch (error) {
-        console.error("Error fetching customers:", error)
-        setCustomers([])
-      }
+  const fetchCustomers = async (page: number = 1) => {
+    try {
+      const response = await ApiService.get<CustomerDTO>(`/user/all?page=${page}&limit=${itemsPerPage}`)
+      setCustomers(response.metadata.results)
+      setTotalPages(response.metadata.pagination.totalPages)
+      setCurrentPage(response.metadata.pagination.page)
+    } catch (error) {
+      console.error("Error fetching customers:", error)
+      setCustomers([])
     }
+  }
+
+  useEffect(() => {
 
     fetchCustomers()
-  },[])
+  }, [])
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -181,7 +184,7 @@ export default function Component() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            onClick={() => fetchCustomers(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
@@ -206,7 +209,7 @@ export default function Component() {
                   key={pageNumber}
                   variant={currentPage === pageNumber ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setCurrentPage(pageNumber)}
+                  onClick={() => fetchCustomers(pageNumber)}
                   className="w-8 h-8 p-0"
                 >
                   {pageNumber}
@@ -218,7 +221,7 @@ export default function Component() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            onClick={() => fetchCustomers(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
             Sau

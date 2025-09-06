@@ -30,14 +30,13 @@ export default function DashboardLayout() {
 
   useEffect(() => {
     if (user.status !== "loading") {
-      console.log("Checking user auth and roles,", user);
       if (!user.isLoggedIn) {
         navigate('/login/admin');
       } else if (!user.userInfo?.roles.includes("ADMIN")) {
         navigate('/unauthorized');
       }
     } else {
-      console.log("user: ", user);
+      // console.log("user: ", user);
     }
   }, [user]);
 
