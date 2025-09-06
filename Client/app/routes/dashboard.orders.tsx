@@ -301,7 +301,7 @@ export default function AdminOrdersPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-gray-500" />
-                            <span>{order.order_userId.slice(-8)}</span>
+                            <span>{order.order_userId?.user_name || 'N/A'}</span>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -323,7 +323,7 @@ export default function AdminOrdersPage() {
                           </div>
                         </TableCell>
                         <TableCell className="font-semibold">
-                          {formatCurrency(order.order_checkout.totalCheckout)}
+                          {formatCurrency(order.order_checkout?.totalCheckout || 0)}
                         </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
@@ -408,7 +408,9 @@ export default function AdminOrdersPage() {
                       </div>
                       <div>
                         <span className="text-gray-600">Khách hàng:</span>
-                        <div className="font-medium">#{selectedOrder.order_userId.slice(-8)}</div>
+                        <div className="font-medium">
+                          {selectedOrder.order_userId?.user_name || 'N/A'} - {selectedOrder.order_userId?.phone || 'N/A'}
+                        </div>
                       </div>
                       <div>
                         <span className="text-gray-600">Thanh toán:</span>
@@ -459,9 +461,9 @@ export default function AdminOrdersPage() {
                     Địa chỉ giao hàng
                   </h4>
                   <div className="bg-gray-50 p-3 rounded-lg">
-                    <p className="text-sm">{selectedOrder.order_shipping.address}</p>
+                    <p className="text-sm">{selectedOrder.order_shipping?.address || 'N/A'}</p>
                     <p className="text-xs text-gray-600 mt-1">
-                      Loại địa chỉ: {selectedOrder.order_shipping.address_type}
+                      Loại địa chỉ: {selectedOrder.order_shipping?.address_type || 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -472,7 +474,7 @@ export default function AdminOrdersPage() {
                 <div>
                   <h4 className="font-semibold mb-3 flex items-center gap-2">
                     <Package className="h-4 w-4" />
-                    Sản phẩm đã đặt ({selectedOrder.order_products.length})
+                    Sản phẩm đã đặt ({selectedOrder.order_products?.length || 0})
                     {isLoadingProducts && (
                       <RefreshCw className="h-4 w-4 animate-spin text-gray-500" />
                     )}
@@ -485,7 +487,7 @@ export default function AdminOrdersPage() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {selectedOrder.order_products.map((orderProduct, index) => {
+                      {(selectedOrder.order_products || []).map((orderProduct, index) => {
                         const productDetail = orderProducts.find(p => p._id === orderProduct.productId)
                         
                         return (
@@ -563,17 +565,17 @@ export default function AdminOrdersPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Tổng tiền hàng:</span>
-                      <span>{formatCurrency(selectedOrder.order_checkout.totalPrice)}</span>
+                      <span>{formatCurrency(selectedOrder.order_checkout?.totalPrice || 0)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Phí vận chuyển:</span>
-                      <span>{formatCurrency(selectedOrder.order_checkout.feeShip)}</span>
+                      <span>{formatCurrency(selectedOrder.order_checkout?.feeShip || 0)}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between font-semibold text-base">
                       <span>Tổng thanh toán:</span>
                       <span className="text-gray-900">
-                        {formatCurrency(selectedOrder.order_checkout.totalCheckout)}
+                        {formatCurrency(selectedOrder.order_checkout?.totalCheckout || 0)}
                       </span>
                     </div>
                   </div>

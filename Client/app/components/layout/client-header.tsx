@@ -424,7 +424,7 @@ export default function SiteHeader() {
                                                 Đăng xuất
                                             </button>
                                         </DialogTrigger>
-                                        <DialogContent>
+                                        <DialogContent className="sm:max-w-sm w-full max-w-2xs">
                                             <div className="space-y-4">
                                                 <h2 className="text-lg font-semibold">Xác nhận đăng xuất</h2>
                                                 <p>Bạn có muốn đăng xuất không?</p>

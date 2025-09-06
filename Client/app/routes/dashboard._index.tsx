@@ -19,7 +19,8 @@ import {
   RefreshCw,
   CreditCard,
   MapPin,
-  Edit
+  Edit,
+  Phone
 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -320,11 +321,11 @@ export default function DashboardIndex() {
               <TableRow key={order._id}>
                 <TableCell className="font-medium">{order._id}</TableCell>
                 <TableCell>
-                  <div className="font-medium">{order.order_userId || 'N/A'}</div>
+                  <div className="font-medium">{order.order_userId?.user_name || 'N/A'}</div>
                   <div className="text-sm text-muted-foreground">{order.order_shipping?.address || 'N/A'}</div>
                 </TableCell>
                 <TableCell>{formatDate(order.createdAt)}</TableCell>
-                <TableCell className="font-medium">{formatCurrency(order.order_checkout.totalCheckout)}</TableCell>
+                <TableCell className="font-medium">{formatCurrency(order.order_checkout?.totalCheckout || 0)}</TableCell>
                 <TableCell>{getStatusBadge(order.order_status)}</TableCell>
                 <TableCell>
                   <Badge className={cn("text-white", getPaymentStatusColor(order.payment_status))}>
@@ -485,7 +486,11 @@ export default function DashboardIndex() {
                   <div className="space-y-1 text-sm">
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <span>Mã khách hàng: {selectedOrder.order_userId}</span>
+                      <span>Khách hàng: {selectedOrder.order_userId?.user_name || 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span>Điện thoại: {selectedOrder.order_userId?.phone || 'N/A'}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />

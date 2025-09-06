@@ -13,7 +13,10 @@ export enum PaymentStatus {
 }
 
 export interface Order {
-    order_userId: string;
+    order_userId: {
+        user_name: string;
+        phone: string;
+    };
     order_checkout: {
         totalPrice: number;
         feeShip: number;
