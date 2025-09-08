@@ -122,6 +122,7 @@ class Product {
                 stock: 1
             })
         }
+        return newProduct
     }
 
     async updateProduct(productId, bodyUpdate) {
@@ -137,7 +138,6 @@ class Perfume extends Product {
         if (!newPerfume) throw new BadRequestError("Invalid request !!")
         const newProduct = await super.createProduct(newPerfume._id)
         if (!newProduct) throw new BadRequestError("Invalid request !!!")
-
         return newProduct
     }
 

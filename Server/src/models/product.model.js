@@ -93,7 +93,7 @@ const perfumeSchema = new Schema({
     },
     gender: {
         type: String,
-        enum: ['Male', 'Female']
+        enum: ['Male', 'Female', 'Unisex']
     },
     longevity_hours: {
         type: String,

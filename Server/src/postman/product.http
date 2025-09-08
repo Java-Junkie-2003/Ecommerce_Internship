@@ -4,28 +4,34 @@
 ### Create Product
 POST {{url_dev}}/product/create-product
 Content-Type: application/json
-x-client-id:689471fc659ad34ec9a2cc6b
-authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTQ5Nzk1MzUsImV4cCI6MTc1NTA2NTkzNX0.43F2IJJZNYg4gatZP0WPmsq-b51zmDCq4nRcff_FyRw
+x-client-id:68be511f453c53ec09212d3b
+authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGJlNTExZjQ1M2M1M2VjMDkyMTJkM2IiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTczMDUzNDcsImV4cCI6MTc1NzM5MTc0N30.5urR5TySb6h4hhlQu8MIYjFmWXeFo2KGLP2YBCmWXvc
 
 {
-    "product_name": "Jo Malone Wood Sage & Sea Salt 100ml",
-    "product_thumb": "https://www.google.com/url?sa=i&url=https%3A%2F%2Fmissi.com.vn%2Fsan-pham%2Fjo-malone-wood-sage-sea-salt%2F%3Fsrsltid%3DAfmBOor-d6qWfCxW_tJY4wlzqE_QtxrHBeI8n8D0kDdHNekwooO2CyeW&psig=AOvVaw3O9UHEL2NnRq8Q5CcuXEOy&ust=1755067499207000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCMCy55nWhI8DFQAAAAAdAAAAABAE",
-    "product_description": "Tươi mát, thoáng đãng với muối biển và xô thơm.",
-    "product_price": 2500000,
+    "_id": {
+      "$oid": "689add80d0ba931366487e76"
+    },
+    "product_name": "Oceanic Breeze EDT 100ml",
+    "product_thumb": "/images/perfumes/img__77898.png",
+    "product_description": "Hương aquatic với Sea Notes và Musk, mang lại cảm giác đặc biệt.",
+    "product_price": 2300000,
     "product_type": "Perfume",
     "product_attributes": {
-      "fragrance_family": "Fresh Aromatic",
-      "top_note": "Ambrette Seeds",
-      "base_note": "Sea Salt",
-      "concentration": "Cologne",
+      "fragrance_family": "Aquatic",
+      "top_note": "Sea Notes",
+      "base_note": "Musk",
+      "concentration": "EDT",
       "volume": 100,
-      "gender": "Female",
-      "longevity_hours": "4-6",
-      "sillage": "Soft-Moderate",
-      "launch_year": 2014
+      "gender": "Unisex",
+      "longevity_hours": "6-8",
+      "sillage": "Moderate",
+      "launch_year": 2018
     },
-    "product_categories": ["689ac94eac93b575fd97819f", "689ac94eac93b575fd97819b"],
-    "product_brand": "689ac945ac93b575fd978199",
+    "product_ratingAverage": 4.1,
+    "product_categories": [
+     "68be5951453c53ec09212d4a"   
+    ],
+    "product_brand": "689ae40a2fd6d6f7c96bfbeb",
     "isDraft": true,
     "isPublished": false
   }

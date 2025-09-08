@@ -1,5 +1,5 @@
 
-const {getAllInventory, updateStockForProduct} = require('../models/repositories/inventory.repo')
+const {getAllInventory, updateStockForProduct, findInvenByProductId} = require('../models/repositories/inventory.repo')
 
 class InventoryService {
 
@@ -9,6 +9,10 @@ class InventoryService {
 
     static updateStock = async ({productId, stock}) => {
         return await updateStockForProduct({productId, stock})
+    }
+
+    static async findInventoryByProductId({productId}){
+        return await findInvenByProductId({productId})
     }
 }
 
