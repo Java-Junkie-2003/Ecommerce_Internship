@@ -300,7 +300,8 @@ const filterProduct = async ({
 const textSearch = async ({ key_search }) => {
     const regexSearch = new RegExp(key_search)
     const results = product.find({
-        $text: { $search: regexSearch }
+        $text: { $search: regexSearch },
+        isPublished: true
     }, { score: { $meta: 'textScore' } })
         .sort({ score: { $meta: 'textScore' } })
         .select(getSelectData(['_id', 'product_name', 'product_thumb', 'product_price']))

@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
-const {db: {user, password, name}} = require('../configs/config.mongo')
-const connectString = `mongodb+srv://${user}:${password}@interncluster.lccrovl.mongodb.net/${name}?retryWrites=true&w=majority&appName=InternCluster`;
-
+const {db: {user, password, name, url}} = require('../configs/config.mongo')
+const connectString = `mongodb+srv://${user}:${password}@${url}/${name}?retryWrites=true&w=majority&appName=InternCluster`;
 
 class Database {
     constructor(){

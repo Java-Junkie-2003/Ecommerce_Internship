@@ -6,6 +6,7 @@ const asyncHandler = require('../../helpers/asyncHandler')
 const { authentication, authenticatorForRoleAdmin } = require('../../auth/authUtils')
 
 
+router.get('/stock/:productId', asyncHandler(InventoryController.findInventoryByProductId))
 router.use(authentication)
 router.use(authenticatorForRoleAdmin)
 router.get('/', asyncHandler(InventoryController.getAllInventory))

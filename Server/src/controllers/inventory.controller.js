@@ -20,6 +20,13 @@ class InventoryController {
             })
         }).send(res)
     }
+
+    findInventoryByProductId = async (req, res, next) => {
+        new SuccessResponse({
+            message: "Find inventory",
+            metadata: await InventoryService.findInventoryByProductId(req.params)
+        }).send(res)
+    }
 }
 
 

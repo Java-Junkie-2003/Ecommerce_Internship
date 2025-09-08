@@ -7,7 +7,8 @@ const dev = {
     db: {
         user: process.env.DEV_DB_USER || "mongo",
         password: process.env.DEV_DB_PASSWORD || "root123456",
-        name: process.env.DEV_DB_NAME || "EcommerceWeb"
+        name: process.env.DEV_DB_NAME || "EcommerceWeb",
+        url: process.env.DEV_DB_URL || "interncluster.2c8iyqg.mongodb.net"
     }
 };
 
