@@ -44,7 +44,6 @@ class CheckoutService {
     }
 
     static async orderByUser({ item_products, userId, addressId, payment_method }) {
-        console.log("addressId:", addressId)
         const { item_products: item_products_new, checkout_order } = await CheckoutService.checkoutReview({ userId, item_products })
         const accquireProduct = []
         for (let i = 0; i < item_products_new.length; i++) {

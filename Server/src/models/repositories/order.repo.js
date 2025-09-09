@@ -1,5 +1,16 @@
-const { getSelectData, getUnSelectData } = require('../../utils');
+const { getSelectData, getUnSelectData, convertToObjectId } = require('../../utils');
 const orderModel = require('../order.model')
+const dayjs = require('dayjs')
+const utc = require('dayjs/plugin/utc')
+const timezone = require('dayjs/plugin/timezone')
+const objectSupport = require('dayjs/plugin/objectSupport');
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.extend(objectSupport)
+const TZ = 'Asia/Ho_Chi_Minh'
+
+dayjs.tz.setDefault(TZ)
 
 const findAllOrderByUserId = async ({ userId, limit, page, sort, unSelect = [] }) => {
     const safeLimit = Math.max(1, Number(limit) || 50);
@@ -70,7 +81,48 @@ const findAllOrdersByAdmin = async ({ limit, page, sort, unSelect = [] }) => {
     }
 }
 
+const statTotalCheckout = async ({scope = 'month', year, month, paidOnly = true } = {}) => {
+    const now = dayjs.tz()
+    const y = Number(year) || now.year()
+    const m = Number(month) || (now.month() + 1)
+
+    const match = {}
+    if (paidOnly) match.payment_status = 'PAID'
+
+    let start, end, groupFmt
+
+    if (scope === 'month') {
+        start = dayjs.tz({ year: y, month: 0, date: 1 }).startOf('day')
+        end = start.add(1, 'year')
+        groupFmt = '%Y-%m'
+    } else if (scope === 'day') {
+        start = dayjs.tz({ year: y, month: m - 1, date: 1 }).startOf('day')
+        end = start.add(1, 'month')
+        groupFmt = '%Y-%m-%d'
+    } else {
+        groupFmt = '%Y'
+    }
+
+    if (start && end) {
+        match.createdAt = { $gte: start.toDate(), $lt: end.toDate() }
+    }
+
+    const pipeline = [
+        { $match: match },
+        {
+            $group: {
+                _id: { $dateToString: { format: groupFmt, date: '$createdAt', timezone: TZ } },
+                totalCheckout: { $sum: '$order_checkout.totalCheckout' },
+                count: { $sum: 1 }
+            }
+        },
+        { $sort: { _id: 1 } }
+    ]
+
+    return orderModel.aggregate(pipeline)
+}
 module.exports = {
     findAllOrderByUserId,
-    findAllOrdersByAdmin
+    findAllOrdersByAdmin,
+    statTotalCheckout
 }

@@ -4,21 +4,21 @@
 ### create order
 POST {{url_dev}}/order/create
 Content-Type: application/json
-authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmQiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU2Mjg2OTM3LCJleHAiOjE3NTYzNzMzMzd9.q-TUstCpr3SAUOsgP8r6CEeF2JAjKhtfmUfMyQYxrjc
-x-client-id: 689471fc659ad34ec9a2cc6d
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGJlNTExZjQ1M2M1M2VjMDkyMTJkM2QiLCJ1c2VybmFtZSI6IkRlbW9BY2NvdW50MSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNzU3MzgzOTA3LCJleHAiOjE3NTc0NzAzMDd9.916HB36YtOcONTew9Zv3t_zlWqFO2rBpN3hWb0BhDqY
+x-client-id: 68be511f453c53ec09212d3d
 
 {
     "item_products": [
          {
             "quantity": 1,
-            "productId": "689add80d0ba931366487e62"
+            "productId": "68be600612fe75e317fee0ea"
          },
          {
             "quantity": 2,
-            "productId": "689ae1d88d25db5c08cff814"
+            "productId": "68be602fdd1544f67404072b"
          }
     ],
-    "addressId": "68ad1d2f273f732014d13265",
+    "addressId": "68bf8d864134391826687ecd",
     "payment_method": "COD"
 }
 
@@ -33,3 +33,14 @@ GET {{url_dev}}/order/all-order?page=1
 Content-Type: application/json
 authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NzFmYzY1OWFkMzRlYzlhMmNjNmIiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTcwNDI2NTEsImV4cCI6MTc1NzEyOTA1MX0.IzOWs0i7gFWQZlPYOdSxHuaejvHM3TpFCFzb_vAaf8E
 x-client-id: 689471fc659ad34ec9a2cc6b
+
+### get stat by time (admin)
+#   scope:
+#    - 'month'  : tổng theo THÁNG trong năm y (12 dòng: YYYY-MM)
+#    - 'day'    : tổng theo NGÀY trong tháng m/y (n dòng: YYYY-MM-DD)
+#    - 'year'   : tổng theo NĂM (toàn bộ collection, group theo YYYY)
+#   paidOnly: chỉ tính đơn đã thanh toán (đổi field theo schema của bạn)
+GET {{url_dev}}/order/stat?scope=year
+Content-Type: application/json
+authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGJlNTExZjQ1M2M1M2VjMDkyMTJkM2IiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTczMDUzNDcsImV4cCI6MTc1NzM5MTc0N30.5urR5TySb6h4hhlQu8MIYjFmWXeFo2KGLP2YBCmWXvc
+x-client-id: 68be511f453c53ec09212d3b
