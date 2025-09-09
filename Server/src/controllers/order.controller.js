@@ -36,6 +36,13 @@ class OrderController {
             metadata: await OrderService.findAllOrdersForAdmin({ page: req.query.page })
         }).send(res)
     }
+
+    statTotalCheckout = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Get total checkout',
+            metadata: await OrderService.statTotalCheckout(req.query)
+        }).send(res)
+    }
 }
 
 module.exports = new OrderController()

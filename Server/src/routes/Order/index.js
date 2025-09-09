@@ -11,6 +11,7 @@ router.post('/create', asyncHandler(OrderController.createOrder))
 router.get('/self', asyncHandler(OrderController.findAllOrdersByUserId))
 router.use(authenticatorForRoleAdmin)
 router.get('/all-order', asyncHandler(OrderController.findAllOrdersForAdmin))
+router.get('/stat', asyncHandler(OrderController.statTotalCheckout))
 router.get('/by-user/:userId', asyncHandler(OrderController.findAllOrdersByUserForAdmin))
 
 module.exports = router
