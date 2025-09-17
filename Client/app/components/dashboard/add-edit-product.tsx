@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, type ChangeEvent } from "react"
-import { Save, Package, Tag, DollarSign, Info, List, Star, Palette, Ruler, BookOpen, Upload, PlusCircle, X } from 'lucide-react'
+import { Save, Package, Tag, DollarSign, Info, List, Star, Palette, Ruler, BookOpen, Upload, PlusCircle, X, CoinsIcon, Banknote } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -264,7 +264,7 @@ export default function AddEditProduct({ productToEdit }: { productToEdit?: Prod
                             <div className="grid gap-2">
                                 <Label htmlFor="product_price">Giá sản phẩm (VND)</Label>
                                 <div className="relative">
-                                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Banknote className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         id="product_price"
                                         type="text"
@@ -357,7 +357,7 @@ export default function AddEditProduct({ productToEdit }: { productToEdit?: Prod
                             <div className="flex flex-col gap-2 flex-1">
                                 <Label htmlFor="product_brand">Thương hiệu</Label>
                                 <Select
-                                    value={product.product_brand._id}
+                                    value={product.product_brand?._id}
                                     onValueChange={(value) => {
                                         const selectedBrand = brands.find(brand => brand._id === value);
                                         if (selectedBrand) {

@@ -27,6 +27,10 @@ export const ENDPOINTS = {
             FETCH_ALL: (page: number) => `${BASE_ENDPOINT}/order/all-order?page=${page}`,
             UPDATE_STATUS: (orderId: string) => `${BASE_ENDPOINT}/order/update-status/${orderId}`,
             FETCH_ONE: (orderId: string) => `${BASE_ENDPOINT}/order/${orderId}`,
+            STATS: {
+                PAID: `${BASE_ENDPOINT}/order/stat/?paidOnly`,
+                MONTHLY: (month: number, year: number) => `${BASE_ENDPOINT}/order/stat/?month=${month}&year=${year}`
+            }
         },
         CUSTOMER: {
             FETCH_ALL: (page?: number, limit?: number) => `${BASE_ENDPOINT}/user/all?page=${page}&limit=${limit}`,
@@ -52,6 +56,7 @@ export const ENDPOINTS = {
         },
         SEARCH: (k: string) => `${BASE_ENDPOINT}/product/search?key_search=${k}`,
         RELATED: (brandId: string) => `${BASE_ENDPOINT}/product/related?brandId=${brandId}`,
+        STOCK: (id: string) => `${BASE_ENDPOINT}/inventory/stock/${id}`
     },
     CART: {
         INIT: `${BASE_ENDPOINT}/cart`,

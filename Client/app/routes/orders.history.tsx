@@ -93,7 +93,7 @@ export default function UserOrderHistory() {
   const getOrderStatusBadge = (status: OrderStatus) => {
     const statusConfig = {
       [OrderStatus.PENDING]: { 
-        label: "Chờ xác nhận", 
+        label: "Chờ vận chuyển", 
         className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
         icon: <Clock className="h-3 w-3" />
       },

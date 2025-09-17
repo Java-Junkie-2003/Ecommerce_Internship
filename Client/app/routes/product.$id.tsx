@@ -31,6 +31,7 @@ import { ENDPOINTS } from "@/utils/api.endpoints"
 import { useAppDispatch } from "@/redux/hook"
 import { addToCart } from "@/redux/thunks/cart.thunk"
 import { toast } from "sonner"
+import { findInventory } from "@/redux/thunks/stock.thunk"
 
 const reviews = [
     {
@@ -83,6 +84,7 @@ export default function Component(meta: MetaArgs) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
     const [quantity, setQuantity] = useState(1)
     const [isWishlisted, setIsWishlisted] = useState(false)
+    const [inventory, setInventory] = useState<number>(0)
 
     useEffect(() => {
         // Reset all states when productId changes
@@ -111,7 +113,20 @@ export default function Component(meta: MetaArgs) {
                 console.error("Failed to fetch product:", error)
                 navigate("/products")
             } finally {
-                setLoading(false)
+                // find inventory here if needed
+                dispatch(findInventory(productId as string)).unwrap()
+                .then((inv) => {
+                    setInventory(inv.metadata.inven_stock)
+                    setLoading(false)
+                })
+                .catch((err) => {
+                    console.error("Failed to fetch inventory:", err)
+                    setLoading(false)
+                    navigate("/products")
+                })
+                .finally(() => {
+                    setLoading(false)
+                })
             }
         }
 
@@ -407,7 +422,11 @@ export default function Component(meta: MetaArgs) {
                                             ))}
                                             <span className="ml-2 text-sm text-gray-600">({product?.product_ratingAverage}) • 1 đánh giá</span>
                                         </div>
-                                        <Badge variant="secondary">Còn hàng</Badge>
+                                        {inventory > 0 ? (
+                                            <span className="text-green-600 font-medium">{inventory} sản phẩm có sẵn</span> 
+                                        ) : (
+                                            <span className="text-red-600 font-medium">Hết hàng</span>
+                                        )}
                                     </div>
 
                                     <p className="text-gray-600 leading-relaxed mb-6">

@@ -17,6 +17,8 @@ import ProductDetailSkeleton from "@/components/skeleton/dashboard/product-detai
 import TableSkeleton from "@/components/skeleton/dashboard/table"
 import { cn } from "@/lib/utils"
 import { useNavigate } from "react-router"
+import { DefaultDTO } from "@/types/dto"
+import { toast } from "sonner"
 
 export function meta() {
     return [
@@ -31,7 +33,7 @@ export default function Component() {
 
     const [isLoading, setIsLoading] = useState(true)
     const [currentPage, setCurrentPage] = useState(1)
-    const itemsPerPage = 5
+    const itemsPerPage = 10
     const [products, setProducts] = useState<Partial<Product>[]>([])
     const [totalPages, setTotalPages] = useState(0)
 
@@ -121,22 +123,34 @@ export default function Component() {
             if (product) {
                 if (product.isPublished) {
                     // Unpublish the product
-                    await ApiService.post(ENDPOINTS.ADMIN.PRODUCT.UNPUBLISH(productId));
+                    const result: DefaultDTO = await ApiService.post(ENDPOINTS.ADMIN.PRODUCT.UNPUBLISH(productId));
+                    if (result.statusCode !== 200) {
+                        throw new Error('Failed to unpublish product');
+                    } else {
+                        const updatedProducts = products.map((p) =>
+                            p._id === productId ? { ...p, isPublished: !p.isPublished, isDraft: !p.isDraft } : p
+                        );
+                        setProducts(updatedProducts);
+                    }
                 } else {
                     // Publish the product
-                    await ApiService.post(ENDPOINTS.ADMIN.PRODUCT.PUBLISH(productId));
+                    const result: DefaultDTO = await ApiService.post(ENDPOINTS.ADMIN.PRODUCT.PUBLISH(productId));
+                    console.log("Publish result:", result);
+                    if (result.statusCode !== 200) {
+                        throw new Error('Failed to publish product');
+                    } else {
+                        const updatedProducts = products.map((p) =>
+                            p._id === productId ? { ...p, isPublished: !p.isPublished, isDraft: !p.isDraft } : p
+                        );
+                        setProducts(updatedProducts);
+                    }
                 }
             }
         } catch (error) {
-            console.error('Failed to publish product:', error)
-        } finally {
-            const updatedProducts = products.map((p) =>
-                p._id === productId ? { ...p, isPublished: !p.isPublished, isDraft: !p.isDraft } : p
-            );
-            setProducts(updatedProducts);
+            toast.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+            console.error('Failed to publish product:', error);
         }
     }
-
     // --- Stats Calculation ---
     const totalProducts = 19
     const publishedProducts = 12
@@ -157,7 +171,7 @@ export default function Component() {
                 </Button>
             </div>
 
-            {/* Stats Cards */}
+            {/* Stats Cards
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-blue-50 to-white shadow-sm hover:shadow-md transition-all duration-300">
                     <div className="absolute right-3 top-3 opacity-10 ">
@@ -210,12 +224,12 @@ export default function Component() {
                         <p className="text-xs text-gray-500">Được thêm trong tháng này</p>
                     </CardContent>
                 </Card>
-            </div>
+            </div> */}
 
 
 
             {/* Products Table */}
-            <h2 className="text-xl font-semibold">Sản phẩm</h2>
+            {/* <h2 className="text-xl font-semibold">Sản phẩm</h2> */}
             <div className="rounded-md border shadow-sm">
                 {isLoading ? <TableSkeleton /> :
                     <Table>

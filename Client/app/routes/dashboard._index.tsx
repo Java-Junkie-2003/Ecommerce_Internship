@@ -39,6 +39,7 @@ import { OrderStatus, PaymentStatus } from "@/types/model/order"
 import { Order } from "@/types/model/order"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { DefaultDTO } from "@/types/dto"
 
 export function meta() {
     return [
@@ -60,10 +61,9 @@ export default function DashboardIndex() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [stats, setStats] = useState({
     total: 0,
-    pending: 0,
-    delivering: 0,
-    delivered: 0,
-    cancelled: 0
+    paid: 0,
+    monthly: 0,
+    monthlyRevenue: 0
   })
 
   // Fetch orders data
@@ -77,14 +77,12 @@ export default function DashboardIndex() {
       setTotalPages(response.metadata.pagination.totalPages)
 
       // Calculate stats from orders
-      const allOrders = response.metadata.orders
-      setStats({
-        total: allOrders.length,
-        pending: allOrders.filter(order => order.order_status === OrderStatus.PENDING).length,
-        delivering: allOrders.filter(order => order.order_status === OrderStatus.DELIVERING).length,
-        delivered: allOrders.filter(order => order.order_status === OrderStatus.DELIVERIED).length,
-        cancelled: allOrders.filter(order => order.order_status === OrderStatus.CANCELED).length
-      })
+      const allOrders = response.metadata
+
+      // Fetch stats
+      const statsPaid = await ApiService.get<DefaultDTO>(ENDPOINTS.ADMIN.ORDER.STATS.PAID)
+      const statsMonthly = await ApiService.get<DefaultDTO>(ENDPOINTS.ADMIN.ORDER.STATS.MONTHLY(new Date().getMonth(), new Date().getFullYear()))
+      setStats({total: allOrders.pagination.totalOrders, paid: statsPaid.metadata[0].count, monthly: statsMonthly.metadata[0].count, monthlyRevenue: statsMonthly.metadata[0].totalCheckout})
     } catch (error) {
       console.error("Failed to fetch orders:", error)
       toast.error("Không thể tải danh sách đơn hàng")
@@ -212,7 +210,7 @@ export default function DashboardIndex() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case OrderStatus.PENDING:
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Chờ xử lý</Badge>
+        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Chờ vận chuyển</Badge>
       case OrderStatus.DELIVERING:
         return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Đang giao hàng</Badge>
       case OrderStatus.DELIVERIED:
@@ -253,47 +251,47 @@ export default function DashboardIndex() {
             <CardTitle className="text-sm font-medium text-blue-800">Tổng đơn hàng</CardTitle>
           </CardHeader>
           <CardContent className="relative z-10">
-            <div className="text-2xl font-bold text-blue-900">8</div>
+            <div className="text-2xl font-bold text-blue-900">{stats.total}</div>
             <p className="text-xs text-muted-foreground">Tổng số đơn hàng</p>
           </CardContent>
         </Card>
 
-        {/* Đơn hàng chờ xử lý */}
-        <Card className="border border-gray-100 relative overflow-hidden bg-gradient-to-br from-yellow-50 to-white shadow-sm hover:shadow-md transition">
-          <Hourglass className="absolute right-3 top-3 h-20 w-20 text-yellow-300 opacity-30  pointer-events-none" />
-
-          <CardHeader className="relative z-10 pb-2">
-            <CardTitle className="text-sm font-medium text-yellow-800">Đơn hàng chờ xử lý</CardTitle>
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <div className="text-2xl font-bold text-yellow-900">10</div>
-            <p className="text-xs text-muted-foreground">Đang chờ xác nhận</p>
-          </CardContent>
-        </Card>
-
-        {/* Đơn hàng đã giao */}
+        {/* Đơn hàng đã thanh toán */}
         <Card className="border border-gray-100 relative overflow-hidden bg-gradient-to-br from-green-50 to-white shadow-sm hover:shadow-md transition">
           <CheckCircle className="absolute right-3 top-3 h-20 w-20 text-green-300 opacity-30  pointer-events-none" />
 
           <CardHeader className="relative z-10 pb-2">
-            <CardTitle className="text-sm font-medium text-green-800">Đơn hàng đã giao</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-800">Đã thanh toán</CardTitle>
           </CardHeader>
           <CardContent className="relative z-10">
-            <div className="text-2xl font-bold text-green-900">0</div>
-            <p className="text-xs text-muted-foreground">Đã hoàn thành</p>
+            <div className="text-2xl font-bold text-green-900">{stats.paid}</div>
+            <p className="text-xs text-muted-foreground">Đơn hàng đã thanh toán</p>
           </CardContent>
         </Card>
+
+        {/* Đơn hàng trong tháng này */}
+          <Card className="border border-gray-100 relative overflow-hidden bg-gradient-to-br from-orange-50 to-white shadow-sm hover:shadow-md transition">
+            <Calendar className="absolute right-3 top-3 h-20 w-20 text-orange-300 opacity-30  pointer-events-none" />
+
+            <CardHeader className="relative z-10 pb-2">
+              <CardTitle className="text-sm font-medium text-orange-800">Đơn hàng trong tháng này</CardTitle>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <div className="text-2xl font-bold text-orange-900">{stats.monthly}</div>
+              <p className="text-xs text-muted-foreground">Số đơn hàng trong tháng này</p>
+            </CardContent>
+          </Card>
 
         {/* Tổng doanh thu */}
         <Card className="border border-gray-100 relative overflow-hidden bg-gradient-to-br from-purple-50 to-white shadow-sm hover:shadow-md transition">
           <DollarSign className="absolute right-3 top-3 h-20 w-20 text-purple-300 opacity-30  pointer-events-none" />
 
           <CardHeader className="relative z-10 pb-2">
-            <CardTitle className="text-sm font-medium text-purple-800">Tổng doanh thu</CardTitle>
+            <CardTitle className="text-sm font-medium text-purple-800">Doanh thu tháng</CardTitle>
           </CardHeader>
           <CardContent className="relative z-10">
             <div className="text-2xl font-bold text-purple-900">
-              20000
+              {stats.monthlyRevenue ? formatCurrency(stats.monthlyRevenue) : formatCurrency(0)}
             </div>
             <p className="text-xs text-muted-foreground">Giá trị đơn hàng</p>
           </CardContent>
@@ -357,7 +355,7 @@ export default function DashboardIndex() {
                             <SelectItem value={OrderStatus.PENDING}>
                               <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4 text-yellow-600" />
-                                <span className="text-yellow-800">Chờ xử lý</span>
+                                <span className="text-yellow-800">Chờ vận chuyển</span>
                               </div>
                             </SelectItem>
                             <SelectItem value={OrderStatus.DELIVERING}>
@@ -556,7 +554,7 @@ export default function DashboardIndex() {
                   <SelectContent>
                     <SelectItem value={OrderStatus.PENDING}>
                       <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-yellow-600" /> Chờ xử lý
+                        <Clock className="h-4 w-4 text-yellow-600" /> Chờ vận chuyển
                       </div>
                     </SelectItem>
                     <SelectItem value={OrderStatus.DELIVERING}>
