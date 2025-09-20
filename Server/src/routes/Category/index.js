@@ -12,5 +12,5 @@ router.use(authentication)
 router.use(authenticatorForRoleAdmin)
 
 router.post("/create", asyncHandler(categoryController.createCategoryForAdmin))
-
+router.put("/update/:categoryId", asyncHandler(categoryController.updateCategory))
 module.exports = router

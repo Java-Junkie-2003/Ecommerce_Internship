@@ -1,5 +1,5 @@
 
-const {createCategory, getAllCategory}= require('../models/repositories/category.repo')
+const {createCategory, getAllCategory, updateCategory}= require('../models/repositories/category.repo')
 
 class CategoryService {
     static createCategory = async ({category_name}) => {
@@ -8,6 +8,10 @@ class CategoryService {
 
     static getAllCategory = async() => {
         return await getAllCategory()
+    }
+
+    static updateCategory = async ({category_id, category_name}) => {
+        return await updateCategory({category_id, category_name})
     }
 }
 
