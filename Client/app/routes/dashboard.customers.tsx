@@ -78,7 +78,7 @@ export default function Component() {
         <p className="text-muted-foreground">Tổng cộng {customers.length} khách hàng</p>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -120,7 +120,7 @@ export default function Component() {
             <p className="text-xs text-muted-foreground">Giá trị trung bình mỗi khách hàng</p>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
 
 
       {/* Customer Table */}

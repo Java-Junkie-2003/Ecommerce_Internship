@@ -11,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { Menu, Search, ShoppingBag, User, X, Loader2 } from "lucide-react";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { logout } from "@/lib/api/api.login";
 import { toast } from "sonner";
@@ -46,6 +46,7 @@ export default function SiteHeader() {
     const [showResults, setShowResults] = useState(false)
     const searchRef = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
+    const location = useLocation()
 
     // Debounce search query
     const debouncedQuery = useDebounce(query, 300)
@@ -124,12 +125,10 @@ export default function SiteHeader() {
             const selectedBrands = shuffledBrands.slice(0, 4);
             selectedBrands.forEach((brand: any) => {
                 if (brand && brand.brand_name) {
-                    links.push({ name: brand.brand_name.toUpperCase(), href: `/products?brandName=${encodeURIComponent(brand.brand_name.toLowerCase())}` });
+                    links.push({ name: brand.brand_name.toUpperCase(), href: `/products?brand=${encodeURIComponent(brand.brand_name)}` });
                 }
             });
         }
-        // push Thương hiệu link at last
-        // links.push({ name: "THƯƠNG HIỆU", href: `/products` });
         setNavLinks(links);
     }, [brands, categories]);
 
@@ -230,7 +229,7 @@ export default function SiteHeader() {
                         placeholder="Tìm kiếm..."
                         className="pl-10 pr-10 w-full"
                     />
-                    
+
                     {/* Search Results Dropdown */}
                     {showResults && (query.trim() || searchResults.length > 0) && (
                         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
@@ -240,13 +239,13 @@ export default function SiteHeader() {
                                     Đang tìm kiếm...
                                 </div>
                             )}
-                            
+
                             {!isSearching && searchResults.length === 0 && query.trim() && (
                                 <div className="p-4 text-center text-gray-500">
                                     Không tìm thấy sản phẩm nào
                                 </div>
                             )}
-                            
+
                             {!isSearching && searchResults.length > 0 && (
                                 <>
                                     <ScrollArea className="max-h-96">
@@ -280,7 +279,7 @@ export default function SiteHeader() {
                                             </div>
                                         ))}
                                     </ScrollArea>
-                                    
+
                                     {query.trim() && (
                                         <div className="p-3 border-t border-gray-100">
                                             <button
@@ -330,7 +329,7 @@ export default function SiteHeader() {
                                         <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 animate-spin" />
                                     )}
                                 </div>
-                                
+
                                 {/* Mobile Search Results */}
                                 {query.trim() && searchResults.length > 0 && (
                                     <ScrollArea className="max-h-60">
@@ -365,7 +364,7 @@ export default function SiteHeader() {
                                         </div>
                                     </ScrollArea>
                                 )}
-                                
+
                                 <Button onClick={handleSearch} className="w-full">
                                     Tìm kiếm
                                 </Button>
@@ -485,19 +484,21 @@ export default function SiteHeader() {
                 </div>
             </div>
 
-            {/* Desktop Nav */}
-            <nav className="hidden lg:flex items-center justify-center space-x-8 max-w-7xl mx-auto pt-4">
-                {navLinks.map((link) => (
-                    <Link
-                        key={link.name}
-                        to={link.href}
-                        className="text-sm font-medium text-gray-700 hover:text-gray-900"
-                    >
-                        {link.name}
-                    </Link>
-                ))}
+            {/* Desktop Nav - Hide when on route cart, checkout, check-payment, order, orders.history and profile */}
 
-            </nav>
+            {["/cart", "/checkout", "/check-payment", "/orders/history", "/profile"].includes(location.pathname) ? null : (
+                <nav className="hidden lg:flex items-center justify-center space-x-8 max-w-7xl mx-auto pt-4">
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.name}
+                            to={link.href}
+                            className="text-sm font-medium text-gray-700 hover:text-gray-900"
+                        >
+                            {link.name}
+                        </Link>
+                    ))}
+                </nav>
+            )}
         </header>
 
     )

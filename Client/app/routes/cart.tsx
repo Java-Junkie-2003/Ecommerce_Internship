@@ -21,6 +21,7 @@ import { ENDPOINTS } from "@/utils/api.endpoints"
 import { setSelectedCartItems } from "@/redux/slices/cart"
 import { Link } from "react-router"
 import { Route } from "../+types/root"
+import { findInventory } from "@/redux/thunks/stock.thunk"
 
 export function meta(meta: Route.MetaArgs) {
     return [
@@ -50,16 +51,16 @@ export default function Component() {
         if (!currentItem) return
 
         try {
-            // Call API to update quantity
-            dispatch(updateCart({ productId: id, quantity: newQuantity, old_quantity: currentItem.quantity }))
-            // setCartItems((items) => items.map((item) => (item.productId === id ? { ...item, quantity: newQuantity } : item)))
-
-            // If selected item
-            if (selectedItems.some(item => item.productId === id)) {
-                const updatedItem = { ...currentItem, quantity: newQuantity }
-                const updatedSelectedItems = selectedItems.map((item) => (item.productId === id ? updatedItem : item))
-                setSelectedItems(updatedSelectedItems)
-            }
+            // check api before update
+            dispatch(findInventory(id)).unwrap()
+            .then((inventory) => {
+                if(inventory.metadata.inven_stock < newQuantity) {
+                    toast.error(`Chỉ còn ${inventory.metadata.inven_stock} sản phẩm trong kho`)
+                    return
+                } else {
+                    dispatch(updateCart({ productId: id, quantity: newQuantity, old_quantity: currentItem.quantity }))
+                }
+            });
 
         } catch (err) {
             console.error(err)

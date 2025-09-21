@@ -314,10 +314,10 @@ export default function Checkout() {
                   {showAddressForm && (
                     <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
                       <div className="space-y-2">
-                        <Label htmlFor="new-address">Địa chỉ chi tiết</Label>
+                        <Label htmlFor="new-address">Địa chỉ</Label>
                         <Textarea
                           id="new-address"
-                          placeholder="Nhập địa chỉ chi tiết (số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố)"
+                          placeholder="Nhập địa chỉ (số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố)"
                           value={newAddress?.address || ""}
                           onChange={(e) => setNewAddress({ ...newAddress, address: e.target.value })}
                           className="min-h-[80px]"

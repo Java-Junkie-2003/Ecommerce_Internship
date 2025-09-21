@@ -15,13 +15,13 @@ export const UserLoader: React.FC<{ children: React.ReactNode }> = ({ children }
 
   useEffect(() => {
     const accessToken = getAccessToken()
-    if(!accessToken) {
+    dispatch(fetchBrands())
+    dispatch(fetchCategories())
+    if (!accessToken) {
       dispatch(loadUserInfo())
       setHasLoadedUser(true)
     } else if (accessToken && !hasLoadedUser) {
       dispatch(loadUserInfo())
-      dispatch(fetchBrands())
-      dispatch(fetchCategories())
       setHasLoadedUser(true)
     } else {
       dispatch(loadUserInfo())

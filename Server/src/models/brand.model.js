@@ -16,7 +16,6 @@ const brandSchema = new Schema({
         type: Boolean,
         default: true,
         index: true,
-        select: false
     }
 
 }, {

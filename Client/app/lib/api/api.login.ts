@@ -89,6 +89,8 @@ export const login = async (
     return response.metadata;
   } catch (error) {
     clearTokens();
+    console.error("Login failed:", error);
+    logout();
     throw error;
   }
 };

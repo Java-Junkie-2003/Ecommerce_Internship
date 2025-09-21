@@ -9,7 +9,6 @@ import SiteFooter from "@/components/layout/client-footer"
 import type { Route } from "../+types/root";
 import { useEffect, useState } from "react";
 import { useAppDispatch } from "@/redux/hook";
-import { fetchBrands } from "@/redux/thunks/brand.thunk";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { Brand } from "@/types/model/brand";
