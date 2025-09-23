@@ -43,6 +43,13 @@ class OrderController {
             metadata: await OrderService.statTotalCheckout(req.query)
         }).send(res)
     }
+
+    updateOrderStatus = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Update order status',
+            metadata: await OrderService.updateOrderStatus(req.params)
+        }).send(res)
+    }
 }
 
 module.exports = new OrderController()
