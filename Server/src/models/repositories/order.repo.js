@@ -1,10 +1,11 @@
-const { getSelectData, getUnSelectData, convertToObjectId } = require('../../utils');
-const orderModel = require('../order.model')
 const dayjs = require('dayjs')
 const utc = require('dayjs/plugin/utc')
 const timezone = require('dayjs/plugin/timezone')
 const objectSupport = require('dayjs/plugin/objectSupport');
 
+const { getSelectData, getUnSelectData, convertToObjectId } = require('../../utils');
+const orderModel = require('../order.model')
+const { NotFoundError } = require('../../core/error.response')
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.extend(objectSupport)
@@ -81,7 +82,7 @@ const findAllOrdersByAdmin = async ({ limit, page, sort, unSelect = [] }) => {
     }
 }
 
-const statTotalCheckout = async ({scope = 'month', year, month, paidOnly = true } = {}) => {
+const statTotalCheckout = async ({ scope = 'month', year, month, paidOnly = true } = {}) => {
     const now = dayjs.tz()
     const y = Number(year) || now.year()
     const m = Number(month) || (now.month() + 1)
@@ -121,8 +122,19 @@ const statTotalCheckout = async ({scope = 'month', year, month, paidOnly = true 
 
     return orderModel.aggregate(pipeline)
 }
+
+const updateOrderStatus = async ({ orderId }) => {
+    const updated = await orderModel.findByIdAndUpdate(
+        convertToObjectId(orderId),
+        {$set: {payment_status: "PAID", order_status: "DELIVERIED"}},
+        {new: true, upsert: true}
+    )
+    if(!updated) throw new NotFoundError("Order not found !!!")
+    return updated
+}
 module.exports = {
     findAllOrderByUserId,
     findAllOrdersByAdmin,
-    statTotalCheckout
+    statTotalCheckout,
+    updateOrderStatus
 }

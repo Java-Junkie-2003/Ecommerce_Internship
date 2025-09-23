@@ -1,4 +1,4 @@
-const {findAllOrderByUserId, findAllOrdersByAdmin, statTotalCheckout} = require('../models/repositories/order.repo')
+const {findAllOrderByUserId, findAllOrdersByAdmin, statTotalCheckout, updateOrderStatus} = require('../models/repositories/order.repo')
 
 class OrderSerivce {
     static async findAllOrderByUserId({userId, limit = 10, page = 1, sort='ctime'}){
@@ -11,6 +11,9 @@ class OrderSerivce {
 
     static async statTotalCheckout({userId ,scope, year, month}){
         return await statTotalCheckout({userId, scope, year, month})
+    }
+    static async updateOrderStatus({orderId}){
+        return await updateOrderStatus({orderId})
     }
 }
 

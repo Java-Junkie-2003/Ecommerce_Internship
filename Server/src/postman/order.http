@@ -44,3 +44,9 @@ GET {{url_dev}}/order/stat?scope=year
 Content-Type: application/json
 authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGJlNTExZjQ1M2M1M2VjMDkyMTJkM2IiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTczMDUzNDcsImV4cCI6MTc1NzM5MTc0N30.5urR5TySb6h4hhlQu8MIYjFmWXeFo2KGLP2YBCmWXvc
 x-client-id: 68be511f453c53ec09212d3b
+
+### update order status (admin)
+PUT {{url_dev}}/order/update-payment/68d205a9327438a7f474f7bd
+Content-Type: application/json
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGJlNTExZjQ1M2M1M2VjMDkyMTJkM2IiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGVzIjpbIkFETUlOIiwiVVNFUiJdLCJpYXQiOjE3NTg1OTc3MDIsImV4cCI6MTc1ODY4NDEwMn0.u2X9jVY96ylCb0f5PjrhW74aBjzNMtnHSzRUUFcs3IU
+x-client-id: 68be511f453c53ec09212d3b
