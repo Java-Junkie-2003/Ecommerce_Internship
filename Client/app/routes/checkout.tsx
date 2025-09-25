@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/hook"
 import { ApiService } from "@/lib/api"
 import { ENDPOINTS } from "@/utils/api.endpoints"
 import { type Address, AddressType } from "@/types/model/address"
-import type { AddressDTO, AddressCreateDTO } from "@/types/dto/address.dto"
+import type { AddressDTO, AddressCreateDTO, AddressUpdateDTO, AddressDeleteDTO } from "@/types/dto/address.dto"
 import type { CheckoutDTO } from "@/types/dto/checkout.dto"
 
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { CreditCard, Home, Plus, Truck, ShoppingBag, MapPin, Shield, Minus, Package } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { CreditCard, Home, Plus, Truck, ShoppingBag, MapPin, Shield, Minus, Package, Edit, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import SiteHeader from "@/components/layout/client-header"
@@ -48,6 +50,13 @@ export default function Checkout() {
     address_type: AddressType.HOME,
   })
   const [paymentMethod, setPaymentMethod] = useState("COD")
+  const [editingAddress, setEditingAddress] = useState<string | null>(null)
+  const [editedAddress, setEditedAddress] = useState<Address>({
+    address: "",
+    address_type: AddressType.HOME,
+  })
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [addressToDelete, setAddressToDelete] = useState<string | null>(null)
 
   const selectedCartItems = useAppSelector((state) => state.cart.selectedCartItem)
   const addressTypes = Object.values(AddressType)
@@ -78,6 +87,67 @@ export default function Checkout() {
     } catch (error) {
       console.error("Failed to add address:", error)
       toast.error("Thêm địa chỉ thất bại")
+    }
+  }
+
+  const handleUpdateAddress = async (id: string, updatedAddress: {
+    address: string;
+    address_type: AddressType;
+  }) => {
+    try {
+      const response = await ApiService.put<AddressUpdateDTO>(ENDPOINTS.ADDRESS.UPDATE(id), { ...updatedAddress })
+      setAddress(response.metadata.addresses)
+      setEditingAddress(null)
+      setEditedAddress({ address: "", address_type: AddressType.HOME })
+      toast.success("Cập nhật địa chỉ thành công")
+    } catch (error) {
+      console.error("Failed to update address:", error)
+      toast.error("Cập nhật địa chỉ thất bại")
+    }
+  }
+
+  const startEditingAddress = (addr: Address) => {
+    setEditingAddress(addr._id || "")
+    setEditedAddress({
+      address: addr.address,
+      address_type: addr.address_type,
+    })
+  }
+
+  const cancelEditingAddress = () => {
+    setEditingAddress(null)
+    setEditedAddress({ address: "", address_type: AddressType.HOME })
+  }
+
+  const openDeleteDialog = (addressId: string) => {
+    setAddressToDelete(addressId)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (addressToDelete) {
+      await handleDeleteAddress(addressToDelete)
+      setDeleteDialogOpen(false)
+      setAddressToDelete(null)
+    }
+  }
+
+  const cancelDelete = () => {
+    setDeleteDialogOpen(false)
+    setAddressToDelete(null)
+  }
+
+  const handleDeleteAddress = async (id: string) => {
+    try {
+      const response = await ApiService.delete<AddressDeleteDTO>(ENDPOINTS.ADDRESS.DELETE(id))
+      setAddress(response.statusCode === 200 ? address?.filter((addr) => addr._id !== id) || null : address)
+      if (selectedAddress === id) {
+        setSelectedAddress(address && address.length > 0 ? address[0]._id || "" : "")
+      }
+      toast.success("Xoá địa chỉ thành công")
+    } catch (error) {
+      console.error("Failed to delete address:", error)
+      toast.error("Xoá địa chỉ thất bại")
     }
   }
 
@@ -276,25 +346,102 @@ export default function Checkout() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {address?.length ? (
-                    <RadioGroup value={selectedAddress} onValueChange={setSelectedAddress}>
-                      {address.map((addr) => (
-                        <div
-                          key={addr._id}
-                          className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                        >
-                          <RadioGroupItem value={addr._id || ""} id={addr._id} className="mt-1" />
-                          <Label htmlFor={addr._id} className="flex-1 cursor-pointer">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Home className="h-4 w-4 text-muted-foreground" />
-                              <Badge variant="outline" className="text-xs">
-                                {addr.address_type}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-foreground">{addr.address}</p>
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
+                    <div className="space-y-4">
+                      <RadioGroup value={selectedAddress} onValueChange={setSelectedAddress}>
+                        {address.map((addr) => (
+                          <div key={addr._id}>
+                            {editingAddress === addr._id ? (
+                              // Edit mode
+                              <div className="p-4 border rounded-lg bg-muted/30 space-y-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor={`edit-address-${addr._id}`}>Địa chỉ</Label>
+                                  <Textarea
+                                    id={`edit-address-${addr._id}`}
+                                    placeholder="Nhập địa chỉ (số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố)"
+                                    value={editedAddress.address}
+                                    onChange={(e) => setEditedAddress({ ...editedAddress, address: e.target.value })}
+                                    className="min-h-[80px]"
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label>Loại địa chỉ</Label>
+                                  <RadioGroup
+                                    value={editedAddress.address_type}
+                                    onValueChange={(value) =>
+                                      setEditedAddress({ ...editedAddress, address_type: value as AddressType })
+                                    }
+                                    className="flex flex-wrap gap-4"
+                                  >
+                                    {addressTypes.map((type) => (
+                                      <div key={type} className="flex items-center space-x-2">
+                                        <RadioGroupItem value={type} id={`edit-${type}-${addr._id}`} />
+                                        <Label htmlFor={`edit-${type}-${addr._id}`} className="text-sm">
+                                          {type}
+                                        </Label>
+                                      </div>
+                                    ))}
+                                  </RadioGroup>
+                                </div>
+
+                                <div className="flex gap-2">
+                                  <Button
+                                    onClick={() => handleUpdateAddress(addr._id || "", {
+                                      address: editedAddress.address,
+                                      address_type: editedAddress.address_type,
+                                    })}
+                                    disabled={!editedAddress.address.trim()}
+                                    className="flex-1"
+                                    size="sm"
+                                  >
+                                    Lưu thay đổi
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    onClick={cancelEditingAddress}
+                                    size="sm"
+                                  >
+                                    Hủy
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              // View mode
+                              <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors group">
+                                <RadioGroupItem value={addr._id || ""} id={addr._id} className="mt-1" />
+                                <Label htmlFor={addr._id} className="flex-1 flex items-center cursor-pointer">
+                                  <div className="flex items-center gap-2">
+                                    <Home className="h-4 w-4 text-muted-foreground" />
+                                    <Badge variant="outline" className="text-xs">
+                                      {addr.address_type}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-sm text-foreground">{addr.address}</p>
+                                </Label>
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                    onClick={() => startEditingAddress(addr)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                                    onClick={() => openDeleteDialog(addr._id || "")}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </div>
                   ) : (
                     <div className="text-center py-8">
                       <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -468,6 +615,26 @@ export default function Checkout() {
       </main>
 
       <SiteFooter />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa địa chỉ</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc chắn muốn xóa địa chỉ này không? Hành động này không thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={cancelDelete}>
+              Hủy
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              Xóa địa chỉ
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

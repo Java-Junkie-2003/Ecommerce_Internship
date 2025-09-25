@@ -60,7 +60,7 @@ export const login = async (
     const tokenInfo: ITokenInfo = await ApiService.get(
       ENDPOINTS.AUTH.INTROSPECT_TOKEN
     );
-    if (!tokenInfo.metadata?.is_valid || tokenInfo.code === 401) {
+    if (!tokenInfo.metadata?.is_valid || tokenInfo.code === 401 ) {
         // Call refresh token api
         const refreshToken = getRefreshToken();
         if (!refreshToken) {

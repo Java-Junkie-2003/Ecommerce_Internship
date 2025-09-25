@@ -4,9 +4,17 @@ import type { Route } from "../+types/root";
 "use client"
 
 import { use, useEffect, useState } from "react"
-import { Plus, Pencil, Trash2 } from "lucide-react"
+import { Plus, Pencil, Trash2, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
@@ -21,9 +29,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Brand } from "@/types/model/brand"
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { RootState } from "@/redux/store";
-import { createBrand, fetchBrands } from "@/redux/thunks/brand.thunk";
+import { createBrand, disableBrand, fetchBrands, updateBrand } from "@/redux/thunks/brand.thunk";
 import { toast } from "sonner";
-
 
 export default function Component() {
 
@@ -34,19 +41,20 @@ export default function Component() {
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
+  const [isDisableConfirmOpen, setIsDisableConfirmOpen] = useState(false)
   const [currentBrand, setCurrentBrand] = useState<Brand | null>(null)
   const [newBrandName, setNewBrandName] = useState("")
   const [newBrandLogoUrl, setNewBrandLogoUrl] = useState("")
 
   const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [filterStatus, setFilterStatus] = useState<"all" | "published" | "unpublished">("all")
 
-  // useEffect(() => {
-  //   setNewBrandName("")
-  //   setNewBrandLogoUrl("")
-  //   setLogoFile(null)
-  //   setCurrentBrand(null)
-  // }, [isAddModalOpen])
+  useEffect(() => {
+    setNewBrandName("")
+    setNewBrandLogoUrl("")
+    setLogoFile(null)
+    setCurrentBrand(null)
+  }, [isAddModalOpen])
 
   const handleAddBrand = async () => {
     if (newBrandName.trim() && logoFile) {
@@ -72,7 +80,7 @@ export default function Component() {
         .finally(() => {
           // Create brand after logo upload
           dispatch(createBrand({
-            brand_name: newBrandName.trim().toUpperCase(),
+            brand_name: newBrandName.trim(),
             brand_icon: newBrandLogoUrl.trim(),
           })).unwrap()
         })
@@ -89,40 +97,106 @@ export default function Component() {
     }
   }
 
+  // call api to update brand
   const handleEditBrand = () => {
     if (currentBrand && newBrandName.trim() && newBrandLogoUrl.trim()) {
-      setIsEditModalOpen(false)
-      setCurrentBrand(null)
-      setNewBrandName("")
-      setNewBrandLogoUrl("")
+      // call api to update brand
+      console.log("Updating brand:", currentBrand._id, newBrandName, newBrandLogoUrl)
+      dispatch(updateBrand({
+        id: currentBrand._id,
+        brandData: {
+          brand_name: newBrandName.trim(),
+          brand_icon: newBrandLogoUrl.trim(),
+        }
+      })).unwrap()
+        .then(() => {
+          setIsEditModalOpen(false)
+          setCurrentBrand(null)
+          setNewBrandName("")
+          setNewBrandLogoUrl("")
+          dispatch(fetchBrands())
+
+          toast.success("Cập nhật thương hiệu thành công")
+        })
+        .catch((error) => {
+          toast.error("Cập nhật thương hiệu thất bại")
+          console.error("Error updating brand:", error)
+        })
     }
   }
 
-  const handleDeleteBrand = () => {
+  const handleDisableBrand = () => {
     if (currentBrand) {
-      setIsDeleteConfirmOpen(false)
-      setCurrentBrand(null)
+      // call api to disable brand
+      dispatch(disableBrand(currentBrand._id)).unwrap()
+        .then(() => {
+          setIsDisableConfirmOpen(false)
+          setCurrentBrand(null)
+          dispatch(fetchBrands())
+          toast.success("Vô hiệu hóa thương hiệu thành công")
+        })
+        .catch((error) => {
+          toast.error("Vô hiệu hóa thương hiệu thất bại")
+          console.error("Error disabling brand:", error)
+        })
+
     }
   }
 
   const openEditModal = (brand: Brand) => {
     setCurrentBrand(brand)
-    setNewBrandName(brand.brand_icon)
+    setNewBrandName(brand.brand_name)
     setNewBrandLogoUrl(brand.brand_icon)
     setIsEditModalOpen(true)
   }
 
-  const openDeleteConfirm = (brand: Brand) => {
+  const openDisableConfirm = (brand: Brand) => {
     setCurrentBrand(brand)
-    setIsDeleteConfirmOpen(true)
+    setIsDisableConfirmOpen(true)
   }
+
+  // Filter brands based on status
+  const filteredBrands = brands.filter(brand => {
+    if (filterStatus === "published") return brand.isPublished
+    if (filterStatus === "unpublished") return !brand.isPublished
+    return true
+  })
+
+  // Count brands by status
+  const publishedCount = brands.filter(brand => brand.isPublished).length
+  const unpublishedCount = brands.length - publishedCount
 
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Quản lý thương hiệu</h1>
-        <p className="text-muted-foreground">Tổng cộng {brands.length} thương hiệu</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Quản lý thương hiệu</h1>
+          <div className="flex items-center gap-4 mt-2">
+            <p className="text-muted-foreground">Tổng cộng {brands.length} thương hiệu</p>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200">
+                Hoạt động: {publishedCount}
+              </Badge>
+              <Badge variant="secondary" className="bg-red-50 text-red-700 border-red-200">
+                Đã tắt: {unpublishedCount}
+              </Badge>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <Select value={filterStatus} onValueChange={(value: "all" | "published" | "unpublished") => setFilterStatus(value)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Lọc theo trạng thái" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả thương hiệu</SelectItem>
+              <SelectItem value="published">Đang hoạt động</SelectItem>
+              <SelectItem value="unpublished">Đã tắt</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Brands Grid */}
@@ -137,26 +211,39 @@ export default function Component() {
         </Card>
 
         {/* Existing Brand Cards */}
-        {brands.map((brand) => (
-          <Card key={brand._id} className="flex flex-col flex-wrap relative">
-            {/* <CardHeader className="flex flex-row items-center justify-between px-3 py-0 border-b relative">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-gray-600 hover:text-gray-800 w-1/2"
-                onClick={() => openEditModal(brand)}
-              >
-                <Pencil className="h-4 w-4 mr-1" /> Thay đổi
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-red-600 hover:text-red-800 w-1/2"
-                onClick={() => openDeleteConfirm(brand)}
-              >
-                <Trash2 className="h-4 w-4 mr-1" /> Xóa
-              </Button>
-            </CardHeader> */}
+        {filteredBrands.length === 0 && filterStatus !== "all" ? (
+          <div className="col-span-full text-center py-12">
+            <div className="text-muted-foreground">
+              <Filter className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-lg">Không có thương hiệu nào với bộ lọc này</p>
+              <p className="text-sm mt-2">Hãy thử thay đổi bộ lọc hoặc thêm thương hiệu mới</p>
+            </div>
+          </div>
+        ) : (
+          filteredBrands.map((brand) => (
+          <Card key={brand._id} className={`flex flex-col flex-wrap relative ${!brand.isPublished ? 'opacity-60 border-red-200' : ''}`}>
+            <CardHeader className="flex flex-row items-center justify-between px-3 py-0 border-b relative">
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-gray-600 hover:text-gray-800 px-2"
+                  onClick={() => openEditModal(brand)}
+                >
+                  <Pencil className="h-3 w-3 mr-1" /> Sửa
+                </Button>
+                {brand.isPublished && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-red-600 hover:text-red-800 px-2"
+                    onClick={() => openDisableConfirm(brand)}
+                  >
+                    <Trash2 className="h-3 w-3 mr-1" /> Tắt
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
             <CardContent className="flex flex-col items-center justify-center p-6 flex-grow">
               <div className="relative w-full h-32 mb-4 flex items-center justify-center">
                 <img
@@ -167,9 +254,15 @@ export default function Component() {
                 />
               </div>
               <h3 className="text-lg font-semibold text-center">{brand.brand_name}</h3>
+              {!brand.isPublished && (
+                <p className="text-xs text-red-600 text-center mt-2">
+                  Thương hiệu này đã bị vô hiệu hóa
+                </p>
+              )}
             </CardContent>
           </Card>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Add Brand Modal */}
@@ -271,8 +364,8 @@ export default function Component() {
                 </Label>
                 <Input
                   id="editBrandName"
-                  value={currentBrand.brand_name}
-                  onChange={(e) => setCurrentBrand({ ...currentBrand, brand_name: e.target.value })}
+                  value={newBrandName}
+                  onChange={(e) => setNewBrandName(e.target.value)}
                   className="col-span-3"
                 />
               </div>
@@ -293,7 +386,7 @@ export default function Component() {
                           setLogoFile(file);
                           // create object URL
                           const objectUrl = URL.createObjectURL(file);
-                          setCurrentBrand({ ...currentBrand, brand_icon: objectUrl });
+                          setCurrentBrand({ ...currentBrand, brand_icon: objectUrl, brand_name: newBrandName });
                         }
                       }}
                     />
@@ -342,21 +435,33 @@ export default function Component() {
 
       {/* Delete Confirmation Dialog */}
       {currentBrand && (
-        <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-          <DialogContent className="sm:max-w-[425px]">
+        <Dialog open={isDisableConfirmOpen} onOpenChange={setIsDisableConfirmOpen}>
+          <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Xác nhận xóa thương hiệu</DialogTitle>
-              <DialogDescription>
-                Bạn có chắc chắn muốn xóa thương hiệu <span className="font-semibold">{currentBrand.brand_name}</span> không?
-                Hành động này không thể hoàn tác.
+              <DialogTitle className="text-destructive">Xác nhận vô hiệu hóa thương hiệu</DialogTitle>
+              <DialogDescription className="space-y-3 text-left">
+                <p>
+                  Bạn có chắc chắn muốn vô hiệu hóa thương hiệu <span className="font-semibold text-foreground">{currentBrand.brand_name}</span> không?
+                </p>
+                <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+                  <p className="font-medium text-destructive mb-2">Cảnh báo quan trọng:</p>
+                  <ul className="space-y-1 text-sm text-muted-foreground">
+                    <li>• Tất cả sản phẩm thuộc thương hiệu này sẽ bị vô hiệu hóa</li>
+                    <li>• Khách hàng sẽ không thể tìm kiếm hoặc mua các sản phẩm này</li>
+                    <li>• <span className="text-destructive font-medium">Hành động này KHÔNG THỂ hoàn tác</span></li>
+                  </ul>
+                </div>
+                <p className="text-sm">
+                  Vui lòng cân nhắc kỹ trước khi thực hiện hành động này.
+                </p>
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDeleteConfirmOpen(false)}>
-                Hủy
+              <Button variant="outline" onClick={() => setIsDisableConfirmOpen(false)}>
+                Hủy bỏ
               </Button>
-              <Button variant="destructive" onClick={handleDeleteBrand}>
-                Xóa
+              <Button variant="destructive" onClick={handleDisableBrand}>
+                Tôi hiểu - Vô hiệu hóa
               </Button>
             </DialogFooter>
           </DialogContent>

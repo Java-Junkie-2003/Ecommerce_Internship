@@ -8,24 +8,6 @@ export interface AddressDTO extends DefaultDTO {
     };
 }
 
-// {
-//   "message": "Insert more address",
-//   "statusCode": 200,
-//   "metadata": {
-//     "_id": "68b00f615b16ccc97b22835f",
-//     "user_id": "689471fc659ad34ec9a2cc6b",
-//     "__v": 0,
-//     "addresses": [
-//       {
-//         "address": "97F1, ABC Street, District 1, HCMC",
-//         "address_type": "COMPANY",
-//         "_id": "68b00f63e7cddaba2687e2f2"
-//       }
-//     ],
-//     "createdAt": "2025-08-28T08:12:19.712Z",
-//     "updatedAt": "2025-08-28T08:12:19.712Z"
-//   }
-// }
 
 export interface AddressCreateDTO extends DefaultDTO {
     metadata: {
@@ -36,4 +18,36 @@ export interface AddressCreateDTO extends DefaultDTO {
         createdAt: string;
         updatedAt: string;
     }
+}
+
+export interface AddressUpdateDTO extends DefaultDTO {
+    metadata: {
+        _id: string;
+        user_id: string;
+        __v: number;
+        addresses: Address[];
+        createdAt: string;
+        updatedAt: string;
+    }
+}
+
+// {
+//   "message": "Removed address",
+//   "statusCode": 200,
+//   "metadata": {
+//     "acknowledged": true,
+//     "modifiedCount": 1,
+//     "upsertedId": null,
+//     "upsertedCount": 0,
+//     "matchedCount": 1
+//   }
+// }
+export interface AddressDeleteDTO extends DefaultDTO {
+    metadata: {
+        acknowledged: boolean;
+        modifiedCount: number;
+        upsertedId: null;
+        upsertedCount: number;
+        matchedCount: number;
+    };
 }

@@ -53,14 +53,14 @@ export default function Component() {
         try {
             // check api before update
             dispatch(findInventory(id)).unwrap()
-            .then((inventory) => {
-                if(inventory.metadata.inven_stock < newQuantity) {
-                    toast.error(`Chỉ còn ${inventory.metadata.inven_stock} sản phẩm trong kho`)
-                    return
-                } else {
-                    dispatch(updateCart({ productId: id, quantity: newQuantity, old_quantity: currentItem.quantity }))
-                }
-            });
+                .then((inventory) => {
+                    if (inventory.metadata.inven_stock < newQuantity) {
+                        toast.error(`Chỉ còn ${inventory.metadata.inven_stock} sản phẩm trong kho`)
+                        return
+                    } else {
+                        dispatch(updateCart({ productId: id, quantity: newQuantity, old_quantity: currentItem.quantity }))
+                    }
+                });
 
         } catch (err) {
             console.error(err)
@@ -203,63 +203,64 @@ export default function Component() {
                                     cartItems.map((item, index) => {
                                         // console.log("Selected cart items:", selectedItems.includes(item), selectedItems, item);
                                         return (
-                                        <div key={item.productId}>
-                                            <div className="flex items-center gap-4 py-4">
-                                                <Checkbox
-                                                    checked={selectedItems.find(sItem => sItem.productId === item.productId) !== undefined}
-                                                    onCheckedChange={() => toggleSelectItem(item.productId)}
-                                                />
-
-                                                <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                                    <img
-                                                        src={item.product_thumb}
-                                                        alt={item.product_name}
-                                                        className="w-full h-full object-cover"
-                                                        loading="lazy"
+                                            <div key={item.productId}>
+                                                <div className="flex items-center gap-4 py-4">
+                                                    <Checkbox
+                                                        checked={selectedItems.find(sItem => sItem.productId === item.productId) !== undefined}
+                                                        onCheckedChange={() => toggleSelectItem(item.productId)}
                                                     />
-                                                </div>
 
-                                                <div className="flex-1 min-w-0">
-                                                    <h3 className="font-medium text-gray-900 truncate">{item.product_name}</h3>
-                                                    <p className="text-lgtext-gray-900 mt-1">
-                                                        <span className="font-semibold">VND</span> {item.product_price.toLocaleString("vi-VN")} đ
-                                                    </p>
-                                                </div>
-
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex items-center border rounded-lg">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8"
-                                                            onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                                                        >
-                                                            <Minus className="h-4 w-4" />
-                                                        </Button>
-                                                        <span className="px-3 py-1 min-w-[3rem] text-center">{item.quantity}</span>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8"
-                                                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                                                        >
-                                                            <Plus className="h-4 w-4" />
-                                                        </Button>
+                                                    <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                        <img
+                                                            src={item.product_thumb}
+                                                            alt={item.product_name}
+                                                            className="w-full h-full object-cover"
+                                                            loading="lazy"
+                                                        />
                                                     </div>
 
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                                        onClick={() => removeItem(item.productId)}
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="font-medium text-gray-900 truncate">{item.product_name}</h3>
+                                                        <p className="text-lgtext-gray-900 mt-1">
+                                                            <span className="font-semibold">VND</span> {item.product_price.toLocaleString("vi-VN")} đ
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex items-center border rounded-lg">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8"
+                                                                onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                                                            >
+                                                                <Minus className="h-4 w-4" />
+                                                            </Button>
+                                                            <span className="px-3 py-1 min-w-[3rem] text-center">{item.quantity}</span>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8"
+                                                                onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                                                            >
+                                                                <Plus className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                            onClick={() => removeItem(item.productId)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
                                                 </div>
+                                                {index < cartItems.length - 1 && <Separator />}
                                             </div>
-                                            {index < cartItems.length - 1 && <Separator />}
-                                        </div>
-                                    )})
+                                        )
+                                    })
                                 )}
                             </CardContent>
                         </Card>
@@ -272,47 +273,58 @@ export default function Component() {
                                 <CardTitle>Tóm tắt đơn hàng</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="flex justify-between text-sm">
-                                    <span>Số lượng sản phẩm:</span>
-                                    <span>{selectedItems.length} sản phẩm</span>
-                                </div>
+                                {selectedItems.length > 0 ? (
+                                    <>
+                                        <div className="flex justify-between text-sm">
+                                            <span>Số lượng sản phẩm:</span>
+                                            <span>{selectedItems.length} sản phẩm</span>
+                                        </div>
 
-                                <div className="flex justify-between text-sm">
-                                    <span>Giá tạm tính:</span>
-                                    <span>{subtotal.toLocaleString("vi-VN")} đ</span>
-                                </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span>Giá tạm tính:</span>
+                                            <span>{subtotal.toLocaleString("vi-VN")} đ</span>
+                                        </div>
 
-                                <div className="flex justify-between text-sm">
-                                    <span>Phí vận chuyển:</span>
-                                    <span>{shipping.toLocaleString("vi-VN")} đ</span>
-                                </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span>Phí vận chuyển:</span>
+                                            <span>{shipping.toLocaleString("vi-VN")} đ</span>
+                                        </div>
 
-                                <Separator />
+                                        <Separator />
 
-                                <div className="flex justify-between font-semibold text-lg">
-                                    <span>Tổng cộng:</span>
-                                    <span className="text-red-600">{total.toLocaleString("vi-VN")} đ</span>
-                                </div>
+                                        <div className="flex justify-between font-semibold text-lg">
+                                            <span>Tổng cộng:</span>
+                                            <span className="text-red-600">{total.toLocaleString("vi-VN")} đ</span>
+                                        </div>
 
-                                <Link to="/checkout">
-                                    <Button
-                                        className="w-full"
-                                        size="lg"
-                                        disabled={selectedItems.length === 0}
-                                        onClick={() => {
-                                            // Proceed to checkout with selectedItems
+                                        <Link to="/checkout">
+                                            <Button
+                                                className="w-full"
+                                                size="lg"
+                                                disabled={selectedItems.length === 0}
+                                                onClick={() => {
+                                                    // Proceed to checkout with selectedItems
 
-                                        }}
-                                    >
-                                        <CreditCard className="h-4 w-4 mr-2" />
-                                        Thanh toán ({selectedItems.length})
-                                    </Button>
-                                </Link>
+                                                }}
+                                            >
+                                                <CreditCard className="h-4 w-4 mr-2" />
+                                                Thanh toán ({selectedItems.length})
+                                            </Button>
+                                        </Link>
 
-                                {/* <div className="text-xs text-gray-500 text-center">
-                                    <Truck className="h-3 w-3 inline mr-1" />
-                                    Miễn phí vận chuyển cho đơn hàng từ 500.000đ
-                                </div> */}
+                                        {/* <div className="text-xs text-gray-500 text-center">
+                                                <Truck className="h-3 w-3 inline mr-1" />
+                                                Miễn phí vận chuyển cho đơn hàng từ 500.000đ
+                                            </div> */}
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="text-center py-8">
+                                            <CreditCard className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                                            <p className="text-gray-500">Chọn sản phẩm để thanh toán</p>
+                                        </div>
+                                    </>
+                                )}
                             </CardContent>
                         </Card>
                     </div>

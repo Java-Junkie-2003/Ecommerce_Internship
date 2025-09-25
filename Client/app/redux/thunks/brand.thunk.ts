@@ -18,6 +18,32 @@ export const createBrand = createAsyncThunk(
     }
 );
 
+export const updateBrand = createAsyncThunk(
+    "brand/update",
+    async ({ id, brandData }: { id: string; brandData: Partial<Brand> }) => {
+        try {
+            const response: DefaultDTO = await ApiService.put(ENDPOINTS.BRAND.UPDATE(id), brandData);
+            return response;
+        }
+        catch (error: any) {
+            console.error("Error updating brand:", error);
+            throw error;
+        }
+    }
+);
+export const disableBrand = createAsyncThunk(
+    "brand/disable",
+    async (id: string) => {
+        try {   
+            const response: DefaultDTO = await ApiService.put(ENDPOINTS.BRAND.UNPUBLISH(id));
+            return response;
+        } catch (error: any) {
+            console.error("Error disabling brand:", error);
+            throw error;
+        }
+    }
+);
+
 export const fetchBrands = createAsyncThunk(
     "brand/fetchAll",
     async () => {

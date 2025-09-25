@@ -22,6 +22,9 @@ export const addToCart = createAsyncThunk<CartDTO, { productId: string; quantity
     async ({ productId, quantity }) => {
         try {
             const response: DefaultDTO = await ApiService.post(ENDPOINTS.CART.ADD, { productId, quantity });
+            if(response.status === 'error') {
+                throw new Error(response.message);
+            }
             return response as CartDTO;
         } catch (error: any) {
             console.error("Error adding to cart:", error);

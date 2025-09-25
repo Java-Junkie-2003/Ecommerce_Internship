@@ -28,7 +28,7 @@ import { FilteredProduct, Product } from "@/types/model/product"
 import { ApiService } from "@/lib/api"
 import { FilteredProductDTO, ProductDTO, RelatedProductDTO } from "@/types/dto/product.dto"
 import { ENDPOINTS } from "@/utils/api.endpoints"
-import { useAppDispatch } from "@/redux/hook"
+import { useAppDispatch, useAppSelector } from "@/redux/hook"
 import { addToCart } from "@/redux/thunks/cart.thunk"
 import { toast } from "sonner"
 import { findInventory } from "@/redux/thunks/stock.thunk"
@@ -72,9 +72,10 @@ export default function Component(meta: MetaArgs) {
     const params = useParams()
     const navigate = useNavigate()
     const dispatch = useAppDispatch()
+    const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn)
 
     const productId = params.id
-    
+
     // All state declarations
     const [loading, setLoading] = useState(true)
     const [relatedLoading, setRelatedLoading] = useState(true)
@@ -95,13 +96,13 @@ export default function Component(meta: MetaArgs) {
         setCurrentImageIndex(0)
         setQuantity(1)
         setIsWishlisted(false)
-        
+
         // Reset document title to loading state
         document.title = "Đang tải sản phẩm..."
-        
+
         // Scroll to top when navigating to new product
         window.scrollTo(0, 0)
-        
+
         // Fetch product details using productId
         const fetchProduct = async () => {
             try {
@@ -115,18 +116,18 @@ export default function Component(meta: MetaArgs) {
             } finally {
                 // find inventory here if needed
                 dispatch(findInventory(productId as string)).unwrap()
-                .then((inv) => {
-                    setInventory(inv.metadata.inven_stock)
-                    setLoading(false)
-                })
-                .catch((err) => {
-                    console.error("Failed to fetch inventory:", err)
-                    setLoading(false)
-                    navigate("/products")
-                })
-                .finally(() => {
-                    setLoading(false)
-                })
+                    .then((inv) => {
+                        setInventory(inv.metadata.inven_stock)
+                        setLoading(false)
+                    })
+                    .catch((err) => {
+                        console.error("Failed to fetch inventory:", err)
+                        setLoading(false)
+                        navigate("/products")
+                    })
+                    .finally(() => {
+                        setLoading(false)
+                    })
             }
         }
 
@@ -139,7 +140,7 @@ export default function Component(meta: MetaArgs) {
     useEffect(() => {
         if (product?.product_name) {
             document.title = `${product.product_name} - Chi tiết sản phẩm`
-            
+
             // Update meta description
             const metaDescription = document.querySelector('meta[name="description"]')
             if (metaDescription) {
@@ -150,7 +151,7 @@ export default function Component(meta: MetaArgs) {
             document.title = "Chi tiết sản phẩm"
         }
     }, [product])
-    
+
     useEffect(() => {
         // Fetch related products based on brand ID
         const fetchRelatedProducts = async () => {
@@ -180,20 +181,33 @@ export default function Component(meta: MetaArgs) {
     }
 
     const updateQuantity = (newQuantity: number) => {
-        if (newQuantity >= 1) {
+        if (newQuantity >= 1 && newQuantity <= inventory) {
             setQuantity(newQuantity)
+        } else {
+            toast.error(`Số lượng vượt mức cho phép`)
         }
     }
 
     const addProductToCart = () => {
         if (product) {
-            try {
-                dispatch(addToCart({ productId: product._id, quantity }))
-                toast.success("Thêm vào giỏ hàng thành công")
-            } catch (error) {
-                console.error("Failed to add product to cart:", error)
-                toast.error("Thêm vào giỏ hàng thất bại")
+            if (!isLoggedIn) {
+                toast.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng")
+                navigate('/login/user')
+                return
             }
+            dispatch(addToCart({ productId: product._id, quantity })).unwrap()
+                .then((result) => {
+                    if (result.status === 'error') {
+                        throw new Error(result.message);
+                    }
+                    // Optionally, you can reset quantity to 1 after adding to cart
+                    setQuantity(1)
+                    toast.success("Thêm vào giỏ hàng thành công")
+                })
+                .catch((err) => {
+                    console.error("Failed to add to cart:", err)
+                    toast.error("Thêm vào giỏ hàng thất bại")
+                })
         }
     }
 
@@ -423,7 +437,7 @@ export default function Component(meta: MetaArgs) {
                                             <span className="ml-2 text-sm text-gray-600">({product?.product_ratingAverage}) • 1 đánh giá</span>
                                         </div>
                                         {inventory > 0 ? (
-                                            <span className="text-green-600 font-medium">{inventory} sản phẩm có sẵn</span> 
+                                            <span className="text-green-600 font-medium">{inventory} sản phẩm có sẵn</span>
                                         ) : (
                                             <span className="text-red-600 font-medium">Hết hàng</span>
                                         )}
@@ -462,13 +476,22 @@ export default function Component(meta: MetaArgs) {
                                     </div>
 
                                     <div className="flex gap-4">
-                                        <Button className="flex-1 h-12"
-                                            onClick={addProductToCart}
-                                        >
-                                            <ShoppingCart className="h-4 w-4 mr-2" />
-                                            Thêm vào giỏ hàng
-                                        </Button>
-                                        <Button
+                                        {isLoggedIn ? (
+                                            <Button className="flex-1 h-12"
+                                                onClick={addProductToCart}
+                                                disabled={inventory === 0}
+                                            >
+                                                <ShoppingCart className="h-4 w-4 mr-2" />
+                                                Thêm vào giỏ hàng
+                                            </Button>
+                                        ) : (
+                                            <Button className="flex-1 h-12"
+                                                onClick={() => { navigate('/login/user') }}
+                                            >
+                                                Đăng nhập để thêm vào giỏ hàng
+                                            </Button>
+                                        )}
+                                        {/* <Button
                                             variant="outline"
                                             size="icon"
                                             className="h-12 w-12 bg-transparent"
@@ -478,7 +501,7 @@ export default function Component(meta: MetaArgs) {
                                         </Button>
                                         <Button variant="outline" size="icon" className="h-12 w-12 bg-transparent">
                                             <Share2 className="h-4 w-4" />
-                                        </Button>
+                                        </Button> */}
                                     </div>
                                 </div>
 

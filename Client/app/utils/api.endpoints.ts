@@ -14,6 +14,8 @@ export const ENDPOINTS = {
     BRAND: {
         FETCH_ALL: `${BASE_ENDPOINT}/brand/all`,
         CREATE: `${BASE_ENDPOINT}/brand/create-brand`,
+        UPDATE: (id: string) => `${BASE_ENDPOINT}/brand/update/${id}`,
+        UNPUBLISH: (id: string) => `${BASE_ENDPOINT}/brand/unpublish/${id}`,
     },
     ADMIN: {
         PRODUCT: {

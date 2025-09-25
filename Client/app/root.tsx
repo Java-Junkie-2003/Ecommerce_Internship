@@ -60,7 +60,11 @@ export default function App() {
         <Provider store={store}>
           <UserLoader>
             <Outlet />
-            <Toaster position="top-right" richColors />
+            <Toaster position="top-right" richColors
+              toastOptions={{
+                className: "mt-16"
+              }}
+            />
           </UserLoader>
         </Provider>
         <ScrollRestoration />
