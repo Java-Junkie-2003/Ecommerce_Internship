@@ -87,7 +87,6 @@ const publishProductByAdmin = async ({ product_id }) => {
     if (!doc) return null;
     if (doc.isPublished && !doc.isDraft) return 0;
     const foundBrand = await brandModel.findOne({_id: doc.product_brand})
-    console.log("foundBrand:::", foundBrand)
     if(!foundBrand) throw new NotFoundError('Brand not found')
     if(!foundBrand.isPublished) throw new BadRequestError("This brand is no longer available.")
     doc.set({ isPublished: true, isDraft: false });
