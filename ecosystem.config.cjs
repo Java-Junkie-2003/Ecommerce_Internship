@@ -11,10 +11,10 @@ module.exports = {
       env: {
         NODE_ENV: "dev",
         DEV_APP_PORT: 3055,
-        DEV_DB_USER=vnraizo,
-        DEV_DB_PASSWORD=daMblOpBhbu1IsSF,
-        DEV_DB_NAME=EcommerceDB,
+        DEV_DB_USER:vnraizo,
+        DEV_DB_PASSWORD:daMblOpBhbu1IsSF,
+        DEV_DB_NAME:EcommerceDB,
       },
     }
-  ]
+  ]``
 };
