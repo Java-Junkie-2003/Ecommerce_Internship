@@ -16,5 +16,5 @@ module.exports = {
         DEV_DB_NAME:"EcommerceDB",
       },
     }
-  ]``
+  ]
 };
